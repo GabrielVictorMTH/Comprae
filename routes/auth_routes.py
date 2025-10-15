@@ -153,7 +153,7 @@ async def post_cadastrar(
             nome=dto.nome,
             email=dto.email,
             senha=criar_hash_senha(dto.senha),
-            perfil=Perfil.CLIENTE.value  # Sempre cliente no cadastro público
+            perfil=Perfil.COMPRADOR.value  # Sempre cliente no cadastro público
         )
 
         # Inserir no banco
@@ -178,7 +178,7 @@ async def post_cadastrar(
         erros = [erro['msg'] for erro in e.errors()]
         informar_erro(request, " | ".join(erros))
         return templates.TemplateResponse(
-            "cadastro.html",
+            "auth/cadastro.html",
             {"request": request, "nome": nome, "email": email}
         )
 
