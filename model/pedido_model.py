@@ -1,5 +1,10 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
+
+from model.anuncio_model import Anuncio
+from model.endereco_model import Endereco
+from model.usuario_model import Usuario
 
 
 @dataclass
@@ -17,3 +22,7 @@ class Pedido:
     nota_avaliacao: int
     comentario_avaliacao: str
     data_hora_avaliacao: datetime
+
+    endereco: Optional[Endereco]
+    comprador: Optional[Usuario]
+    anuncio: Optional[Anuncio]
