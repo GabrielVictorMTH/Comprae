@@ -92,6 +92,7 @@ class TestCadastro:
     def test_cadastro_com_dados_validos(self, client):
         """Deve cadastrar usuário com dados válidos"""
         response = client.post("/cadastrar", data={
+            "perfil": "Cliente",
             "nome": "Novo Usuario",
             "email": "novo@example.com",
             "senha": "Senha@123",
@@ -113,6 +114,7 @@ class TestCadastro:
 
         # Tentar cadastrar com mesmo e-mail
         response = client.post("/cadastrar", data={
+            "perfil": "Cliente",
             "nome": "Outro Nome",
             "email": usuario_teste["email"],  # E-mail duplicado
             "senha": "OutraSenha@123",
@@ -125,6 +127,7 @@ class TestCadastro:
     def test_cadastro_com_senhas_diferentes(self, client):
         """Deve rejeitar quando senhas não coincidem"""
         response = client.post("/cadastrar", data={
+            "perfil": "Cliente",
             "nome": "Usuario Teste",
             "email": "teste@example.com",
             "senha": "Senha@123",
@@ -137,6 +140,7 @@ class TestCadastro:
     def test_cadastro_com_senha_fraca(self, client):
         """Deve rejeitar senha que não atende requisitos de força"""
         response = client.post("/cadastrar", data={
+            "perfil": "Cliente",
             "nome": "Usuario Teste",
             "email": "teste@example.com",
             "senha": "123456",  # Senha fraca
@@ -151,7 +155,8 @@ class TestCadastro:
         """Cadastro público deve criar usuário com perfil CLIENTE (Enum Perfil)"""
         from repo import usuario_repo
 
-        client.post("/cadastro", data={
+        client.post("/cadastrar", data={
+            "perfil": "Cliente",
             "nome": "Usuario Teste",
             "email": "teste@example.com",
             "senha": "Senha@123",
