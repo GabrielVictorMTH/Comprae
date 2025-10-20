@@ -39,9 +39,27 @@
                             href="/usuario">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if '/tarefas/' in request.path else '' }}"
-                            href="/tarefas/listar">Minhas Tarefas</a>
+                        <a class="nav-link {{ 'active' if '/perfil/' in request.path else '' }}"
+                            href="/perfil/visualizar">Perfil</a>
                     </li>
+                    {% if request.session.get('usuario_logado')['perfil'] == 'Administrador' %}
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/admin/usuarios/' in request.path else '' }}"
+                            href="/admin/usuarios/listar">Usuários</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/admin/tema' in request.path else '' }}"
+                            href="/admin/tema">Tema</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/admin/auditoria' in request.path else '' }}"
+                            href="/admin/auditoria">Auditoria</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/admin/backups/' in request.path else '' }}"
+                            href="/admin/backups/listar">Backup</a>
+                    </li>
+                    {% endif %}
                 </ul>
 
                 <!-- Dropdown do Usuário -->

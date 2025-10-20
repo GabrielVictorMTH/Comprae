@@ -34,15 +34,22 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Início</a>
+                        <a class="nav-link {{ 'active' if request.path == '/' or request.path == '/index' else '' }}"
+                            href="/">Início</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/sobre">Sobre</a>
+                        <a class="nav-link {{ 'active' if request.path == '/sobre' else '' }}"
+                            href="/sobre">Sobre</a>
                     </li>
+                    {% if request.session.get('usuario_logado') %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/examples">
-                            <i class="bi bi-code-square"></i> Exemplos
-                        </a>
+                        <a class="nav-link {{ 'active' if '/tarefas/' in request.path else '' }}"
+                            href="/tarefas/listar">Tarefas</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/examples' in request.path else '' }}"
+                            href="/examples">Exemplos</a>
                     </li>
                 </ul>
 
@@ -82,10 +89,12 @@
                     {% else %}
                     <!-- Botões de Login e Cadastro -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/login">Login</a>
+                        <a class="nav-link {{ 'active' if request.path == '/login' else '' }}"
+                            href="/login">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/cadastrar">Cadastrar</a>
+                        <a class="nav-link {{ 'active' if request.path == '/cadastrar' else '' }}"
+                            href="/cadastrar">Cadastrar</a>
                     </li>
                     {% endif %}
                 </ul>
