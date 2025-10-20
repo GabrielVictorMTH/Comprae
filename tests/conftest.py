@@ -63,13 +63,17 @@ def limpar_banco_dados():
 def limpar_rate_limiter():
     """Limpa o rate limiter antes de cada teste para evitar bloqueios"""
     # Importar após configuração do banco de dados
-    from routes.auth_routes import login_limiter
+    from routes.auth_routes import login_limiter, cadastro_limiter, esqueci_senha_limiter
 
     # Limpar antes do teste
     login_limiter.limpar()
+    cadastro_limiter.limpar()
+    esqueci_senha_limiter.limpar()
     yield
     # Limpar depois do teste também
     login_limiter.limpar()
+    cadastro_limiter.limpar()
+    esqueci_senha_limiter.limpar()
 
 
 @pytest.fixture(scope="function")
