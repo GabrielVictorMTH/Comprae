@@ -27,6 +27,7 @@ from routes.auth_routes import router as auth_router
 from routes.tarefas_routes import router as tarefas_router
 from routes.admin_usuarios_routes import router as admin_usuarios_router
 from routes.admin_configuracoes_routes import router as admin_config_router
+from routes.admin_backups_routes import router as admin_backups_router
 from routes.perfil_routes import router as perfil_router
 from routes.usuario_routes import router as usuario_router
 from routes.public_routes import router as public_router
@@ -91,6 +92,9 @@ logger.info("Router admin de usuários incluído")
 
 app.include_router(admin_config_router, tags=["Admin - Configurações"])
 logger.info("Router admin de configurações incluído")
+
+app.include_router(admin_backups_router, tags=["Admin - Backups"])
+logger.info("Router admin de backups incluído")
 
 app.include_router(usuario_router, tags=["Usuário"])
 logger.info("Router de usuário incluído")
