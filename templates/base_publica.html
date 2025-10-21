@@ -1,13 +1,18 @@
+{% set erros = erros if erros is defined else {} %}
+{% set dados = dados if dados is defined else {} %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block titulo %}{{ APP_NAME }}{% endblock %}</title>
+    <title>{{ APP_NAME }} :: {% block titulo %}{% endblock %}</title>
+
+    <!-- Bootstrap CSS (local - permite troca de temas) -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- CSS Customizado -->
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/custom.css">
 
     <!-- Bootstrap 5.3.8 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,7 +24,7 @@
     <!-- Navbar Pública -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand d-flex align-middle" href="/">
+            <a class="navbar-brand d-flex align-middle" href="/index">
                 <img src="/static/img/logo.svg" alt="Logo" height="30" class="d-inline-block align-text-top me-2"
                     onerror="this.style.display='none'">
                 {{ APP_NAME }}
@@ -31,28 +36,77 @@
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    {% block nav_items %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/">Início</a>
+                        <a class="nav-link {{ 'active' if request.path == '/' or request.path == '/index' else '' }}"
+                            href="/">Início</a>
                     </li>
-                    {% endblock %}
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if request.path == '/sobre' else '' }}"
+                            href="/sobre">Sobre</a>
+                    </li>
+                    {% if request.session.get('usuario_logado') %}
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/tarefas/' in request.path else '' }}"
+                            href="/tarefas/listar">Tarefas</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/examples' in request.path else '' }}"
+                            href="/examples">Exemplos</a>
+                    </li>
                 </ul>
 
-                <!-- Botões de Login e Cadastro -->
+                <!-- Menu do Usuário (se logado) ou Botões de Login/Cadastro -->
                 <ul class="navbar-nav">
+                    {% if request.session.get('usuario_logado') %}
+                    <!-- Dropdown do Usuário -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <img src="/static/img/usuarios/{{ '%06d' % request.session.get('usuario_logado')['id'] }}.jpg"
+                                 alt="Foto do usuário"
+                                 class="rounded-circle me-2 object-fit-cover"
+                                 width="32"
+                                 height="32"
+                                 onerror="this.src='/static/img/user.jpg'">
+                            {{ request.session.get('usuario_logado')['nome'] }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/perfil/visualizar">
+                                <i class="bi bi-person"></i> Meu Perfil
+                            </a></li>
+
+                            <!-- Opções Admin no dropdown -->
+                            {% if request.session.get('usuario_logado')['perfil'] == 'Administrador' %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/usuario">
+                                <i class="bi bi-speedometer2"></i> Dashboard
+                            </a></li>
+                            {% endif %}
+
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="bi bi-box-arrow-right"></i> Sair
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <!-- Botões de Login e Cadastro -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/login">Login</a>
+                        <a class="nav-link {{ 'active' if request.path == '/login' else '' }}"
+                            href="/login">Login</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/cadastrar">Cadastrar</a>
+                        <a class="nav-link {{ 'active' if request.path == '/cadastrar' else '' }}"
+                            href="/cadastrar">Cadastrar</a>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Container para Toasts (top-right) -->
-    <div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>
+    <!-- Container para Toasts (bottom-right) -->
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-4 toast-offset"></div>
 
     <!-- Conteúdo Principal -->
     <main class="container d-flex flex-column flex-fill my-4">
@@ -61,6 +115,9 @@
 
     <!-- Modal de Confirmação (componente genérico) -->
     {% include 'components/modal_confirmacao.html' %}
+
+    <!-- Modal de Alerta (componente genérico) -->
+    {% include 'components/modal_alerta.html' %}
 
     <!-- Footer -->
     <footer class="bg-light text-center text-muted py-3 mt-auto">
@@ -78,13 +135,19 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <!-- Script de Toasts -->
     <script src="/static/js/toasts.js"></script>
 
+    <!-- Script de Modal de Alerta -->
+    <script src="/static/js/modal-alerta.js"></script>
+
     <!-- Script de Validação de Senha -->
     <script src="/static/js/password-validator.js"></script>
+
+    <!-- Script de Máscaras de Input -->
+    <script src="/static/js/input-mask.js"></script>
 
     {% block scripts %}{% endblock %}
 </body>

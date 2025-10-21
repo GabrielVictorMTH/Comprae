@@ -10,6 +10,7 @@ from util.auth_decorator import requer_autenticacao
 from util.template_util import criar_templates
 from util.flash_messages import informar_sucesso, informar_erro
 from util.logger_config import logger
+from util.exceptions import FormValidationError
 
 router = APIRouter(prefix="/tarefas")
 templates = criar_templates("templates/tarefas")
@@ -35,12 +36,16 @@ async def get_cadastrar(request: Request, usuario_logado: Optional[dict] = None)
 @requer_autenticacao()
 async def post_cadastrar(
     request: Request,
-    titulo: str = Form(...),
-    descricao: str = Form(""),
+    titulo: str = Form(),
+    descricao: str = Form(),
     usuario_logado: Optional[dict] = None
 ):
     """Cadastra uma nova tarefa"""
     assert usuario_logado is not None
+
+    # Armazena os dados do formulário para reexibição em caso de erro
+    dados_formulario = {"titulo": titulo, "descricao": descricao}
+
     try:
         # Validar com DTO
         dto = CriarTarefaDTO(titulo=titulo, descricao=descricao)
@@ -61,11 +66,11 @@ async def post_cadastrar(
         return RedirectResponse("/tarefas/listar", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        erros = [erro['msg'] for erro in e.errors()]
-        informar_erro(request, " | ".join(erros))
-        return templates.TemplateResponse(
-            "tarefas/cadastrar.html",
-            {"request": request, "dados": {"titulo": titulo, "descricao": descricao}}
+        raise FormValidationError(
+            validation_error=e,
+            template_path="tarefas/cadastrar.html",
+            dados_formulario=dados_formulario,
+            campo_padrao="titulo",
         )
 
 @router.post("/{id}/concluir")

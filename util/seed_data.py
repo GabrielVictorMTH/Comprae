@@ -14,7 +14,7 @@ def carregar_usuarios_seed():
     - id: sequencial iniciando em 1
     - nome: {Perfil} Padrão
     - email: {perfil}@email.com
-    - senha: {Perfil}@123
+    - senha: 1234aA@#
     - perfil: {Perfil}
     """
     # Verificar se já existem usuários cadastrados
@@ -35,8 +35,8 @@ def carregar_usuarios_seed():
 
             # Gera dados do usuário baseado no perfil
             nome = f"{perfil_valor} Padrão"
-            email = f"{perfil_valor.lower()}@email.com"
-            senha_plain = f"{perfil_valor}@123"
+            email = f"padrao@{perfil_valor.lower()}.com"
+            senha_plain = "1234aA@#"
 
             # Criar usuário
             usuario = Usuario(

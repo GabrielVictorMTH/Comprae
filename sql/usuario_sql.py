@@ -8,7 +8,6 @@ CREATE TABLE IF NOT EXISTS usuario (
     email TEXT UNIQUE NOT NULL,
     senha TEXT NOT NULL,
     perfil TEXT DEFAULT 'cliente',
-    foto TEXT,
     token_redefinicao TEXT,
     data_token DATETIME,
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -22,7 +21,7 @@ VALUES (?, ?, ?, ?)
 
 ALTERAR = """
 UPDATE usuario
-SET nome = ?, email = ?
+SET nome = ?, email = ?, perfil = ?
 WHERE id = ?
 """
 
@@ -46,12 +45,6 @@ ATUALIZAR_TOKEN = """
 UPDATE usuario
 SET token_redefinicao = ?, data_token = ?
 WHERE email = ?
-"""
-
-ATUALIZAR_FOTO = """
-UPDATE usuario
-SET foto = ?
-WHERE id = ?
 """
 
 OBTER_POR_TOKEN = """

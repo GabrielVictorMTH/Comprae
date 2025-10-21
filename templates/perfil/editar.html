@@ -1,68 +1,53 @@
 {% extends "base_privada.html" %}
+{% from "macros/form_fields.html" import field with context %}
 
 {% block titulo %}Editar Perfil{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container">
     <div class="row">
         <div class="col-md-8 mx-auto">
             <!-- Cabeçalho -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="bi bi-pencil-square"></i> Editar Perfil</h2>
-                <a href="/perfil/visualizar" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Voltar
-                </a>
             </div>
 
             <!-- Formulário de Edição -->
             <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <form action="/perfil/editar" method="post">
-                        <!-- Nome -->
-                        <div class="mb-3">
-                            <label for="nome" class="form-label">
-                                <i class="bi bi-person"></i> Nome Completo
-                            </label>
-                            <input type="text" class="form-control" id="nome" name="nome" value="{{ usuario.nome }}"
-                                required minlength="3" maxlength="100" placeholder="Digite seu nome completo">
-                            <div class="form-text">Mínimo de 3 caracteres</div>
-                        </div>
+                <form action="/perfil/editar" method="post">
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-12">
+                                {% include "components/alert_erro_geral.html" %}
+                            </div>
 
-                        <!-- E-mail -->
-                        <div class="mb-3">
-                            <label for="email" class="form-label">
-                                <i class="bi bi-envelope"></i> E-mail
-                            </label>
-                            <input type="email" class="form-control" id="email" name="email" value="{{ usuario.email }}"
-                                required placeholder="seu@email.com">
-                            <div class="form-text">
-                                Este e-mail será usado para login
+                            <div class="col-12 mb-3">
+                                {{ field(name='nome', label='Nome Completo', type='text', required=true,
+                                value=dados.nome, attributes={'minlength': 3, 'maxlength': 100}) }}
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {{ field(name='email', label='E-mail', type='email', required=true,
+                                value=dados.email) }}
+                            </div>
+
+                            <div class="col-12">
+                                {{ field(name='perfil', label='Perfil de Acesso', type='text',
+                                value=dados.perfil, disabled=true, wrapper_class='mb-0') }}
                             </div>
                         </div>
-
-                        <!-- Informação do Perfil (Read-only) -->
-                        <div class="mb-3">
-                            <label class="form-label">
-                                <i class="bi bi-person-badge"></i> Perfil de Acesso
-                            </label>
-                            <input type="text" class="form-control"
-                                value="{{ usuario.perfil }}" disabled>
-                            <div class="form-text">
-                                O perfil de acesso não pode ser alterado por aqui
-                            </div>
-                        </div>
-
-                        <!-- Botões -->
-                        <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                    </div>
+                    <div class="card-footer p-4">
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-check-circle"></i> Salvar Alterações
                             </button>
                             <a href="/perfil/visualizar" class="btn btn-outline-secondary">
                                 Cancelar
                             </a>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
 
             <!-- Avisos -->
@@ -77,23 +62,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    // Validação do formulário
-    document.querySelector('form').addEventListener('submit', function (e) {
-        const nome = document.getElementById('nome').value.trim();
-        const email = document.getElementById('email').value.trim();
-
-        if (nome.length < 3) {
-            e.preventDefault();
-            alert('O nome deve ter no mínimo 3 caracteres');
-            return false;
-        }
-
-        if (!email.includes('@')) {
-            e.preventDefault();
-            alert('Digite um e-mail válido');
-            return false;
-        }
-    });
-</script>
+<!-- Validação é feita server-side via EditarPerfilDTO -->
 {% endblock %}

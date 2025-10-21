@@ -15,6 +15,9 @@ passlib[bcrypt]==1.7.4
 bcrypt>=3.2.0,<4.0.0  # Versão 3.x é totalmente compatível com passlib 1.7.4
 python-multipart==0.0.12
 
+# Processamento de Imagens
+Pillow>=10.0.0
+
 # Sessões
 itsdangerous==2.2.0
 

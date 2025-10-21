@@ -114,9 +114,9 @@ class TestCriarTarefa:
         assert response.status_code == status.HTTP_200_OK
         assert tarefa_teste["titulo"] in response.text
 
-    def test_tarefa_criada_pertence_ao_usuario(self, cliente_autenticado, tarefa_teste):
+    def test_tarefa_criada_pertence_ao_usuario(self, cliente_autenticado, tarefa_teste, usuario_teste):
         """Tarefa criada deve pertencer ao usuário que a criou"""
-        from repo import tarefa_repo
+        from repo import tarefa_repo, usuario_repo
 
         # Criar tarefa
         cliente_autenticado.post("/tarefas/cadastrar", data={
@@ -124,9 +124,10 @@ class TestCriarTarefa:
             "descricao": tarefa_teste["descricao"]
         })
 
-        # Buscar tarefas do usuário (ID 1 é o primeiro usuário criado)
-        # Como estamos usando fixtures, sabemos que o usuário autenticado é o ID 1
-        tarefas = tarefa_repo.obter_todos_por_usuario(1)
+        # Buscar ID do usuário de teste
+        usuario = usuario_repo.obter_por_email(usuario_teste["email"])
+        assert usuario is not None
+        tarefas = tarefa_repo.obter_todos_por_usuario(usuario.id)
         assert len(tarefas) > 0
         assert tarefas[0].titulo == tarefa_teste["titulo"]
 
@@ -134,15 +135,17 @@ class TestCriarTarefa:
 class TestConcluirTarefa:
     """Testes de conclusão de tarefas"""
 
-    def test_concluir_tarefa_propria(self, cliente_autenticado, criar_tarefa, tarefa_teste):
+    def test_concluir_tarefa_propria(self, cliente_autenticado, criar_tarefa, tarefa_teste, usuario_teste):
         """Deve permitir concluir tarefa própria"""
-        from repo import tarefa_repo
+        from repo import tarefa_repo, usuario_repo
 
         # Criar tarefa
         criar_tarefa(tarefa_teste["titulo"], tarefa_teste["descricao"])
 
-        # Buscar ID da tarefa criada
-        tarefas = tarefa_repo.obter_todos_por_usuario(1)
+        # Buscar ID do usuário e da tarefa
+        usuario = usuario_repo.obter_por_email(usuario_teste["email"])
+        assert usuario is not None
+        tarefas = tarefa_repo.obter_todos_por_usuario(usuario.id)
         tarefa_id = tarefas[0].id
 
         # Concluir tarefa
@@ -155,6 +158,7 @@ class TestConcluirTarefa:
 
         # Verificar no banco que foi concluída
         tarefa = tarefa_repo.obter_por_id(tarefa_id)
+        assert tarefa is not None
         assert tarefa.concluida is True
 
     def test_concluir_tarefa_sem_autenticacao(self, client):
@@ -176,15 +180,17 @@ class TestConcluirTarefa:
 class TestExcluirTarefa:
     """Testes de exclusão de tarefas"""
 
-    def test_excluir_tarefa_propria(self, cliente_autenticado, criar_tarefa, tarefa_teste):
+    def test_excluir_tarefa_propria(self, cliente_autenticado, criar_tarefa, tarefa_teste, usuario_teste):
         """Deve permitir excluir tarefa própria"""
-        from repo import tarefa_repo
+        from repo import tarefa_repo, usuario_repo
 
         # Criar tarefa
         criar_tarefa(tarefa_teste["titulo"], tarefa_teste["descricao"])
 
-        # Buscar ID da tarefa
-        tarefas = tarefa_repo.obter_todos_por_usuario(1)
+        # Buscar ID do usuário e da tarefa
+        usuario = usuario_repo.obter_por_email(usuario_teste["email"])
+        assert usuario is not None
+        tarefas = tarefa_repo.obter_todos_por_usuario(usuario.id)
         tarefa_id = tarefas[0].id
 
         # Excluir tarefa
@@ -249,14 +255,14 @@ class TestIsolamentoTarefas:
         })
 
         # Listar tarefas como usuário 2
-        response = client.get("/tarefas")
+        response = client.get("/tarefas/listar")
 
         # Não deve ver tarefa do usuário 1
         assert "Tarefa Usuario 1" not in response.text
 
     def test_usuario_nao_pode_concluir_tarefa_de_outro(self, client, criar_usuario):
         """Usuário não deve poder concluir tarefa de outro usuário"""
-        from repo import tarefa_repo
+        from repo import tarefa_repo, usuario_repo
         from model.tarefa_model import Tarefa
 
         # Criar dois usuários
@@ -275,8 +281,10 @@ class TestIsolamentoTarefas:
             "descricao": "Descrição"
         })
 
-        # Buscar ID da tarefa
-        tarefas = tarefa_repo.obter_todos_por_usuario(1)
+        # Buscar ID do usuário 1 e da tarefa
+        usuario1 = usuario_repo.obter_por_email("usuario1@example.com")
+        assert usuario1 is not None
+        tarefas = tarefa_repo.obter_todos_por_usuario(usuario1.id)
         tarefa_id = tarefas[0].id
 
         # Logout
@@ -296,11 +304,12 @@ class TestIsolamentoTarefas:
 
         # Verificar que tarefa não foi concluída
         tarefa = tarefa_repo.obter_por_id(tarefa_id)
+        assert tarefa is not None
         assert tarefa.concluida is False
 
     def test_usuario_nao_pode_excluir_tarefa_de_outro(self, client, criar_usuario):
         """Usuário não deve poder excluir tarefa de outro usuário"""
-        from repo import tarefa_repo
+        from repo import tarefa_repo, usuario_repo
 
         # Criar dois usuários
         criar_usuario("Usuario 1", "usuario1@example.com", "Senha@123")
@@ -318,8 +327,10 @@ class TestIsolamentoTarefas:
             "descricao": "Descrição"
         })
 
-        # Buscar ID da tarefa
-        tarefas = tarefa_repo.obter_todos_por_usuario(1)
+        # Buscar ID do usuário 1 e da tarefa
+        usuario1 = usuario_repo.obter_por_email("usuario1@example.com")
+        assert usuario1 is not None
+        tarefas = tarefa_repo.obter_todos_por_usuario(usuario1.id)
         tarefa_id = tarefas[0].id
 
         # Logout
@@ -360,20 +371,24 @@ class TestValidacoesTarefa:
         for titulo in tarefas:
             assert titulo in response.text
 
-    def test_tarefa_criada_nao_esta_concluida(self, cliente_autenticado, criar_tarefa, tarefa_teste):
+    def test_tarefa_criada_nao_esta_concluida(self, cliente_autenticado, criar_tarefa, tarefa_teste, usuario_teste):
         """Tarefa criada deve estar marcada como não concluída"""
-        from repo import tarefa_repo
+        from repo import tarefa_repo, usuario_repo
 
         criar_tarefa(tarefa_teste["titulo"], tarefa_teste["descricao"])
 
-        tarefas = tarefa_repo.obter_todos_por_usuario(1)
+        usuario = usuario_repo.obter_por_email(usuario_teste["email"])
+        assert usuario is not None
+        tarefas = tarefa_repo.obter_todos_por_usuario(usuario.id)
         assert tarefas[0].concluida is False
 
-    def test_tarefa_tem_data_criacao(self, cliente_autenticado, criar_tarefa, tarefa_teste):
+    def test_tarefa_tem_data_criacao(self, cliente_autenticado, criar_tarefa, tarefa_teste, usuario_teste):
         """Tarefa deve ter data de criação registrada"""
-        from repo import tarefa_repo
+        from repo import tarefa_repo, usuario_repo
 
         criar_tarefa(tarefa_teste["titulo"], tarefa_teste["descricao"])
 
-        tarefas = tarefa_repo.obter_todos_por_usuario(1)
+        usuario = usuario_repo.obter_por_email(usuario_teste["email"])
+        assert usuario is not None
+        tarefas = tarefa_repo.obter_todos_por_usuario(usuario.id)
         assert tarefas[0].data_criacao is not None

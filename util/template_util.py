@@ -68,6 +68,18 @@ def formatar_data_hora_br(data_str):
     except (ValueError, AttributeError):
         return data_str
 
+def foto_usuario(id: int) -> str:
+    """
+    Retorna o caminho da foto do usuário para uso em templates.
+
+    Args:
+        id: ID do usuário
+
+    Returns:
+        String com caminho da foto (ex: /static/img/usuarios/000001.jpg)
+    """
+    return f"/static/img/usuarios/{id:06d}.jpg"
+
 def criar_templates(pasta: str):
     """Cria Jinja2Templates com funções globais customizadas"""
     # Usar o diretório raiz 'templates' para permitir acesso a base.html e subpastas
@@ -83,6 +95,7 @@ def criar_templates(pasta: str):
     # Adicionar filtros customizados
     env.filters['data_br'] = formatar_data_br
     env.filters['data_hora_br'] = formatar_data_hora_br
+    env.filters['foto_usuario'] = foto_usuario
 
     templates = Jinja2Templates(env=env)
     return templates

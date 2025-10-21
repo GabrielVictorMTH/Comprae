@@ -5,7 +5,6 @@ import pytest
 from fastapi.testclient import TestClient
 import os
 import tempfile
-from pathlib import Path
 from util.perfis import Perfil
 
 # Configurar banco de dados de teste ANTES de importar a aplicação
@@ -33,6 +32,58 @@ def setup_test_database():
         os.unlink(test_db_path)
     except:
         pass
+
+
+@pytest.fixture(scope="function", autouse=True)
+def limpar_rate_limiter():
+    """Limpa o rate limiter antes de cada teste para evitar bloqueios"""
+    # Importar após configuração do banco de dados
+    from routes.auth_routes import login_limiter, cadastro_limiter, esqueci_senha_limiter
+
+    # Limpar antes do teste
+    login_limiter.limpar()
+    cadastro_limiter.limpar()
+    esqueci_senha_limiter.limpar()
+    yield
+    # Limpar depois do teste também
+    login_limiter.limpar()
+    cadastro_limiter.limpar()
+    esqueci_senha_limiter.limpar()
+
+
+@pytest.fixture(scope="function", autouse=True)
+def limpar_banco_dados():
+    """Limpa todas as tabelas do banco antes de cada teste para evitar interferência"""
+    # Importar após configuração do banco de dados
+    from util.db_util import get_connection
+
+    def _limpar_tabelas():
+        """Limpa tabelas se elas existirem"""
+        with get_connection() as conn:
+            cursor = conn.cursor()
+            # Verificar se tabelas existem antes de limpar
+            cursor.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('tarefa', 'usuario', 'configuracao')"
+            )
+            tabelas_existentes = [row[0] for row in cursor.fetchall()]
+
+            # Limpar apenas tabelas que existem (respeitando foreign keys)
+            if 'tarefa' in tabelas_existentes:
+                cursor.execute("DELETE FROM tarefa")
+            if 'usuario' in tabelas_existentes:
+                cursor.execute("DELETE FROM usuario")
+            if 'configuracao' in tabelas_existentes:
+                cursor.execute("DELETE FROM configuracao")
+
+            conn.commit()
+
+    # Limpar antes do teste
+    _limpar_tabelas()
+
+    yield
+
+    # Limpar depois do teste também
+    _limpar_tabelas()
 
 
 @pytest.fixture(scope="function")
@@ -77,9 +128,10 @@ def criar_usuario(client):
     Fixture que retorna uma função para criar usuários
     Útil para criar múltiplos usuários em um teste
     """
-    def _criar_usuario(nome: str, email: str, senha: str):
+    def _criar_usuario(nome: str, email: str, senha: str, perfil: str = Perfil.CLIENTE.value):
         """Cadastra um usuário via endpoint de cadastro"""
-        response = client.post("/cadastro", data={
+        response = client.post("/cadastrar", data={
+            "perfil": perfil,
             "nome": nome,
             "email": email,
             "senha": senha,

@@ -2,6 +2,7 @@ from typing import Optional
 from model.usuario_model import Usuario
 from sql.usuario_sql import *
 from util.db_util import get_connection
+from util.foto_util import criar_foto_padrao_usuario
 
 def criar_tabela() -> bool:
     with get_connection() as conn:
@@ -18,7 +19,13 @@ def inserir(usuario: Usuario) -> Optional[int]:
             usuario.senha,
             usuario.perfil
         ))
-        return cursor.lastrowid
+        usuario_id = cursor.lastrowid
+
+        # Criar foto padrão para o novo usuário
+        if usuario_id:
+            criar_foto_padrao_usuario(usuario_id)
+
+        return usuario_id
 
 def alterar(usuario: Usuario) -> bool:
     with get_connection() as conn:
@@ -26,6 +33,7 @@ def alterar(usuario: Usuario) -> bool:
         cursor.execute(ALTERAR, (
             usuario.nome,
             usuario.email,
+            usuario.perfil,
             usuario.id
         ))
         return cursor.rowcount > 0
@@ -54,7 +62,6 @@ def obter_por_id(id: int) -> Optional[Usuario]:
                 email=row["email"],
                 senha=row["senha"],
                 perfil=row["perfil"],
-                foto=row["foto"],
                 token_redefinicao=row["token_redefinicao"],
                 data_token=row["data_token"],
                 data_cadastro=row["data_cadastro"]
@@ -73,7 +80,6 @@ def obter_todos() -> list[Usuario]:
                 email=row["email"],
                 senha=row["senha"],
                 perfil=row["perfil"],
-                foto=row["foto"],
                 token_redefinicao=row["token_redefinicao"] if "token_redefinicao" in row.keys() else None,
                 data_token=row["data_token"] if "data_token" in row.keys() else None,
                 data_cadastro=row["data_cadastro"] if "data_cadastro" in row.keys() else None
@@ -100,7 +106,6 @@ def obter_por_email(email: str) -> Optional[Usuario]:
                 email=row["email"],
                 senha=row["senha"],
                 perfil=row["perfil"],
-                foto=row["foto"],
                 token_redefinicao=row["token_redefinicao"] if "token_redefinicao" in row.keys() else None,
                 data_token=row["data_token"] if "data_token" in row.keys() else None
             )
@@ -110,12 +115,6 @@ def atualizar_token(email: str, token: str, data_expiracao: str) -> bool:
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(ATUALIZAR_TOKEN, (token, data_expiracao, email))
-        return cursor.rowcount > 0
-
-def atualizar_foto(id: int, caminho_foto: str) -> bool:
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute(ATUALIZAR_FOTO, (caminho_foto, id))
         return cursor.rowcount > 0
 
 def obter_por_token(token: str) -> Optional[Usuario]:
@@ -130,7 +129,6 @@ def obter_por_token(token: str) -> Optional[Usuario]:
                 email=row["email"],
                 senha=row["senha"],
                 perfil=row["perfil"],
-                foto=row["foto"],
                 token_redefinicao=row["token_redefinicao"],
                 data_token=row["data_token"]
             )
@@ -154,7 +152,6 @@ def obter_todos_por_perfil(perfil: str) -> list[Usuario]:
                 email=row["email"],
                 senha=row["senha"],
                 perfil=row["perfil"],
-                foto=row["foto"],
                 data_cadastro=row["data_cadastro"]
             )
             for row in rows

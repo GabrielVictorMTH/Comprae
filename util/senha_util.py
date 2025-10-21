@@ -17,6 +17,9 @@ def validar_forca_senha(senha: str) -> Tuple[bool, str]:
 
     if not re.search(r"\d", senha):
         return False, "Senha deve conter pelo menos um número"
+    
+    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", senha):
+        return False, "Senha deve conter pelo menos um caractere especial"
 
     return True, "Senha válida"
 

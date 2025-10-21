@@ -3,6 +3,7 @@ from fastapi.responses import RedirectResponse
 from functools import wraps
 from typing import List, Optional
 from util.logger_config import logger
+from util.flash_messages import informar_erro
 
 def criar_sessao(request: Request, usuario: dict):
     """Cria sessão de usuário"""
@@ -40,6 +41,7 @@ def requer_autenticacao(perfis_permitidos: Optional[List[str]] = None):
             usuario = obter_usuario_logado(request)
             if not usuario:
                 logger.warning(f"Tentativa de acesso não autenticado a {request.url.path}")
+                informar_erro(request, "Você precisa estar autenticado para acessar esta página.")
                 return RedirectResponse(
                     f"/login?redirect={request.url.path}",
                     status_code=status.HTTP_303_SEE_OTHER
@@ -53,7 +55,8 @@ def requer_autenticacao(perfis_permitidos: Optional[List[str]] = None):
                         f"Usuário {usuario.get('email')} tentou acessar {request.url.path} "
                         f"sem permissão (perfil: {perfil_usuario})"
                     )
-                    return RedirectResponse("/", status_code=status.HTTP_303_SEE_OTHER)
+                    informar_erro(request, "Você não tem permissão para acessar esta página.")
+                    return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
 
             # Injetar usuario_logado nos kwargs
             kwargs['usuario_logado'] = usuario

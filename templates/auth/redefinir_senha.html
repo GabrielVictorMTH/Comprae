@@ -1,67 +1,69 @@
 {% extends "base_publica.html" %}
+{% from "macros/form_fields.html" import field with context %}
 
-{% block titulo %}Redefinir Senha - {{ APP_NAME }}{% endblock %}
+{% block titulo %}Redefinir Senha{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-body p-4">
-                <h3 class="card-title text-center mb-4">
-                    <i class="bi bi-shield-lock"></i> Redefinir Senha
-                </h3>
-
-                <p class="text-muted text-center mb-4">
-                    Digite sua nova senha abaixo.
-                </p>
-
+<div class="d-flex flex-column flex-fill justify-content-center">
+    <div class="row align-items-center justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5">
+            <div class="card shadow">
                 <form method="POST" action="/redefinir-senha">
-                    <input type="hidden" name="token" value="{{ token }}">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="bi bi-shield-lock"></i> Redefinir Senha
+                        </h3>
 
-                    <div class="mb-3">
-                        <label for="senha" class="form-label">Nova Senha</label>
-                        <input
-                            type="password"
-                            class="form-control"
-                            id="senha"
-                            name="senha"
-                            placeholder="Digite sua nova senha"
-                            minlength="8"
-                            required
-                            autofocus
-                        >
-                        <div class="form-text">
-                            Mínimo 8 caracteres com letra maiúscula, minúscula e número
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="text-muted text-center mb-4">
+                                    Digite sua nova senha abaixo.
+                                </p>
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {% include "components/alert_erro_geral.html" %}
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {{ field(name='token', type='hidden', value=token) }}
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {{ field(name='senha', label='Nova Senha', type='password', required=true,
+                                autofocus=true,
+                                attributes={'minlength': 8}) }}
+                            </div>
+
+                            <div class="col-12 mb-1">
+                                {{ field(name='confirmar_senha', label='Confirmar Nova Senha', type='password',
+                                required=true,
+                                attributes={'minlength': 8}) }}
+                            </div>
+
+                            <!-- Indicador de força da senha -->
+                            <div class="mb-0">
+                                {% set show_special = true %}
+                                {% include 'components/password_strength_indicator.html' %}
+                            </div>
                         </div>
                     </div>
+                    <div class="card-footer p-4">
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-shield-lock"></i> Redefinir Senha
+                            </button>
+                        </div>
 
-                    <div class="mb-3">
-                        <label for="confirmar_senha" class="form-label">Confirmar Nova Senha</label>
-                        <input
-                            type="password"
-                            class="form-control"
-                            id="confirmar_senha"
-                            name="confirmar_senha"
-                            placeholder="Digite a senha novamente"
-                            minlength="8"
-                            required
-                        >
-                    </div>
+                        <hr class="my-4">
 
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-shield-lock"></i> Redefinir Senha
-                        </button>
+                        <p class="text-center mb-0">
+                            <a href="/login" class="text-decoration-none">
+                                <i class="bi bi-arrow-left"></i> Voltar ao Login
+                            </a>
+                        </p>
                     </div>
                 </form>
-
-                <hr class="my-4">
-
-                <p class="text-center mb-0">
-                    <a href="/login" class="text-decoration-none">
-                        <i class="bi bi-arrow-left"></i> Voltar ao Login
-                    </a>
-                </p>
             </div>
         </div>
     </div>
@@ -70,19 +72,24 @@
 
 {% block scripts %}
 <script>
-    // Inicializar validador de senha
+    // Inicializar validador de senha (apenas feedback visual)
     const passwordValidator = new PasswordValidator({
         passwordFieldId: 'senha',
         confirmPasswordFieldId: 'confirmar_senha',
-        minLength: 8
+        strengthBarId: 'senha-strength',
+        strengthTextId: 'senha-strength-text',
+        matchMessageId: 'senha-match',
+        requirements: {
+            length: 'req-length',
+            uppercase: 'req-uppercase',
+            lowercase: 'req-lowercase',
+            number: 'req-number'
+        },
+        minLength: 8,
+        showStrength: true,
+        showRequirements: true
     });
 
-    // Validação do formulário
-    document.querySelector('form').addEventListener('submit', function(e) {
-        if (!passwordValidator.validateForm()) {
-            e.preventDefault();
-            return false;
-        }
-    });
+    // Validação é feita server-side via RedefinirSenhaDTO
 </script>
 {% endblock %}

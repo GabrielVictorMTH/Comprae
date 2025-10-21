@@ -12,6 +12,7 @@ from util.flash_messages import informar_sucesso, informar_erro
 from util.logger_config import logger
 from util.perfis import Perfil
 from util.security import criar_hash_senha
+from util.exceptions import FormValidationError
 
 router = APIRouter(prefix="/admin/usuarios")
 templates = criar_templates("templates/admin/usuarios")
@@ -54,6 +55,10 @@ async def post_cadastrar(
 ):
     """Cadastra um novo usuário"""
     assert usuario_logado is not None
+
+    # Armazena os dados do formulário para reexibição em caso de erro
+    dados_formulario: dict = {"nome": nome, "email": email, "perfil": perfil}
+
     try:
         # Validar com DTO
         dto = CriarUsuarioDTO(
@@ -96,16 +101,13 @@ async def post_cadastrar(
         return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        erros = [erro['msg'] for erro in e.errors()]
-        informar_erro(request, " | ".join(erros))
-        perfis = Perfil.valores()
-        return templates.TemplateResponse(
-            "cadastro.html",
-            {
-                "request": request,
-                "perfis": perfis,
-                "dados": {"nome": nome, "email": email, "perfil": perfil}
-            }
+        # Adicionar perfis aos dados para renderizar o select no template
+        dados_formulario["perfis"] = Perfil.valores()
+        raise FormValidationError(
+            validation_error=e,
+            template_path="admin/usuarios/cadastro.html",
+            dados_formulario=dados_formulario,
+            campo_padrao="senha",
         )
 
 @router.get("/editar/{id}")
@@ -118,10 +120,19 @@ async def get_editar(request: Request, id: int, usuario_logado: Optional[dict] =
         informar_erro(request, "Usuário não encontrado")
         return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
 
+    # Criar cópia dos dados do usuário sem o campo senha (para não expor hash no HTML)
+    dados_usuario = usuario.__dict__.copy()
+    dados_usuario.pop('senha', None)
+
     perfis = Perfil.valores()
     return templates.TemplateResponse(
         "admin/usuarios/editar.html",
-        {"request": request, "usuario": usuario, "perfis": perfis}
+        {
+            "request": request,
+            "usuario": usuario,
+            "dados": dados_usuario,
+            "perfis": perfis
+        }
     )
 
 @router.post("/editar/{id}")
@@ -136,13 +147,17 @@ async def post_editar(
 ):
     """Altera dados de um usuário"""
     assert usuario_logado is not None
-    try:
-        # Verificar se usuário existe
-        usuario_atual = usuario_repo.obter_por_id(id)
-        if not usuario_atual:
-            informar_erro(request, "Usuário não encontrado")
-            return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
 
+    # Verificar se usuário existe
+    usuario_atual = usuario_repo.obter_por_id(id)
+    if not usuario_atual:
+        informar_erro(request, "Usuário não encontrado")
+        return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Armazena os dados do formulário para reexibição em caso de erro
+    dados_formulario: dict = {"id": id, "nome": nome, "email": email, "perfil": perfil}
+
+    try:
         # Validar com DTO
         dto = AlterarUsuarioDTO(
             id=id,
@@ -162,7 +177,7 @@ async def post_editar(
                     "request": request,
                     "usuario": usuario_atual,
                     "perfis": perfis,
-                    "dados": {"nome": nome, "email": email, "perfil": perfil}
+                    "dados": {"id": id, "nome": nome, "email": email, "perfil": perfil}
                 }
             )
 
@@ -182,18 +197,14 @@ async def post_editar(
         return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        erros = [erro['msg'] for erro in e.errors()]
-        informar_erro(request, " | ".join(erros))
-        usuario_atual = usuario_repo.obter_por_id(id)
-        perfis = Perfil.valores()
-        return templates.TemplateResponse(
-            "editar.html",
-            {
-                "request": request,
-                "usuario": usuario_atual,
-                "perfis": perfis,
-                "dados": {"nome": nome, "email": email, "perfil": perfil}
-            }
+        # Adicionar perfis e usuario aos dados para renderizar o template
+        dados_formulario["perfis"] = Perfil.valores()
+        dados_formulario["usuario"] = usuario_repo.obter_por_id(id)
+        raise FormValidationError(
+            validation_error=e,
+            template_path="admin/usuarios/editar.html",
+            dados_formulario=dados_formulario,
+            campo_padrao="email",
         )
 
 @router.post("/excluir/{id}")

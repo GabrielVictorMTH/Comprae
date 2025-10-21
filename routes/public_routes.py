@@ -9,24 +9,32 @@ templates_home = criar_templates("templates")
 @router.get("/")
 async def home(request: Request):
     """
-    Rota inicial:
-    - Se usuário estiver logado: exibe dashboard (home.html)
-    - Se não estiver logado: exibe landing page pública (index.html)
+    Rota inicial - Landing Page pública (sempre)
     """
-    usuario_logado = obter_usuario_logado(request)
+    return templates_home.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )
 
-    if usuario_logado:
-        # Usuário autenticado - Dashboard
-        return templates_home.TemplateResponse(
-            "home.html",
-            {
-                "request": request,
-                "usuario": usuario_logado
-            }
-        )
-    else:
-        # Usuário não autenticado - Landing Page
-        return templates_home.TemplateResponse(
-            "index.html",
-            {"request": request}
-        )
+
+@router.get("/index")
+async def index(request: Request):
+    """
+    Página pública inicial (Landing Page)
+    Sempre exibe a página pública, independentemente de autenticação
+    """
+    return templates_home.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )
+
+
+@router.get("/sobre")
+async def sobre(request: Request):
+    """
+    Página "Sobre" com informações do projeto acadêmico
+    """
+    return templates_home.TemplateResponse(
+        "sobre.html",
+        {"request": request}
+    )
