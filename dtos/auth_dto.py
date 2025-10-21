@@ -42,7 +42,7 @@ class CadastroDTO(BaseModel):
     def validar_senhas_coincidem(self) -> "CadastroDTO":
         """Valida se senha e confirmação são iguais"""
         if self.senha != self.confirmar_senha:
-            raise ValueError("As senhas não coincidem")
+            raise ValueError("As senhas não coincidem.")
         return self
 
 
@@ -73,5 +73,5 @@ class RedefinirSenhaDTO(BaseModel):
     def validar_senhas_coincidem(self) -> "RedefinirSenhaDTO":
         """Valida se senha e confirmação são iguais"""
         if self.senha != self.confirmar_senha:
-            raise ValueError("As senhas não coincidem")
+            raise ValueError("As senhas não coincidem.")
         return self

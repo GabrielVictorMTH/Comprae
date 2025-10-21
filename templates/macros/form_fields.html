@@ -112,7 +112,7 @@ decimal_suffix=''
 
 {# ========== CHECKBOX ========== #}
 {% elif type == 'checkbox' %}
-<div class="mb-3 {{ wrapper_class }}">
+<div class="{{ wrapper_class }}">
     <div class="form-check {% if checkbox_style == 'switch' %}form-switch{% endif %}">
         <input class="form-check-input {{ class_extra }} {% if has_error %}is-invalid{% endif %}" type="checkbox"
             id="{{ field_id }}" name="{{ name }}" value="1" {% if field_value or (field_value|string=='1' ) or
@@ -135,7 +135,7 @@ decimal_suffix=''
 
 {# ========== RADIO BUTTONS ========== #}
 {% elif type == 'radio' %}
-<div class="mb-3 {{ wrapper_class }}">
+<div class="{{ wrapper_class }}">
     {% if radio_style == 'buttons' %}
     {# Estilo button-group #}
     {% if label %}
@@ -209,7 +209,7 @@ decimal_suffix=''
 
 {# ========== TEXTAREA ========== #}
 {% elif type == 'textarea' %}
-<div class="mb-3 {{ wrapper_class }}">
+<div class="{{ wrapper_class }}">
     <div class="form-floating">
         <textarea class="form-control {{ class_extra }} {% if has_error %}is-invalid{% endif %}" id="{{ field_id }}"
             name="{{ name }}" placeholder="{{ field_placeholder }}" style="height: {{ rows * 30 }}px;" {% if disabled
@@ -230,7 +230,7 @@ decimal_suffix=''
 
 {# ========== SELECT ========== #}
 {% elif type == 'select' %}
-<div class="mb-3 {{ wrapper_class }}">
+<div class="{{ wrapper_class }}">
     <div class="form-floating">
         <select class="form-select {{ class_extra }} {% if has_error %}is-invalid{% endif %}" id="{{ field_id }}"
             name="{{ name }}" {% if disabled %}disabled{% endif %} {% if required %}required{% endif %} {% if autofocus
@@ -259,7 +259,7 @@ decimal_suffix=''
 
 {# ========== DECIMAL INPUT ========== #}
 {% elif type == 'decimal' %}
-<div class="mb-3 {{ wrapper_class }}">
+<div class="{{ wrapper_class }}">
     <div class="form-floating">
         <input type="text" class="form-control {{ class_extra }} {% if has_error %}is-invalid{% endif %}"
             id="{{ field_id }}" name="{{ name }}" value="{{ field_value }}" placeholder="{{ field_placeholder }}" {% if
@@ -280,7 +280,7 @@ decimal_suffix=''
 
 {# ========== INPUT COM BOTÃO ANEXADO (input-group) ========== #}
 {% elif append_icon %}
-<div class="mb-3 {{ wrapper_class }}">
+<div class="{{ wrapper_class }}">
     <div class="input-group">
         <div class="form-floating">
             <input type="{{ type }}" class="form-control {{ class_extra }} {% if has_error %}is-invalid{% endif %}"
@@ -306,7 +306,7 @@ decimal_suffix=''
 
 {# ========== INPUT PADRÃO (text, email, password, date, etc.) ========== #}
 {% elif type in floating_types %}
-<div class="mb-3 {{ wrapper_class }}">
+<div class="{{ wrapper_class }}">
     <div class="form-floating">
         <input type="{{ type }}" class="form-control {{ class_extra }} {% if has_error %}is-invalid{% endif %}"
             id="{{ field_id }}" name="{{ name }}" value="{{ field_value }}" placeholder="{{ field_placeholder }}" {% if
@@ -327,7 +327,7 @@ decimal_suffix=''
 
 {# ========== FALLBACK (tipo não reconhecido) ========== #}
 {% else %}
-<div class="mb-3 {{ wrapper_class }}">
+<div class="{{ wrapper_class }}">
     <div class="alert alert-warning" role="alert">
         <i class="bi bi-exclamation-triangle"></i> Tipo de campo '{{ type }}' não suportado pela macro field().
     </div>

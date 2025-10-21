@@ -11,45 +11,41 @@
         </div>
 
         <div class="card shadow-sm">
-            <div class="card-body">
-                <form method="POST" action="/admin/usuarios/cadastrar">
+            <form method="POST" action="/admin/usuarios/cadastrar">
+                <div class="card-body p-4">
                     <div class="row">
-                        <div class="col-md-12">
-                            {{ field(name='nome', label='Nome Completo', type='text', required=true,
-                                     wrapper_class='mb-3') }}
+                        <div class="col-12">
+                            {% include "components/alert_erro_geral.html" %}
                         </div>
 
-                        <div class="col-md-12">
-                            {{ field(name='email', label='Email', type='email', required=true,
-                                     wrapper_class='mb-3') }}
-                        </div>
-
-                        <div class="col-md-12">
+                        <div class="col-12 mb-3">
                             {% set perfis_dict = {} %}
                             {% for perfil in perfis %}
-                                {% set _ = perfis_dict.update({perfil: perfil}) %}
+                            {% set _ = perfis_dict.update({perfil: perfil}) %}
                             {% endfor %}
                             {{ field(name='perfil', label='Perfil de Acesso', type='radio', required=true,
-                                     radio_style='buttons', options=perfis_dict, wrapper_class='mb-3') }}
+                            radio_style='buttons', options=perfis_dict) }}
                         </div>
 
-                        <div class="col-md-6">
-                            {{ field(name='senha', label='Senha', type='password', required=true,
-                                     wrapper_class='mb-3') }}
+                        <div class="col-12 mb-3">
+                            {{ field(name='nome', label='Nome Completo', type='text', required=true) }}
                         </div>
 
-                        <div class="col-md-6">
-                            {{ field(name='confirma_senha', label='Confirmar Senha', type='password', required=true,
-                                     wrapper_class='mb-3') }}
+                        <div class="col-12 mb-3">
+                            {{ field(name='email', label='Email', type='email', required=true) }}
+                        </div>                        
+
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            {{ field(name='senha', label='Senha', type='password', required=true) }}
                         </div>
 
-                        <div class="col-md-12">
-                            {{ field(name='ativo', label='Usuário ativo', type='checkbox', value='1',
-                                     wrapper_class='mb-3') }}
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            {{ field(name='confirma_senha', label='Confirmar Senha', type='password', required=true) }}
                         </div>
                     </div>
-
-                    <div class="d-flex gap-2">
+                </div>
+                <div class="card-footer p-4">
+                    <div class="d-flex gap-3">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-circle"></i> Cadastrar
                         </button>
@@ -57,8 +53,8 @@
                             <i class="bi bi-x-circle"></i> Cancelar
                         </a>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

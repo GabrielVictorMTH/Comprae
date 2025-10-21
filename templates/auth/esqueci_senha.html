@@ -8,29 +8,43 @@
     <div class="row align-items-center justify-content-center">
         <div class="col-12 col-md-6 col-lg-5">
             <div class="card shadow">
-                <div class="card-body p-4">
-                    <h3 class="card-title text-center mb-4">
-                        <i class="bi bi-key"></i> Recuperar Senha
-                    </h3>
+                <form method="POST" action="/esqueci-senha">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="bi bi-key"></i> Recuperar Senha
+                        </h3>
 
-                    <p class="text-muted text-center mb-4">
-                        Digite seu e-mail cadastrado para receber instruções de recuperação de senha.
-                    </p>
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <p class="text-muted text-center mb-0">
+                                    Não se preocupe! Basta informar seu e-mail cadastrado e enviaremos um link para
+                                    redefinição de senha.
+                                </p>
+                            </div>
 
-                    <form method="POST" action="/esqueci-senha">
-                        {{ field(name='email', label='E-mail', type='email', required=true, autofocus=true) }}
+                            <div class="col-12 mb-3">
+                                {% include "components/alert_erro_geral.html" %}
+                            </div>
 
-                        <div class="d-grid gap-2">
+                            <div class="col-12">
+                                {{ field(name='email', label='E-mail', type='email', required=true, autofocus=true) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer p-4">
+                        <div class="d-grid">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-envelope"></i> Enviar Link de Recuperação
                             </button>
+
+                            <hr class="my-4">
 
                             <a href="/login" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left"></i> Voltar ao Login
                             </a>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

@@ -16,8 +16,10 @@ from util.logger_config import logger
 from util.exception_handlers import (
     http_exception_handler,
     validation_exception_handler,
-    generic_exception_handler
+    generic_exception_handler,
+    form_validation_exception_handler,
 )
+from util.exceptions import FormValidationError
 
 # Repositórios
 from repo import usuario_repo, configuracao_repo, tarefa_repo
@@ -45,6 +47,7 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
 # Registrar Exception Handlers
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)  # type: ignore[arg-type]
 app.add_exception_handler(RequestValidationError, validation_exception_handler)  # type: ignore[arg-type]
+app.add_exception_handler(FormValidationError, form_validation_exception_handler)  # type: ignore[arg-type]
 app.add_exception_handler(Exception, generic_exception_handler)
 logger.info("Exception handlers registrados")
 

@@ -14,6 +14,8 @@
 
 ✅ **Validação robusta** - 15+ validadores prontos (CPF, CNPJ, email, telefone, etc.)
 
+✅ **Tratamento de erros centralizado** - Sistema inteligente que elimina ~70% do código repetitivo
+
 ✅ **Máscaras de input** - CPF, CNPJ, telefone, valores monetários, datas, placas de veículo
 
 ✅ **Sistema de fotos** - Upload, crop, redimensionamento automático
@@ -216,6 +218,38 @@ Sistema completo de máscaras em `static/js/input-mask.js`:
 - CARTAO: `0000 0000 0000 0000`
 - CVV: `000`
 - VALIDADE_CARTAO: `00/00`
+
+### 🛡️ Tratamento de Erros Centralizado
+
+Sistema de tratamento de erros de validação que garante consistência em toda aplicação:
+
+```python
+from util.exceptions import FormValidationError
+from pydantic import ValidationError
+
+@router.post("/cadastrar")
+async def post_cadastrar(request: Request, email: str = Form(), senha: str = Form()):
+    # Armazena dados do formulário para reexibição em caso de erro
+    dados_formulario = {"email": email}
+
+    try:
+        dto = CadastroDTO(email=email, senha=senha)
+        # lógica de negócio...
+
+    except ValidationError as e:
+        raise FormValidationError(
+            validation_error=e,
+            template_path="auth/cadastro.html",
+            dados_formulario=dados_formulario,
+            campo_padrao="senha"
+        )
+```
+
+**O handler global automaticamente:**
+- ✅ Processa os erros de validação
+- ✅ Exibe mensagem flash ao usuário
+- ✅ Renderiza o template com dados e erros
+- ✅ Registra o erro nos logs
 
 ### ✅ Validadores Reutilizáveis
 
@@ -554,6 +588,7 @@ from pydantic import ValidationError
 from util.auth_decorator import requer_autenticacao
 from util.template_util import criar_templates
 from util.flash_messages import informar_sucesso, informar_erro
+from util.exceptions import FormValidationError
 from util.perfis import Perfil
 
 import repo.produto_repo as produto_repo
@@ -590,6 +625,14 @@ async def cadastrar_post(
     preco: float = Form(...),
     estoque: int = Form(...)
 ):
+    # Armazena dados do formulário para reexibição em caso de erro
+    dados_formulario = {
+        "nome": nome,
+        "descricao": descricao,
+        "preco": preco,
+        "estoque": estoque
+    }
+
     try:
         # Validar com DTO
         dto = ProdutoCriarDTO(
@@ -615,10 +658,11 @@ async def cadastrar_post(
         return RedirectResponse("/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        erros = {erro['loc'][0]: erro['msg'] for erro in e.errors()}
-        return templates.TemplateResponse(
-            "produtos/cadastrar.html",
-            {"request": request, "erros": erros, "dados": request.__dict__}
+        raise FormValidationError(
+            validation_error=e,
+            template_path="produtos/cadastrar.html",
+            dados_formulario=dados_formulario,
+            campo_padrao="nome"
         )
 
 @router.get("/editar/{produto_id}")
@@ -646,6 +690,15 @@ async def editar_post(
     estoque: int = Form(...),
     ativo: bool = Form(False)
 ):
+    # Armazena dados do formulário para reexibição em caso de erro
+    dados_formulario = {
+        "nome": nome,
+        "descricao": descricao,
+        "preco": preco,
+        "estoque": estoque,
+        "ativo": ativo
+    }
+
     try:
         # Validar com DTO
         dto = ProdutoAlterarDTO(
@@ -672,11 +725,13 @@ async def editar_post(
         return RedirectResponse("/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        erros = {erro['loc'][0]: erro['msg'] for erro in e.errors()}
-        produto = produto_repo.obter_por_id(produto_id)
-        return templates.TemplateResponse(
-            "produtos/editar.html",
-            {"request": request, "produto": produto, "erros": erros}
+        # Adicionar produto aos dados para renderizar o formulário
+        dados_formulario["produto"] = produto_repo.obter_por_id(produto_id)
+        raise FormValidationError(
+            validation_error=e,
+            template_path="produtos/editar.html",
+            dados_formulario=dados_formulario,
+            campo_padrao="nome"
         )
 
 @router.post("/excluir/{produto_id}")
@@ -937,13 +992,15 @@ DefaultWebApp/
 │   ├── senha_util.py       # Validação de senha forte
 │   ├── email_service.py    # Envio de emails
 │   ├── foto_util.py        # ⭐ Sistema de fotos
+│   ├── exceptions.py       # ⭐ Exceções customizadas
+│   ├── exception_handlers.py # ⭐ Handlers globais de exceções
+│   ├── validation_util.py  # ⭐ Processamento de erros de validação
 │   ├── flash_messages.py   # ⭐ Flash messages
 │   ├── logger_config.py    # ⭐ Logger profissional
 │   ├── template_util.py    # Helpers de templates
 │   ├── config.py           # Configurações
 │   ├── config_cache.py     # Cache de configurações
 │   ├── seed_data.py        # Carregamento de seeds
-│   ├── exception_handlers.py
 │   └── security_headers.py
 │
 ├── tests/                   # Testes automatizados

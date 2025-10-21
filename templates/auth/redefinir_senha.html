@@ -8,65 +8,62 @@
     <div class="row align-items-center justify-content-center">
         <div class="col-12 col-md-6 col-lg-5">
             <div class="card shadow">
-                <div class="card-body p-4">
-                    <h3 class="card-title text-center mb-4">
-                        <i class="bi bi-shield-lock"></i> Redefinir Senha
-                    </h3>
+                <form method="POST" action="/redefinir-senha">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="bi bi-shield-lock"></i> Redefinir Senha
+                        </h3>
 
-                    <p class="text-muted text-center mb-4">
-                        Digite sua nova senha abaixo.
-                    </p>
-
-                    <form method="POST" action="/redefinir-senha">
-                        {{ field(name='token', type='hidden', value=token) }}
-
-                        {{ field(name='senha', label='Nova Senha', type='password', required=true, autofocus=true,
-                                 attributes={'minlength': 8}) }}
-
-                        {{ field(name='confirmar_senha', label='Confirmar Nova Senha', type='password', required=true,
-                                 attributes={'minlength': 8}) }}
-
-                        <!-- Indicador de força da senha -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <small class="text-muted">Força da senha:</small>
-                                <small id="senha-strength-text" class="text-muted"></small>
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="text-muted text-center mb-4">
+                                    Digite sua nova senha abaixo.
+                                </p>
                             </div>
-                            <div class="progress">
-                                <div class="progress-bar" id="senha-strength" role="progressbar"></div>
+
+                            <div class="col-12 mb-3">
+                                {% include "components/alert_erro_geral.html" %}
                             </div>
-                        </div>
 
-                        <div id="senha-match" class="form-text mb-3"></div>
+                            <div class="col-12 mb-3">
+                                {{ field(name='token', type='hidden', value=token) }}
+                            </div>
 
-                        <!-- Requisitos da Senha -->
-                        <div class="mb-3">
-                            <div class="alert alert-info">
-                                <strong><i class="bi bi-info-circle"></i> Requisitos da senha:</strong>
-                                <ul class="mb-0 mt-2">
-                                    <li id="req-length">Mínimo de 8 caracteres</li>
-                                    <li id="req-uppercase">Pelo menos 1 letra maiúscula</li>
-                                    <li id="req-lowercase">Pelo menos 1 letra minúscula</li>
-                                    <li id="req-number">Pelo menos 1 número</li>
-                                </ul>
+                            <div class="col-12 mb-3">
+                                {{ field(name='senha', label='Nova Senha', type='password', required=true,
+                                autofocus=true,
+                                attributes={'minlength': 8}) }}
+                            </div>
+
+                            <div class="col-12 mb-1">
+                                {{ field(name='confirmar_senha', label='Confirmar Nova Senha', type='password',
+                                required=true,
+                                attributes={'minlength': 8}) }}
+                            </div>
+
+                            <!-- Indicador de força da senha -->
+                            <div class="mb-0">
+                                {% set show_special = true %}
+                                {% include 'components/password_strength_indicator.html' %}
                             </div>
                         </div>
-
+                    </div>
+                    <div class="card-footer p-4">
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-shield-lock"></i> Redefinir Senha
                             </button>
                         </div>
-                    </form>
 
-                    <hr class="my-4">
+                        <hr class="my-4">
 
-                    <p class="text-center mb-0">
-                        <a href="/login" class="text-decoration-none">
-                            <i class="bi bi-arrow-left"></i> Voltar ao Login
-                        </a>
-                    </p>
-                </div>
+                        <p class="text-center mb-0">
+                            <a href="/login" class="text-decoration-none">
+                                <i class="bi bi-arrow-left"></i> Voltar ao Login
+                            </a>
+                        </p>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -75,7 +72,7 @@
 
 {% block scripts %}
 <script>
-    // Inicializar validador de senha
+    // Inicializar validador de senha (apenas feedback visual)
     const passwordValidator = new PasswordValidator({
         passwordFieldId: 'senha',
         confirmPasswordFieldId: 'confirmar_senha',
@@ -93,12 +90,6 @@
         showRequirements: true
     });
 
-    // Validação do formulário
-    document.querySelector('form').addEventListener('submit', function (e) {
-        if (!passwordValidator.validateForm()) {
-            e.preventDefault();
-            return false;
-        }
-    });
+    // Validação é feita server-side via RedefinirSenhaDTO
 </script>
 {% endblock %}

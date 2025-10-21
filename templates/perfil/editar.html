@@ -14,19 +14,31 @@
 
             <!-- Formulário de Edição -->
             <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <form action="/perfil/editar" method="post">
-                        {{ field(name='nome', label='Nome Completo', type='text', required=true,
-                                 value=usuario.nome, attributes={'minlength': 3, 'maxlength': 100}) }}
+                <form action="/perfil/editar" method="post">
+                    <div class="card-body p-4">
+                        <div class="row">
+                            <div class="col-12">
+                                {% include "components/alert_erro_geral.html" %}
+                            </div>
 
-                        {{ field(name='email', label='E-mail', type='email', required=true,
-                                 value=usuario.email) }}
+                            <div class="col-12 mb-3">
+                                {{ field(name='nome', label='Nome Completo', type='text', required=true,
+                                value=dados.nome, attributes={'minlength': 3, 'maxlength': 100}) }}
+                            </div>
 
-                        {{ field(name='perfil', label='Perfil de Acesso', type='text',
-                                 value=usuario.perfil, disabled=true) }}
+                            <div class="col-12 mb-3">
+                                {{ field(name='email', label='E-mail', type='email', required=true,
+                                value=dados.email) }}
+                            </div>
 
-                        <!-- Botões -->
-                        <div class="d-flex gap-2">
+                            <div class="col-12">
+                                {{ field(name='perfil', label='Perfil de Acesso', type='text',
+                                value=dados.perfil, disabled=true, wrapper_class='mb-0') }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer p-4">
+                        <div class="d-flex gap-3">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-check-circle"></i> Salvar Alterações
                             </button>
@@ -34,8 +46,8 @@
                                 Cancelar
                             </a>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
 
             <!-- Avisos -->
@@ -50,23 +62,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
-    // Validação do formulário
-    document.querySelector('form').addEventListener('submit', function (e) {
-        const nome = document.getElementById('nome').value.trim();
-        const email = document.getElementById('email').value.trim();
-
-        if (nome.length < 3) {
-            e.preventDefault();
-            alert('O nome deve ter no mínimo 3 caracteres');
-            return false;
-        }
-
-        if (!email.includes('@')) {
-            e.preventDefault();
-            alert('Digite um e-mail válido');
-            return false;
-        }
-    });
-</script>
+<!-- Validação é feita server-side via EditarPerfilDTO -->
 {% endblock %}

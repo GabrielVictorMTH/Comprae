@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             // Se houver erro (arquivo inválido, muito grande, etc.), exibir mensagem
-            alert(error);
+            exibirErro(error.message || error, 'Erro ao Processar Imagem');
             photoInput.value = '';
         }
     });

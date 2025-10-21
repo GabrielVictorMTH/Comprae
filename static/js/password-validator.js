@@ -1,12 +1,15 @@
 /**
- * PasswordValidator - Sistema de validação de senha reutilizável
+ * PasswordValidator - Sistema de feedback visual de senha
  *
  * Funcionalidades:
  * - Toggle de visibilidade de senha
  * - Medição de força de senha
  * - Atualização visual de requisitos
- * - Validação de senhas coincidentes
- * - Validação de formulário
+ * - Feedback visual de senhas coincidentes
+ *
+ * IMPORTANTE: Este componente fornece APENAS feedback visual.
+ * A validação real é feita server-side através de DTOs Pydantic.
+ * NÃO bloqueia envio do formulário com alerts.
  */
 
 class PasswordValidator {
@@ -180,82 +183,49 @@ class PasswordValidator {
     }
 
     /**
-     * Valida o formulário antes do envio
-     * @param {Object} options - Opções de validação
-     * @param {boolean} options.requireCurrent - Se requer senha atual (padrão: false)
-     * @param {string} options.currentPasswordFieldId - ID do campo de senha atual
+     * Retorna informações sobre a força da senha (para uso programático)
+     * @returns {Object} Objeto com força (0-100) e requisitos atendidos
      */
-    validateForm(options = {}) {
+    getPasswordStrength() {
         const password = this.passwordField.value;
-        const confirmPassword = this.confirmPasswordField ? this.confirmPasswordField.value : password;
+        let strength = 0;
 
-        // Verificar senha atual se requerido
-        if (options.requireCurrent && options.currentPasswordFieldId) {
-            const currentPassword = document.getElementById(options.currentPasswordFieldId)?.value;
-            if (!currentPassword) {
-                alert('Digite sua senha atual');
-                return false;
-            }
-        }
+        // Verificar requisitos
+        const requirements = {
+            length: password.length >= this.config.minLength,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /\d/.test(password),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
 
-        // Verificar tamanho mínimo
-        if (password.length < this.config.minLength) {
-            alert(`A senha deve ter no mínimo ${this.config.minLength} caracteres`);
-            return false;
-        }
+        // Calcular força (20% para cada requisito)
+        if (requirements.length) strength += 20;
+        if (requirements.uppercase) strength += 20;
+        if (requirements.lowercase) strength += 20;
+        if (requirements.number) strength += 20;
+        if (requirements.special) strength += 20;
 
-        // Verificar senhas coincidem
-        if (this.confirmPasswordField && password !== confirmPassword) {
-            alert('As senhas não coincidem!');
-            this.confirmPasswordField.focus();
-            return false;
-        }
-
-        // Verificar requisitos mínimos (maiúscula, minúscula, número)
-        if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/\d/.test(password)) {
-            alert('A senha deve conter pelo menos:\n- 1 letra maiúscula\n- 1 letra minúscula\n- 1 número');
-            return false;
-        }
-
-        // Callback customizado de validação
-        if (this.config.onValidate && typeof this.config.onValidate === 'function') {
-            return this.config.onValidate(password, confirmPassword);
-        }
-
-        return true;
+        return {
+            strength,
+            requirements,
+            isStrong: strength >= 80,
+            isMedium: strength >= 60,
+            isWeak: strength < 60
+        };
     }
 
     /**
-     * Validação flexível para edição (senha opcional)
+     * Retorna se as senhas coincidem (para uso programático)
+     * @returns {boolean} True se senhas coincidem ou não há confirmação
      */
-    validateFormOptional(options = {}) {
+    doPasswordsMatch() {
+        if (!this.confirmPasswordField) return true;
+
         const password = this.passwordField.value;
-        const confirmPassword = this.confirmPasswordField ? this.confirmPasswordField.value : '';
+        const confirmPassword = this.confirmPasswordField.value;
 
-        // Se senha não foi preenchida, não validar
-        if (!password && !confirmPassword) {
-            return true;
-        }
-
-        // Se alguma senha foi preenchida, validar normalmente
-        if (password || confirmPassword) {
-            if (password !== confirmPassword) {
-                alert('As senhas não coincidem!');
-                return false;
-            }
-
-            if (password.length < this.config.minLength) {
-                alert(`A senha deve ter no mínimo ${this.config.minLength} caracteres!`);
-                return false;
-            }
-        }
-
-        // Callback customizado de validação
-        if (this.config.onValidate && typeof this.config.onValidate === 'function') {
-            return this.config.onValidate(password, confirmPassword);
-        }
-
-        return true;
+        return password === confirmPassword;
     }
 }
 

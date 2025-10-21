@@ -8,77 +8,68 @@
     <div class="row align-items-center justify-content-center">
         <div class="col-12 col-md-8 col-lg-7">
             <div class="card shadow">
-                <div class="card-body p-4">
-                    <h3 class="card-title text-center mb-4">
-                        <i class="bi bi-person-plus"></i> Criar Conta
-                    </h3>
-
-                    <form method="POST" action="/cadastrar">
-                        {{ field(name='perfil', type='radio', radio_style='buttons', required=true,
-                                 options={'Cliente': 'Cliente', 'Vendedor': 'Vendedor'},
-                                 radio_icons={'Cliente': 'bi-cart3', 'Vendedor': 'bi-shop'}) }}
-
-                        {{ field(name='nome', label='Nome Completo', type='text', required=true,
-                                 attributes={'minlength': 3, 'maxlength': 100}) }}
-
-                        {{ field(name='email', label='E-mail', type='email', required=true) }}
+                <form method="POST" action="/cadastrar">
+                    <div class="card-body p-4">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="bi bi-person-plus"></i> Criar Conta
+                        </h3>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-12">
+                                {% include "components/alert_erro_geral.html" %}
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {{ field(name='perfil', type='radio', radio_style='buttons', required=true,
+                                options={'Cliente': 'Cliente', 'Vendedor': 'Vendedor'},
+                                radio_icons={'Cliente': 'bi-cart3', 'Vendedor': 'bi-shop'}) }}
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {{ field(name='nome', label='Nome Completo', type='text', required=true,
+                                attributes={'minlength': 3, 'maxlength': 100}) }}
+                            </div>
+
+                            <div class="col-12 mb-3">
+                                {{ field(name='email', label='E-mail', type='email', required=true) }}
+                            </div>
+
+                            <div class="col-12 col-lg-6 mb-3 mb-lg-0">
                                 {{ field(name='senha', label='Senha', type='password', required=true,
-                                         append_icon='bi-eye', append_button_onclick="togglePassword('senha')",
-                                         attributes={'minlength': 8}) }}
+                                append_icon='bi-eye', append_button_onclick="togglePassword('senha')",
+                                attributes={'minlength': 8}) }}
                             </div>
 
-                            <div class="col-md-6">
-                                {{ field(name='confirmar_senha', label='Confirmar Senha', type='password', required=true,
-                                         append_icon='bi-eye', append_button_onclick="togglePassword('confirmar_senha')",
-                                         attributes={'minlength': 8}) }}
+                            <div class="col-12 col-lg-6 mb-1">
+                                {{ field(name='confirmar_senha', label='Confirmar Senha', type='password',
+                                required=true,
+                                append_icon='bi-eye', append_button_onclick="togglePassword('confirmar_senha')",
+                                attributes={'minlength': 8}) }}
                             </div>
-                        </div>
-
-                        <!-- Indicador de força da senha -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <small class="text-muted">Força da senha:</small>
-                                <small id="senha-strength-text" class="text-muted"></small>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar" id="senha-strength" role="progressbar"></div>
+                            
+                            <div class="col-12 mb-0">
+                                {% set show_special = true %}
+                                {% include 'components/password_strength_indicator.html' %}
                             </div>
                         </div>
-
-                        <div id="senha-match" class="form-text mb-3"></div>
-
-                        <!-- Requisitos da Senha -->
-                        <div class="mb-3">
-                            <div class="alert alert-info">
-                                <strong><i class="bi bi-info-circle"></i> Requisitos da senha:</strong>
-                                <ul class="mb-0 mt-2">
-                                    <li id="req-length">Mínimo de 8 caracteres</li>
-                                    <li id="req-uppercase">Pelo menos 1 letra maiúscula</li>
-                                    <li id="req-lowercase">Pelo menos 1 letra minúscula</li>
-                                    <li id="req-number">Pelo menos 1 número</li>
-                                </ul>
-                            </div>
-                        </div>
-
+                    </div>
+                    <div class="card-footer p-4">
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bi bi-person-plus"></i> Criar Conta
                             </button>
                         </div>
-                    </form>
 
-                    <hr class="my-4">
+                        <hr class="my-4">
 
-                    <p class="text-center mb-0">
-                        Já tem uma conta?
-                        <a href="/login" class="text-decoration-none">
-                            Faça login aqui
-                        </a>
-                    </p>
-                </div>
+                        <p class="text-center mb-0">
+                            Já tem uma conta?
+                            <a href="/login" class="text-decoration-none">
+                                Faça login aqui
+                            </a>
+                        </p>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -87,7 +78,7 @@
 
 {% block scripts %}
 <script>
-    // Inicializar validador de senha
+    // Inicializar validador de senha (apenas feedback visual)
     const passwordValidator = new PasswordValidator({
         passwordFieldId: 'senha',
         confirmPasswordFieldId: 'confirmar_senha',
@@ -105,11 +96,6 @@
         showRequirements: true
     });
 
-    // Validação do formulário
-    document.querySelector('form').addEventListener('submit', function (e) {
-        if (!passwordValidator.validateForm()) {
-            e.preventDefault();
-        }
-    });
+    // Validação é feita server-side via CadastroDTO
 </script>
 {% endblock %}

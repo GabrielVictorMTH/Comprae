@@ -38,5 +38,5 @@ class AlterarSenhaDTO(BaseModel):
     def validar_senhas_coincidem(self) -> "AlterarSenhaDTO":
         """Valida se senha nova e confirmação são iguais"""
         if self.senha_nova != self.confirmar_senha:
-            raise ValueError("As senhas não coincidem")
+            raise ValueError("As senhas não coincidem.")
         return self

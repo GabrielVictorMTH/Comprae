@@ -11,52 +11,50 @@
         </div>
 
         <div class="card shadow-sm">
-            <div class="card-body">
-                <form method="POST" action="/admin/usuarios/editar/{{ usuario.id }}">
+            <form method="POST" action="/admin/usuarios/editar/{{ dados.id if dados.id is defined else usuario.id }}">
+                <div class="card-body p-4">
                     <div class="row">
-                        <div class="col-md-12">
-                            {{ field(name='nome', label='Nome Completo', type='text', required=true,
-                                     value=usuario.nome, wrapper_class='mb-3') }}
+                        <div class="col-12">
+                            {% include "components/alert_erro_geral.html" %}
                         </div>
 
-                        <div class="col-md-12">
-                            {{ field(name='email', label='Email', type='email', required=true,
-                                     value=usuario.email, wrapper_class='mb-3') }}
-                        </div>
-
-                        <div class="col-md-12">
+                        <div class="col-12 mb-3">
                             {% set perfis_dict = {} %}
                             {% for perfil in perfis %}
-                                {% set _ = perfis_dict.update({perfil: perfil}) %}
+                            {% set _ = perfis_dict.update({perfil: perfil}) %}
                             {% endfor %}
                             {{ field(name='perfil', label='Perfil de Acesso', type='radio', required=true,
-                                     radio_style='buttons', options=perfis_dict, value=usuario.perfil, wrapper_class='mb-3') }}
+                            radio_style='buttons', options=perfis_dict, value=dados.perfil) }}
                         </div>
 
-                        <div class="col-md-12 mb-3">
+                        <div class="col-12 mb-3">
+                            {{ field(name='nome', label='Nome Completo', type='text', required=true,
+                            value=dados.nome) }}
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            {{ field(name='email', label='Email', type='email', required=true,
+                            value=dados.email) }}
+                        </div>
+
+                        <div class="col-12">
                             <div class="alert alert-info">
                                 <i class="bi bi-info-circle"></i>
                                 Deixe os campos de senha em branco para manter a senha atual.
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            {{ field(name='senha', label='Nova Senha', type='password',
-                                     wrapper_class='mb-3') }}
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            {{ field(name='senha', label='Nova Senha', type='password') }}
                         </div>
 
-                        <div class="col-md-6">
-                            {{ field(name='confirma_senha', label='Confirmar Nova Senha', type='password',
-                                     wrapper_class='mb-3') }}
-                        </div>
-
-                        <div class="col-md-12">
-                            {{ field(name='ativo', label='Usuário ativo', type='checkbox', value='1',
-                                     wrapper_class='mb-3') }}
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            {{ field(name='confirma_senha', label='Confirmar Nova Senha', type='password') }}
                         </div>
                     </div>
-
-                    <div class="d-flex gap-2">
+                </div>
+                <div class="card-footer p-4">
+                    <div class="d-flex gap-3">
                         <button type="submit" class="btn btn-primary">
                             <i class="bi bi-check-circle"></i> Salvar Alterações
                         </button>
@@ -64,8 +62,8 @@
                             <i class="bi bi-x-circle"></i> Cancelar
                         </a>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>

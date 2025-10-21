@@ -50,18 +50,18 @@ def validar_string_obrigatoria(
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or (truncar and not v.strip()):
-            raise ValueError(f"{nome_campo} é obrigatório")
+            raise ValueError(f"{nome_campo} é obrigatório.")
 
         valor = v.strip() if truncar else v
 
         if tamanho_minimo and len(valor) < tamanho_minimo:
             raise ValueError(
-                f"{nome_campo} deve ter no mínimo {tamanho_minimo} caracteres"
+                f"{nome_campo} deve ter no mínimo {tamanho_minimo} caracteres."
             )
 
         if tamanho_maximo and len(valor) > tamanho_maximo:
             raise ValueError(
-                f"{nome_campo} deve ter no máximo {tamanho_maximo} caracteres"
+                f"{nome_campo} deve ter no máximo {tamanho_maximo} caracteres."
             )
 
         return valor
@@ -93,10 +93,10 @@ def validar_comprimento(
         valor = v.strip() if truncar else v
 
         if tamanho_minimo and len(valor) < tamanho_minimo:
-            raise ValueError(f"Deve ter no mínimo {tamanho_minimo} caracteres")
+            raise ValueError(f"Deve ter no mínimo {tamanho_minimo} caracteres.")
 
         if tamanho_maximo and len(valor) > tamanho_maximo:
-            raise ValueError(f"Deve ter no máximo {tamanho_maximo} caracteres")
+            raise ValueError(f"Deve ter no máximo {tamanho_maximo} caracteres.")
 
         return valor
 
@@ -127,16 +127,16 @@ def validar_texto_minimo_palavras(
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError(f"{nome_campo} é obrigatório")
+            raise ValueError(f"{nome_campo} é obrigatório.")
 
         valor = v.strip()
 
         if len(valor.split()) < min_palavras:
-            raise ValueError(f"{nome_campo} deve ter no mínimo {min_palavras} palavras")
+            raise ValueError(f"{nome_campo} deve ter no mínimo {min_palavras} palavras.")
 
         if len(valor) > tamanho_maximo:
             raise ValueError(
-                f"{nome_campo} deve ter no máximo {tamanho_maximo} caracteres"
+                f"{nome_campo} deve ter no máximo {tamanho_maximo} caracteres."
             )
 
         return valor
@@ -173,18 +173,18 @@ def validar_nome_pessoa(
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError("Nome é obrigatório")
+            raise ValueError("Nome é obrigatório.")
 
         valor = v.strip()
 
         if tamanho_minimo and len(valor) < tamanho_minimo:
-            raise ValueError(f"Nome deve ter no mínimo {tamanho_minimo} caracteres")
+            raise ValueError(f"Nome deve ter no mínimo {tamanho_minimo} caracteres.")
 
         if min_palavras and len(valor.split()) < min_palavras:
-            raise ValueError(f"Nome deve ter no mínimo {min_palavras} palavras")
+            raise ValueError(f"Nome deve ter no mínimo {min_palavras} palavras.")
 
         if tamanho_maximo and len(valor) > tamanho_maximo:
-            raise ValueError(f"Nome deve ter no máximo {tamanho_maximo} caracteres")
+            raise ValueError(f"Nome deve ter no máximo {tamanho_maximo} caracteres.")
 
         return valor
 
@@ -212,19 +212,19 @@ def validar_email(
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError("E-mail é obrigatório")
+            raise ValueError("E-mail é obrigatório.")
 
         valor = v.strip()
 
         if len(valor) < tamanho_minimo:
-            raise ValueError(f"E-mail deve ter no mínimo {tamanho_minimo} caracteres")
+            raise ValueError(f"E-mail deve ter no mínimo {tamanho_minimo} caracteres.")
 
         if len(valor) > tamanho_maximo:
-            raise ValueError(f"E-mail deve ter no máximo {tamanho_maximo} caracteres")
+            raise ValueError(f"E-mail deve ter no máximo {tamanho_maximo} caracteres.")
 
         email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(email_regex, valor):
-            raise ValueError("Formato de e-mail inválido")
+            raise ValueError("Formato de e-mail inválido.")
 
         return valor.lower()
 
@@ -247,17 +247,17 @@ def validar_cpf(formatar: bool = False) -> Callable[[Any, Any], Any]:
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError("CPF é obrigatório")
+            raise ValueError("CPF é obrigatório.")
 
         # Remove caracteres não numéricos
         cpf = re.sub(r"\D", "", v.strip())
 
         if len(cpf) != 11:
-            raise ValueError("CPF deve conter 11 dígitos")
+            raise ValueError("CPF deve conter 11 dígitos.")
 
         # Verifica se todos os dígitos são iguais
         if cpf == cpf[0] * 11:
-            raise ValueError("CPF inválido")
+            raise ValueError("CPF inválido.")
 
         # Validação dos dígitos verificadores
         def calcular_digito(cpf_parcial: str) -> str:
@@ -269,11 +269,11 @@ def validar_cpf(formatar: bool = False) -> Callable[[Any, Any], Any]:
 
         # Valida primeiro dígito
         if cpf[9] != calcular_digito(cpf[:9]):
-            raise ValueError("CPF inválido")
+            raise ValueError("CPF inválido.")
 
         # Valida segundo dígito
         if cpf[10] != calcular_digito(cpf[:10]):
-            raise ValueError("CPF inválido")
+            raise ValueError("CPF inválido.")
 
         if formatar:
             return f"{cpf[:3]}.{cpf[3:6]}.{cpf[6:9]}-{cpf[9:]}"
@@ -299,17 +299,17 @@ def validar_cnpj(formatar: bool = False) -> Callable[[Any, Any], Any]:
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError("CNPJ é obrigatório")
+            raise ValueError("CNPJ é obrigatório.")
 
         # Remove caracteres não numéricos
         cnpj = re.sub(r"\D", "", v.strip())
 
         if len(cnpj) != 14:
-            raise ValueError("CNPJ deve conter 14 dígitos")
+            raise ValueError("CNPJ deve conter 14 dígitos.")
 
         # Verifica se todos os dígitos são iguais
         if cnpj == cnpj[0] * 14:
-            raise ValueError("CNPJ inválido")
+            raise ValueError("CNPJ inválido.")
 
         # Validação dos dígitos verificadores
         def calcular_digito(cnpj_parcial: str, pesos: list[int]) -> str:
@@ -323,11 +323,11 @@ def validar_cnpj(formatar: bool = False) -> Callable[[Any, Any], Any]:
 
         # Valida primeiro dígito
         if cnpj[12] != calcular_digito(cnpj[:12], pesos_primeiro):
-            raise ValueError("CNPJ inválido")
+            raise ValueError("CNPJ inválido.")
 
         # Valida segundo dígito
         if cnpj[13] != calcular_digito(cnpj[:13], pesos_segundo):
-            raise ValueError("CNPJ inválido")
+            raise ValueError("CNPJ inválido.")
 
         if formatar:
             return f"{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:]}"
@@ -360,23 +360,23 @@ def validar_telefone_br(formatar: bool = False) -> Callable[[Any, Any], Any]:
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError("Telefone é obrigatório")
+            raise ValueError("Telefone é obrigatório.")
 
         # Remove caracteres não numéricos
         telefone = re.sub(r"\D", "", v.strip())
 
         # Valida comprimento (10 dígitos para fixo, 11 para celular)
         if len(telefone) not in [10, 11]:
-            raise ValueError("Telefone deve ter 10 ou 11 dígitos")
+            raise ValueError("Telefone deve ter 10 ou 11 dígitos.")
 
         # Valida DDD
         ddd = int(telefone[:2])
         if ddd < 11 or ddd > 99:
-            raise ValueError("DDD inválido")
+            raise ValueError("DDD inválido.")
 
         # Valida celular (deve começar com 9)
         if len(telefone) == 11 and telefone[2] != "9":
-            raise ValueError("Número de celular deve começar com 9")
+            raise ValueError("Número de celular deve começar com 9.")
 
         if formatar:
             if len(telefone) == 11:  # Celular
@@ -405,13 +405,13 @@ def validar_cep(formatar: bool = True) -> Callable[[Any, Any], Any]:
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError("CEP é obrigatório")
+            raise ValueError("CEP é obrigatório.")
 
         # Remove caracteres não numéricos
         cep = re.sub(r"\D", "", v.strip())
 
         if len(cep) != 8:
-            raise ValueError("CEP deve conter 8 dígitos")
+            raise ValueError("CEP deve conter 8 dígitos.")
 
         if formatar:
             return f"{cep[:5]}-{cep[5:]}"
@@ -454,27 +454,27 @@ def validar_senha_forte(
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError("Senha é obrigatória")
+            raise ValueError("Senha é obrigatória.")
 
         valor = v.strip()
 
         if len(valor) < tamanho_minimo:
-            raise ValueError(f"Senha deve ter no mínimo {tamanho_minimo} caracteres")
+            raise ValueError(f"Senha deve ter no mínimo {tamanho_minimo} caracteres.")
 
         if len(valor) > tamanho_maximo:
-            raise ValueError(f"Senha deve ter no máximo {tamanho_maximo} caracteres")
+            raise ValueError(f"Senha deve ter no máximo {tamanho_maximo} caracteres.")
 
         if requer_maiuscula and not re.search(r"[A-Z]", valor):
-            raise ValueError("Senha deve conter pelo menos uma letra maiúscula")
+            raise ValueError("Senha deve conter pelo menos uma letra maiúscula.")
 
         if requer_minuscula and not re.search(r"[a-z]", valor):
-            raise ValueError("Senha deve conter pelo menos uma letra minúscula")
+            raise ValueError("Senha deve conter pelo menos uma letra minúscula.")
 
         if requer_numero and not re.search(r"\d", valor):
-            raise ValueError("Senha deve conter pelo menos um número")
+            raise ValueError("Senha deve conter pelo menos um número.")
 
         if requer_especial and not re.search(caracteres_especiais, valor):
-            raise ValueError("Senha deve conter pelo menos um caractere especial")
+            raise ValueError("Senha deve conter pelo menos um caractere especial.")
 
         return valor
 
@@ -500,7 +500,7 @@ def validar_id_positivo(nome_campo: str = "Identificador") -> Callable[[Any, Any
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not isinstance(v, int) or v <= 0:
-            raise ValueError(f"{nome_campo} deve ser um número positivo")
+            raise ValueError(f"{nome_campo} deve ser um número positivo.")
         return v
 
     return validator
@@ -522,17 +522,17 @@ def validar_slug(tamanho_maximo: int = 128) -> Callable[[Any, Any], Any]:
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError("Slug é obrigatório")
+            raise ValueError("Slug é obrigatório.")
 
         valor = v.strip().lower()
 
         if not re.match(r"^[a-z0-9]+(?:-[a-z0-9]+)*$", valor):
             raise ValueError(
-                "Slug deve conter apenas letras minúsculas, números e hífens"
+                "Slug deve conter apenas letras minúsculas, números e hífens."
             )
 
         if len(valor) > tamanho_maximo:
-            raise ValueError(f"Slug deve ter no máximo {tamanho_maximo} caracteres")
+            raise ValueError(f"Slug deve ter no máximo {tamanho_maximo} caracteres.")
 
         return valor
 
@@ -564,13 +564,13 @@ def validar_extensao_arquivo(
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError(f"Nenhum {nome_campo.lower()} selecionado")
+            raise ValueError(f"Nenhum {nome_campo.lower()} selecionado.")
 
         file_ext = Path(v.strip()).suffix.lower()
 
         if file_ext not in extensoes_permitidas:
             extensoes_str = ", ".join(sorted(extensoes_permitidas))
-            raise ValueError(f"Formato não permitido. Use: {extensoes_str}")
+            raise ValueError(f"Formato não permitido. Use: {extensoes_str}.")
 
         return v.strip()
 
@@ -599,11 +599,11 @@ def validar_tamanho_arquivo(
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if v <= 0:
-            raise ValueError(f"{nome_campo} vazio")
+            raise ValueError(f"{nome_campo} vazio.")
 
         if v > tamanho_max_bytes:
             max_mb = tamanho_max_bytes // (1024 * 1024)
-            raise ValueError(f"{nome_campo} muito grande. Tamanho máximo: {max_mb}MB")
+            raise ValueError(f"{nome_campo} muito grande. Tamanho máximo: {max_mb}MB.")
 
         return v
 
@@ -638,21 +638,21 @@ def validar_data(
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError("Data é obrigatória")
+            raise ValueError("Data é obrigatória.")
 
         try:
             data = datetime.strptime(v.strip(), formato)
         except ValueError:
-            raise ValueError(f"Data inválida. Use o formato: {formato}")
+            raise ValueError(f"Data inválida. Use o formato: {formato}.")
 
         if data_minima and data < data_minima:
             raise ValueError(
-                f"Data deve ser posterior a {data_minima.strftime(formato)}"
+                f"Data deve ser posterior a {data_minima.strftime(formato)}."
             )
 
         if data_maxima and data > data_maxima:
             raise ValueError(
-                f"Data deve ser anterior a {data_maxima.strftime(formato)}"
+                f"Data deve ser anterior a {data_maxima.strftime(formato)}."
             )
 
         return v.strip()
@@ -676,18 +676,18 @@ def validar_url(requer_protocolo: bool = True) -> Callable[[Any, Any], Any]:
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
         if not v or not v.strip():
-            raise ValueError("URL é obrigatória")
+            raise ValueError("URL é obrigatória.")
 
         valor = v.strip()
 
         if requer_protocolo:
             url_regex = r"^https?://[^\s/$.?#].[^\s]*$"
             if not re.match(url_regex, valor, re.IGNORECASE):
-                raise ValueError("URL inválida. Deve começar com http:// ou https://")
+                raise ValueError("URL inválida. Deve começar com http:// ou https://.")
         else:
             url_regex = r"^(?:https?://)?[^\s/$.?#].[^\s]*$"
             if not re.match(url_regex, valor, re.IGNORECASE):
-                raise ValueError("URL inválida")
+                raise ValueError("URL inválida.")
 
         return valor
 
@@ -716,7 +716,7 @@ def validar_perfil_usuario(perfil_enum: Any) -> Callable[[Any, Any], Any]:
         if not perfil_enum.existe(v):
             perfis_validos = ", ".join([f"'{p}'" for p in perfil_enum.valores()])
             raise ValueError(
-                f'Perfil inválido: "{v}". ' f"Valores válidos: {perfis_validos}"
+                f'Perfil inválido: "{v}". ' f"Valores válidos: {perfis_validos}."
             )
         return v
 

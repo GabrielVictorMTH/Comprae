@@ -8,7 +8,8 @@
     <div class="row mb-4">
         <div class="col-12">
             <h1 class="display-4 mb-2">Detalhes do Produto</h1>
-            <p class="text-muted">Exemplo de página de detalhes de produto e-commerce com galeria de imagens e abas de informação.</p>
+            <p class="text-muted">Exemplo de página de detalhes de produto e-commerce com galeria de imagens e abas de
+                informação.</p>
             <hr>
         </div>
     </div>
@@ -18,10 +19,10 @@
         <!-- Coluna Esquerda - Imagens -->
         <div class="col-12 col-md-6">
             {{ photo_gallery([
-                {'url': 'https://picsum.photos/seed/product-main/600/600', 'alt': 'Produto Principal'},
-                {'url': 'https://picsum.photos/seed/product-2/600/600', 'alt': 'Produto - Visão 2'},
-                {'url': 'https://picsum.photos/seed/product-3/600/600', 'alt': 'Produto - Visão 3'},
-                {'url': 'https://picsum.photos/seed/product-4/600/600', 'alt': 'Produto - Visão 4'}
+            {'url': 'https://picsum.photos/seed/product-main/600/600', 'alt': 'Produto Principal'},
+            {'url': 'https://picsum.photos/seed/product-2/600/600', 'alt': 'Produto - Visão 2'},
+            {'url': 'https://picsum.photos/seed/product-3/600/600', 'alt': 'Produto - Visão 3'},
+            {'url': 'https://picsum.photos/seed/product-4/600/600', 'alt': 'Produto - Visão 4'}
             ], 'productGallery') }}
         </div>
 
@@ -53,7 +54,7 @@
 
                 <!-- Preço -->
                 <div class="mb-4">
-                    <div class="d-flex align-items-baseline gap-2">
+                    <div class="d-flex align-items-baseline gap-3">
                         <span class="text-muted text-decoration-line-through fs-5">R$ 3.999,00</span>
                         <span class="badge bg-danger">-20%</span>
                     </div>
@@ -84,7 +85,7 @@
                 </div>
 
                 <!-- Botões de Ação -->
-                <div class="d-grid gap-2 mb-3">
+                <div class="d-grid gap-3 mb-3">
                     <button class="btn btn-primary btn-lg">
                         <i class="bi bi-cart-plus me-2"></i>Adicionar ao Carrinho
                     </button>
@@ -94,12 +95,13 @@
                 </div>
 
                 <!-- Ações Secundárias -->
-                <div class="d-flex gap-2 align-items-center mb-3">
+                <div class="d-flex gap-3 align-items-center mb-3">
                     <button class="btn btn-outline-danger flex-fill">
                         <i class="bi bi-heart me-2"></i>Favoritar
                     </button>
                     <div class="dropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown">
                             <i class="bi bi-share"></i>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
@@ -124,17 +126,20 @@
         <div class="col-12">
             <ul class="nav nav-tabs" id="productTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link active" id="description-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">
+                    <button class="nav-link active" id="description-tab" data-bs-toggle="tab"
+                        data-bs-target="#description" type="button" role="tab">
                         <i class="bi bi-file-text me-2"></i>Descrição
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button" role="tab">
+                    <button class="nav-link" id="specs-tab" data-bs-toggle="tab" data-bs-target="#specs" type="button"
+                        role="tab">
                         <i class="bi bi-list-ul me-2"></i>Especificações
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                    <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews"
+                        type="button" role="tab">
                         <i class="bi bi-star me-2"></i>Avaliações (150)
                     </button>
                 </li>
@@ -143,17 +148,24 @@
                 <!-- Descrição -->
                 <div class="tab-pane fade show active" id="description" role="tabpanel">
                     <h4 class="mb-3">Descrição do Produto</h4>
-                    <p>O <strong>Smartphone Galaxy Ultra Pro</strong> representa o que há de mais moderno em tecnologia móvel.
-                    Com design premium em metal e vidro, este dispositivo combina elegância e resistência.</p>
+                    <p>O <strong>Smartphone Galaxy Ultra Pro</strong> representa o que há de mais moderno em tecnologia
+                        móvel.
+                        Com design premium em metal e vidro, este dispositivo combina elegância e resistência.</p>
 
                     <h5 class="mt-4 mb-3">Principais Características:</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Tela AMOLED 6.8" com taxa de atualização de 120Hz</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Processador Snapdragon 8 Gen 3 - Desempenho excepcional</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Câmera tripla: 108MP (principal) + 12MP (ultra-wide) + 10MP (telefoto)</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Bateria de 5000mAh com carregamento rápido 65W</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>256GB de armazenamento interno</li>
-                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Conectividade 5G para velocidades ultra-rápidas</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Tela AMOLED 6.8" com
+                            taxa de atualização de 120Hz</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Processador Snapdragon
+                            8 Gen 3 - Desempenho excepcional</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Câmera tripla: 108MP
+                            (principal) + 12MP (ultra-wide) + 10MP (telefoto)</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Bateria de 5000mAh com
+                            carregamento rápido 65W</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>256GB de armazenamento
+                            interno</li>
+                        <li class="mb-2"><i class="bi bi-check-circle-fill text-success me-2"></i>Conectividade 5G para
+                            velocidades ultra-rápidas</li>
                     </ul>
                 </div>
 
@@ -232,7 +244,8 @@
                                 <div class="d-flex align-items-center">
                                     <span class="me-2">5★</span>
                                     <div class="progress flex-fill me-2" style="height: 20px;">
-                                        <div class="progress-bar bg-success" role="progressbar" style="width: 70%"></div>
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: 70%">
+                                        </div>
                                     </div>
                                     <span class="text-muted">105</span>
                                 </div>
@@ -241,7 +254,8 @@
                                 <div class="d-flex align-items-center">
                                     <span class="me-2">4★</span>
                                     <div class="progress flex-fill me-2" style="height: 20px;">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 20%"></div>
+                                        <div class="progress-bar bg-primary" role="progressbar" style="width: 20%">
+                                        </div>
                                     </div>
                                     <span class="text-muted">30</span>
                                 </div>
@@ -291,8 +305,9 @@
                             <span class="text-muted ms-auto">15/10/2024</span>
                         </div>
                         <h6>Excelente produto!</h6>
-                        <p class="text-muted">O melhor smartphone que já tive. A câmera é incrível e a bateria dura o dia todo.
-                        Recomendo muito!</p>
+                        <p class="text-muted">O melhor smartphone que já tive. A câmera é incrível e a bateria dura o
+                            dia todo.
+                            Recomendo muito!</p>
                     </div>
 
                     <div class="mb-4">
@@ -308,7 +323,8 @@
                             <span class="text-muted ms-auto">10/10/2024</span>
                         </div>
                         <h6>Muito bom, mas poderia melhorar</h6>
-                        <p class="text-muted">Ótimo desempenho e tela linda. Único ponto negativo é o peso, um pouco pesado para uso prolongado.</p>
+                        <p class="text-muted">Ótimo desempenho e tela linda. Único ponto negativo é o peso, um pouco
+                            pesado para uso prolongado.</p>
                     </div>
                 </div>
             </div>

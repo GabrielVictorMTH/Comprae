@@ -11,6 +11,7 @@ from util.flash_messages import informar_sucesso, informar_erro
 from util.security import criar_hash_senha, verificar_senha
 from util.foto_util import salvar_foto_cropada_usuario
 from util.logger_config import logger
+from util.exceptions import FormValidationError
 
 router = APIRouter(prefix="/perfil")
 templates = criar_templates("templates/perfil")
@@ -24,12 +25,11 @@ async def get_visualizar(request: Request, usuario_logado: Optional[dict] = None
     usuario = usuario_repo.obter_por_id(usuario_logado["id"])
 
     if not usuario:
-        informar_erro(request, "Usuário não encontrado")
+        informar_erro(request, "Usuário não encontrado!")
         return RedirectResponse("/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     return templates.TemplateResponse(
-        "perfil/visualizar.html",
-        {"request": request, "usuario": usuario}
+        "perfil/visualizar.html", {"request": request, "usuario": usuario}
     )
 
 
@@ -41,12 +41,11 @@ async def get_editar(request: Request, usuario_logado: Optional[dict] = None):
     usuario = usuario_repo.obter_por_id(usuario_logado["id"])
 
     if not usuario:
-        informar_erro(request, "Usuário não encontrado")
+        informar_erro(request, "Usuário não encontrado!")
         return RedirectResponse("/logout", status_code=status.HTTP_303_SEE_OTHER)
 
     return templates.TemplateResponse(
-        "perfil/editar.html",
-        {"request": request, "usuario": usuario}
+        "perfil/editar.html", {"request": request, "dados": usuario.__dict__}
     )
 
 
@@ -54,12 +53,22 @@ async def get_editar(request: Request, usuario_logado: Optional[dict] = None):
 @requer_autenticacao()
 async def post_editar(
     request: Request,
-    nome: str = Form(...),
-    email: str = Form(...),
-    usuario_logado: Optional[dict] = None
+    nome: str = Form(),
+    email: str = Form(),
+    usuario_logado: Optional[dict] = None,
 ):
     """Processar edição de dados do perfil"""
     assert usuario_logado is not None
+
+    # Obter usuário atual antes do try para ter acesso no except
+    usuario = usuario_repo.obter_por_id(usuario_logado["id"])
+
+    if not usuario:
+        informar_erro(request, "Usuário não encontrado!")
+        return RedirectResponse("/logout", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Armazenar dados do formulário para reexibição em caso de erro
+    dados_formulario: dict = {"nome": nome, "email": email}
     try:
         # Validar com DTO
         dto = EditarPerfilDTO(nome=nome, email=email)
@@ -67,15 +76,22 @@ async def post_editar(
         # Verificar se o e-mail já está em uso por outro usuário
         usuario_existente = usuario_repo.obter_por_email(dto.email)
         if usuario_existente and usuario_existente.id != usuario_logado["id"]:
-            informar_erro(request, "Este e-mail já está em uso por outro usuário")
-            return RedirectResponse("/perfil/editar", status_code=status.HTTP_303_SEE_OTHER)
-
-        # Obter usuário atual
-        usuario = usuario_repo.obter_por_id(usuario_logado["id"])
-
-        if not usuario:
-            informar_erro(request, "Usuário não encontrado")
-            return RedirectResponse("/logout", status_code=status.HTTP_303_SEE_OTHER)
+            informar_erro(
+                request, "Este e-mail já está sendo usado em outra conta de usuário."
+            )
+            logger.warning(
+                f"Tentativa de alterar e-mail para um já existente: {dto.email} - Usuário ID: {usuario_logado['id']}"
+            )
+            return templates.TemplateResponse(
+                "perfil/editar.html",
+                {
+                    "request": request,
+                    "dados": dados_formulario,
+                    "erros": {
+                        "email": "Este e-mail já está sendo usado em outra conta de usuário."
+                    },
+                },
+            )
 
         # Atualizar dados
         usuario.nome = dto.nome
@@ -86,42 +102,70 @@ async def post_editar(
             # Atualizar sessão
             request.session["usuario_logado"]["nome"] = usuario.nome
             request.session["usuario_logado"]["email"] = usuario.email
-
             logger.info(f"Perfil atualizado para usuário ID: {usuario.id}")
             informar_sucesso(request, "Perfil atualizado com sucesso!")
+            return RedirectResponse(
+                "/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER
+            )
         else:
-            informar_erro(request, "Erro ao atualizar perfil. Tente novamente.")
-
-        return RedirectResponse("/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER)
+            informar_erro(
+                request,
+                "Ocorreu um erro desconhecido ao atualizar seu perfil. A equipe de suporte foi notificada. Tente novamente mais tarde.",
+            )
+            return templates.TemplateResponse(
+                "perfil/editar.html",
+                {"request": request,
+                    "dados": dados_formulario,
+                    "erros": {
+                        "geral": "Ocorreu um erro desconhecido ao atualizar seu perfil. A equipe de suporte foi notificada. Tente novamente mais tarde."
+                    },
+                },
+            )
 
     except ValidationError as e:
-        erros = [erro['msg'] for erro in e.errors()]
-        informar_erro(request, " | ".join(erros))
-        return RedirectResponse("/perfil/editar", status_code=status.HTTP_303_SEE_OTHER)
+        # Incluir dados do usuário para o template
+        dados_formulario["usuario"] = usuario
+        raise FormValidationError(
+            validation_error=e,
+            template_path="perfil/editar.html",
+            dados_formulario=dados_formulario,
+            campo_padrao="email",
+            mensagem_flash="Há campos com erros de validação!",
+        )
     except Exception as e:
         logger.error(f"Erro ao atualizar perfil: {e}")
-        informar_erro(request, "Erro ao processar atualização")
-        return RedirectResponse("/perfil/editar", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request,
+            "Ocorreu um erro desconhecido ao processar atualização de perfil. A equipe de suporte foi notificada. Tente novamente mais tarde.",
+        )
+        return templates.TemplateResponse(
+            "perfil/editar.html",
+            {
+                "request": request,
+                "dados": dados_formulario,
+                "erros": {
+                    "geral": "Ocorreu um erro desconhecido ao processar atualização de perfil. A equipe de suporte foi notificada. Tente novamente mais tarde."
+                },
+            },
+        )
 
 
 @router.get("/alterar-senha")
 @requer_autenticacao()
 async def get_alterar_senha(request: Request, usuario_logado: Optional[dict] = None):
     """Formulário para alterar senha"""
-    return templates.TemplateResponse(
-        "perfil/alterar-senha.html",
-        {"request": request}
-    )
+    assert usuario_logado is not None
+    return templates.TemplateResponse("perfil/alterar-senha.html", {"request": request})
 
 
 @router.post("/alterar-senha")
 @requer_autenticacao()
 async def post_alterar_senha(
     request: Request,
-    senha_atual: str = Form(...),
-    senha_nova: str = Form(...),
-    confirmar_senha: str = Form(...),
-    usuario_logado: Optional[dict] = None
+    senha_atual: str = Form(),
+    senha_nova: str = Form(),
+    confirmar_senha: str = Form(),
+    usuario_logado: Optional[dict] = None,
 ):
     """Processar alteração de senha"""
     assert usuario_logado is not None
@@ -130,53 +174,98 @@ async def post_alterar_senha(
         dto = AlterarSenhaDTO(
             senha_atual=senha_atual,
             senha_nova=senha_nova,
-            confirmar_senha=confirmar_senha
+            confirmar_senha=confirmar_senha,
         )
 
         # Obter usuário
         usuario = usuario_repo.obter_por_id(usuario_logado["id"])
 
         if not usuario:
-            informar_erro(request, "Usuário não encontrado")
+            informar_erro(request, "Usuário não encontrado!")
             return RedirectResponse("/logout", status_code=status.HTTP_303_SEE_OTHER)
 
         # Validar senha atual
         if not verificar_senha(dto.senha_atual, usuario.senha):
-            informar_erro(request, "Senha atual incorreta")
-            logger.warning(f"Tentativa de alteração de senha com senha atual incorreta - Usuário ID: {usuario.id}")
-            return RedirectResponse("/perfil/alterar-senha", status_code=status.HTTP_303_SEE_OTHER)
+            informar_erro(request, "Senha atual está incorreta")
+            logger.warning(
+                f"Tentativa de alteração de senha com senha atual incorreta - Usuário ID: {usuario.id}"
+            )
+            return templates.TemplateResponse(
+                "perfil/alterar-senha.html",
+                {
+                    "request": request,
+                    "erros": {"senha_atual": "Senha atual está incorreta."},
+                },
+            )
 
         # Verificar se a nova senha é diferente da atual
         if verificar_senha(dto.senha_nova, usuario.senha):
-            informar_erro(request, "A nova senha deve ser diferente da senha atual")
-            return RedirectResponse("/perfil/alterar-senha", status_code=status.HTTP_303_SEE_OTHER)
+            informar_erro(request, "A nova senha deve ser diferente da senha atual.")
+            return templates.TemplateResponse(
+                "perfil/alterar-senha.html",
+                {
+                    "request": request,
+                    "erros": {
+                        "senha_nova": "A nova senha deve ser diferente da senha atual."
+                    },
+                },
+            )
 
         # Atualizar senha
         senha_hash = criar_hash_senha(dto.senha_nova)
         if usuario_repo.atualizar_senha(usuario.id, senha_hash):
             logger.info(f"Senha alterada com sucesso - Usuário ID: {usuario.id}")
             informar_sucesso(request, "Senha alterada com sucesso!")
+            return RedirectResponse(
+                "/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER
+            )
         else:
             informar_erro(request, "Erro ao alterar senha. Tente novamente.")
-
-        return RedirectResponse("/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER)
+            return templates.TemplateResponse(
+                "perfil/alterar-senha.html",
+                {
+                    "request": request,
+                    "erros": {
+                        "geral": "Ocorreu um erro desconhecido ao processar alteração de senha. A equipe de suporte foi notificada. Tente novamente mais tarde."
+                    },
+                },
+            )
 
     except ValidationError as e:
-        erros = [erro['msg'] for erro in e.errors()]
-        informar_erro(request, " | ".join(erros))
-        return RedirectResponse("/perfil/alterar-senha", status_code=status.HTTP_303_SEE_OTHER)
+        # Não preservar senhas no formulário por segurança
+        raise FormValidationError(
+            validation_error=e,
+            template_path="perfil/alterar-senha.html",
+            dados_formulario={},
+            campo_padrao="confirmar_senha",
+            mensagem_flash="Há campos com erros de validação!",
+        )
+
     except Exception as e:
-        logger.error(f"Erro ao alterar senha: {e}")
-        informar_erro(request, "Erro ao processar alteração de senha")
-        return RedirectResponse("/perfil/alterar-senha", status_code=status.HTTP_303_SEE_OTHER)
+        logger.error(
+            f"Erro ao alterar senha para usuario ID {usuario_logado['id']}: {e}"
+        )
+        informar_erro(
+            request,
+            "Ocorreu um erro desconhecido ao processar alteração de senha. A equipe de suporte foi notificada. Tente novamente mais tarde.",
+        )
+        return templates.TemplateResponse(
+            "perfil/alterar-senha.html",
+            {
+                "request": request,
+                "erros": {
+                    "geral": "Ocorreu um erro desconhecido ao processar alteração de senha. A equipe de suporte foi notificada. Tente novamente mais tarde."
+                },
+            },
+        )
 
 
 @router.post("/atualizar-foto")
 @requer_autenticacao()
 async def post_atualizar_foto(
     request: Request,
-    foto_base64: str = Form(...),
-    usuario_logado: Optional[dict] = None
+    foto_base64: str = Form(),
+    usuario_logado: Optional[dict] = None,
 ):
     """Upload de foto de perfil cropada"""
     assert usuario_logado is not None
@@ -186,25 +275,39 @@ async def post_atualizar_foto(
         # Validação básica
         if not foto_base64 or len(foto_base64) < 100:
             informar_erro(request, "Foto inválida. Por favor, tente novamente.")
-            return RedirectResponse("/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(
+                "/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER
+            )
 
         # Validar tamanho aproximado (base64 é ~33% maior que binário)
         tamanho_aproximado = len(foto_base64) * 3 / 4
         max_size = 10 * 1024 * 1024  # 10MB
         if tamanho_aproximado > max_size:
-            informar_erro(request, "Imagem muito grande. Tamanho máximo: 10MB")
-            return RedirectResponse("/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER)
+            informar_erro(request, "Imagem muito grande. O tamanho máximo é 10MB.")
+            return RedirectResponse(
+                "/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER
+            )
 
         # Salvar foto cropada
         if salvar_foto_cropada_usuario(usuario_id, foto_base64):
             logger.info(f"Foto de perfil atualizada - Usuário ID: {usuario_id}")
             informar_sucesso(request, "Foto de perfil atualizada com sucesso!")
         else:
-            informar_erro(request, "Erro ao atualizar foto. Tente novamente.")
+            informar_erro(
+                request,
+                "Ocorreu um erro desconhecido ao atualizar foto. A equipe de suporte foi notificada. Tente novamente mais tarde.",
+            )
 
-        return RedirectResponse("/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     except Exception as e:
-        logger.error(f"Erro ao fazer upload de foto: {e}")
-        informar_erro(request, "Erro ao processar upload da foto")
-        return RedirectResponse("/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER)
+        logger.error(f"Erro ao fazer upload de foto para usuário ID {usuario_id}: {e}")
+        informar_erro(
+            request,
+            "Ocorreu um erro desconhecido ao processar upload da foto. A equipe de suporte foi notificada. Tente novamente mais tarde.",
+        )
+        return RedirectResponse(
+            "/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER
+        )

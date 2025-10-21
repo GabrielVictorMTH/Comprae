@@ -153,13 +153,19 @@ function loadImageFromFile(modalId, file, aspectRatio = 1.0, maxFileSizeMB = 5, 
     // Validar tamanho
     const maxBytes = maxFileSizeMB * 1024 * 1024;
     if (file.size > maxBytes) {
-        alert(`Arquivo muito grande! Tamanho máximo: ${maxFileSizeMB}MB`);
+        exibirErro(
+            `O arquivo selecionado é muito grande. Tamanho máximo permitido: ${maxFileSizeMB}MB.`,
+            'Arquivo Muito Grande'
+        );
         return;
     }
 
     // Validar tipo
     if (!file.type.startsWith('image/')) {
-        alert('Por favor, selecione um arquivo de imagem válido.');
+        exibirErro(
+            'Por favor, selecione um arquivo de imagem válido (JPG, PNG, GIF, etc.).',
+            'Tipo de Arquivo Inválido'
+        );
         return;
     }
 
@@ -247,7 +253,7 @@ function initImageCropper(modalId, aspectRatio = 1.0, maxFileSizeMB = 5) {
             e.preventDefault();
 
             if (!cropperInstances[modalId]) {
-                alert('Nenhuma imagem selecionada');
+                exibirAviso('Por favor, selecione uma imagem antes de salvar.', 'Nenhuma Imagem Selecionada');
                 return;
             }
 

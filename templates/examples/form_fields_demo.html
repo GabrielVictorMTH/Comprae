@@ -16,29 +16,31 @@
                 <!-- INPUT TEXT -->
                 <h3 class="mt-5 mb-3">Campos de Texto</h3>
                 {{ field(name='nome', label='Nome Completo', type='text', required=true, autofocus=true,
-                         attributes={'minlength': 3, 'maxlength': 100}) }}
+                attributes={'minlength': 3, 'maxlength': 100}) }}
 
                 {{ field(name='email', label='E-mail', type='email', required=true) }}
 
                 {{ field(name='telefone', label='Telefone', type='tel',
-                         attributes={'pattern': '[0-9]{2} [0-9]{5}-[0-9]{4}'}) }}
+                attributes={'pattern': '[0-9]{2} [0-9]{5}-[0-9]{4}'}) }}
 
                 {{ field(name='site', label='Website', type='url') }}
 
                 <!-- PASSWORD COM BOTÃO ANEXADO -->
                 <h3 class="mt-5 mb-3">Senha com Botão Toggle</h3>
                 {{ field(name='senha', label='Senha', type='password', required=true,
-                         append_icon='bi-eye', append_button_onclick="alert('Toggle senha')") }}
+                append_icon='bi-eye', append_button_onclick="exibirInfo('Exemplo de botão anexado ao campo', 'Botão
+                Clicked')") }}
 
                 <!-- TEXTAREA -->
                 <h3 class="mt-5 mb-3">Área de Texto</h3>
                 {{ field(name='descricao', label='Descrição', type='textarea', rows=5,
-                         help_text='Descreva em detalhes o que você precisa.') }}
+                help_text='Descreva em detalhes o que você precisa.') }}
 
                 <!-- SELECT -->
                 <h3 class="mt-5 mb-3">Select (Dropdown)</h3>
                 {{ field(name='estado', label='Estado', type='select', required=true,
-                         options={'': 'Selecione...', 'SP': 'São Paulo', 'RJ': 'Rio de Janeiro', 'MG': 'Minas Gerais', 'RS': 'Rio Grande do Sul'}) }}
+                options={'': 'Selecione...', 'SP': 'São Paulo', 'RJ': 'Rio de Janeiro', 'MG': 'Minas Gerais', 'RS': 'Rio
+                Grande do Sul'}) }}
 
                 <!-- CHECKBOX PADRÃO -->
                 <h3 class="mt-5 mb-3">Checkbox</h3>
@@ -48,44 +50,47 @@
 
                 <!-- CHECKBOX SWITCH -->
                 <h3 class="mt-5 mb-3">Checkbox Switch</h3>
-                {{ field(name='notificacoes', label='Receber notificações por e-mail', type='checkbox', checkbox_style='switch') }}
+                {{ field(name='notificacoes', label='Receber notificações por e-mail', type='checkbox',
+                checkbox_style='switch') }}
 
                 {{ field(name='publico', label='Perfil público', type='checkbox', checkbox_style='switch') }}
 
                 <!-- RADIO PADRÃO -->
                 <h3 class="mt-5 mb-3">Radio Buttons (Padrão)</h3>
                 {{ field(name='genero', label='Gênero', type='radio', required=true,
-                         options={'M': 'Masculino', 'F': 'Feminino', 'O': 'Outro', 'N': 'Prefiro não informar'}) }}
+                options={'M': 'Masculino', 'F': 'Feminino', 'O': 'Outro', 'N': 'Prefiro não informar'}) }}
 
                 <!-- RADIO HORIZONTAL -->
                 <h3 class="mt-5 mb-3">Radio Buttons (Horizontal)</h3>
                 {{ field(name='tamanho', label='Tamanho', type='radio', radio_layout='horizontal', required=true,
-                         options={'P': 'Pequeno', 'M': 'Médio', 'G': 'Grande', 'GG': 'Extra Grande'}) }}
+                options={'P': 'Pequeno', 'M': 'Médio', 'G': 'Grande', 'GG': 'Extra Grande'}) }}
 
                 <!-- RADIO BUTTON GROUP -->
                 <h3 class="mt-5 mb-3">Radio Buttons (Button Group)</h3>
                 {{ field(name='plano', label='Escolha seu plano', type='radio', radio_style='buttons', required=true,
-                         options={'basico': 'Básico', 'profissional': 'Profissional', 'empresarial': 'Empresarial'}) }}
+                options={'basico': 'Básico', 'profissional': 'Profissional', 'empresarial': 'Empresarial'}) }}
 
                 <!-- RADIO BUTTON GROUP COM ÍCONES -->
                 <h3 class="mt-5 mb-3">Radio Buttons (Button Group com Ícones)</h3>
-                {{ field(name='perfil_usuario', label='Escolha seu perfil', type='radio', radio_style='buttons', required=true,
-                         options={'Cliente': 'Comprador', 'Vendedor': 'Vendedor'},
-                         radio_icons={'Cliente': 'bi-cart3', 'Vendedor': 'bi-shop'},
-                         help_text='Selecione o tipo de conta que deseja criar') }}
+                {{ field(name='perfil_usuario', label='Escolha seu perfil', type='radio', radio_style='buttons',
+                required=true,
+                options={'Cliente': 'Comprador', 'Vendedor': 'Vendedor'},
+                radio_icons={'Cliente': 'bi-cart3', 'Vendedor': 'bi-shop'},
+                help_text='Selecione o tipo de conta que deseja criar') }}
 
                 <!-- MÁSCARAS DE DIGITAÇÃO -->
                 <h3 class="mt-5 mb-3">Máscaras de Digitação</h3>
 
                 <div class="alert alert-info">
                     <strong><i class="bi bi-info-circle"></i> Máscaras de Digitação</strong>
-                    <p class="mb-0 mt-2">As máscaras formatam automaticamente o valor durante a digitação. Padrões: <code>0</code>=número, <code>A</code>=maiúscula, <code>a</code>=minúscula</p>
+                    <p class="mb-0 mt-2">As máscaras formatam automaticamente o valor durante a digitação. Padrões:
+                        <code>0</code>=número, <code>A</code>=maiúscula, <code>a</code>=minúscula</p>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6">
                         {{ field(name='cpf', label='CPF', mask='000.000.000-00',
-                                 help_text='Apenas números serão aceitos') }}
+                        help_text='Apenas números serão aceitos') }}
                     </div>
                     <div class="col-md-6">
                         {{ field(name='cnpj', label='CNPJ', mask='00.000.000/0000-00') }}
@@ -104,7 +109,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         {{ field(name='data_mask', label='Data', mask='00/00/0000',
-                                 help_text='Digite no formato DD/MM/AAAA') }}
+                        help_text='Digite no formato DD/MM/AAAA') }}
                     </div>
                     <div class="col-md-6">
                         {{ field(name='hora_mask', label='Hora', mask='00:00') }}
@@ -114,11 +119,11 @@
                 <div class="row">
                     <div class="col-md-6">
                         {{ field(name='placa_antiga', label='Placa (Antiga)', mask='AAA-0000',
-                                 help_text='Formato: 3 letras + hífen + 4 números') }}
+                        help_text='Formato: 3 letras + hífen + 4 números') }}
                     </div>
                     <div class="col-md-6">
                         {{ field(name='placa_mercosul', label='Placa (Mercosul)', mask='AAA-0A00',
-                                 help_text='Formato: ABC-1D23') }}
+                        help_text='Formato: ABC-1D23') }}
                     </div>
                 </div>
 
@@ -127,7 +132,7 @@
                 <div class="row">
                     <div class="col-md-9">
                         {{ field(name='validade_cartao', label='Validade', mask='00/00',
-                                 help_text='MM/AA') }}
+                        help_text='MM/AA') }}
                     </div>
                     <div class="col-md-3">
                         {{ field(name='cvv', label='CVV', mask='000') }}
@@ -135,16 +140,17 @@
                 </div>
 
                 <h4 class="mt-4 mb-3">Máscara com Unmask</h4>
-                <p class="text-muted">Quando <code>unmask=true</code>, o valor enviado no formulário será sem formatação.</p>
+                <p class="text-muted">Quando <code>unmask=true</code>, o valor enviado no formulário será sem
+                    formatação.</p>
 
                 {{ field(name='cpf_unmask', label='CPF (unmask)', mask='000.000.000-00', unmask=true,
-                         help_text='Valor enviado: apenas números, sem pontos e hífen') }}
+                help_text='Valor enviado: apenas números, sem pontos e hífen') }}
 
                 <h4 class="mt-4 mb-3">Máscara com Eventos JavaScript</h4>
 
                 {{ field(name='cep_busca', label='CEP (com busca de endereço)', mask='00000-000',
-                         onblur="console.log('Buscar endereço para CEP:', this.value)",
-                         help_text='Ao sair do campo, simula busca de endereço (veja o console)') }}
+                onblur="console.log('Buscar endereço para CEP:', this.value)",
+                help_text='Ao sair do campo, simula busca de endereço (veja o console)') }}
 
                 <!-- CAMPOS DE DATA E HORA -->
                 <h3 class="mt-5 mb-3">Data e Hora (Nativos do HTML5)</h3>
@@ -164,11 +170,11 @@
                 <div class="row">
                     <div class="col-md-6">
                         {{ field(name='idade', label='Idade', type='number',
-                                 attributes={'min': 18, 'max': 120}) }}
+                        attributes={'min': 18, 'max': 120}) }}
                     </div>
                     <div class="col-md-6">
                         {{ field(name='valor', label='Valor (R$)', type='number',
-                                 attributes={'min': 0, 'step': '0.01'}) }}
+                        attributes={'min': 0, 'step': '0.01'}) }}
                     </div>
                 </div>
 
@@ -178,7 +184,8 @@
                 <div class="alert alert-info">
                     <strong><i class="bi bi-info-circle"></i> Campos Decimais</strong>
                     <p class="mb-0 mt-2">
-                        Formatam automaticamente valores decimais com separadores de milhar (ponto) e decimais (vírgula),
+                        Formatam automaticamente valores decimais com separadores de milhar (ponto) e decimais
+                        (vírgula),
                         seguindo o padrão brasileiro. Exemplo: 1.234,56
                     </p>
                 </div>
@@ -188,22 +195,22 @@
                 <div class="row">
                     <div class="col-md-6">
                         {{ field(name='valor_decimal', label='Valor Decimal', type='decimal',
-                                 help_text='2 casas decimais com separador de milhares') }}
+                        help_text='2 casas decimais com separador de milhares') }}
                     </div>
                     <div class="col-md-6">
                         {{ field(name='preco', label='Preço', type='decimal', decimal_prefix='R$ ',
-                                 help_text='Com prefixo R$') }}
+                        help_text='Com prefixo R$') }}
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6">
                         {{ field(name='percentual', label='Percentual', type='decimal', decimal_suffix=' %',
-                                 help_text='Com sufixo %') }}
+                        help_text='Com sufixo %') }}
                     </div>
                     <div class="col-md-6">
                         {{ field(name='peso', label='Peso', type='decimal', decimal_suffix=' kg', decimal_places=3,
-                                 help_text='3 casas decimais com sufixo kg') }}
+                        help_text='3 casas decimais com sufixo kg') }}
                     </div>
                 </div>
 
@@ -212,36 +219,36 @@
                 <div class="row">
                     <div class="col-md-6">
                         {{ field(name='temperatura', label='Temperatura', type='decimal',
-                                 decimal_suffix=' °C', allow_negative=true,
-                                 help_text='Permite valores negativos') }}
+                        decimal_suffix=' °C', allow_negative=true,
+                        help_text='Permite valores negativos') }}
                     </div>
                     <div class="col-md-6">
                         {{ field(name='valor_sem_milhar', label='Valor sem Separador', type='decimal',
-                                 show_thousands=false,
-                                 help_text='Sem separador de milhares') }}
+                        show_thousands=false,
+                        help_text='Sem separador de milhares') }}
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6">
                         {{ field(name='nota', label='Nota', type='decimal', decimal_places=1,
-                                 attributes={'max': 10}, help_text='1 casa decimal (ex: 9,5)') }}
+                        attributes={'max': 10}, help_text='1 casa decimal (ex: 9,5)') }}
                     </div>
                     <div class="col-md-6">
                         {{ field(name='area', label='Área', type='decimal', decimal_suffix=' m²', decimal_places=2,
-                                 help_text='Área em metros quadrados') }}
+                        help_text='Área em metros quadrados') }}
                     </div>
                 </div>
 
                 {{ field(name='orcamento', label='Orçamento Total', type='decimal', decimal_prefix='R$ ', required=true,
-                         help_text='Valor obrigatório com prefixo monetário') }}
+                help_text='Valor obrigatório com prefixo monetário') }}
 
                 <!-- CAMPO COM ERRO (simulação) -->
                 <h3 class="mt-5 mb-3">Campo com Erro (Simulação)</h3>
                 <div class="mb-3 ">
                     <div class="form-floating">
                         <input type="text" class="form-control is-invalid" id="campo_erro" name="campo_erro"
-                               value="valor inválido" placeholder="Campo com Erro">
+                            value="valor inválido" placeholder="Campo com Erro">
                         <label for="campo_erro">Campo com Erro</label>
                         <div class="invalid-feedback">
                             Este campo contém um erro de validação.
@@ -253,7 +260,7 @@
                 {{ field(name='id', type='hidden', value='123') }}
 
                 <!-- BOTÕES -->
-                <div class="d-flex gap-2 mt-5">
+                <div class="d-flex gap-3 mt-5">
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i class="bi bi-check-circle"></i> Enviar Formulário
                     </button>
@@ -268,7 +275,8 @@
                 <div class="card-body">
                     <h4 class="card-title">Como Usar a Macro</h4>
                     <p>Importe a macro no topo do seu template:</p>
-                    <pre class="bg-light p-3 rounded"><code>{% raw %}{% from "macros/form_fields.html" import field %}{% endraw %}</code></pre>
+                    <pre
+                        class="bg-light p-3 rounded"><code>{% raw %}{% from "macros/form_fields.html" import field %}{% endraw %}</code></pre>
 
                     <p class="mt-3">Exemplos de uso:</p>
                     <pre class="bg-light p-3 rounded"><code>{% raw %}{{ field(name='email', label='E-mail', type='email', required=true) }}
@@ -347,8 +355,10 @@
                     <ul>
                         <li><code>name</code> - Nome do campo (obrigatório)</li>
                         <li><code>label</code> - Texto do label (obrigatório)</li>
-                        <li><code>type</code> - Tipo do campo (text, email, password, textarea, select, checkbox, radio, etc.)</li>
-                        <li><code>value</code> - Valor inicial (se não fornecido, busca de <code>dados[name]</code>)</li>
+                        <li><code>type</code> - Tipo do campo (text, email, password, textarea, select, checkbox, radio,
+                            etc.)</li>
+                        <li><code>value</code> - Valor inicial (se não fornecido, busca de <code>dados[name]</code>)
+                        </li>
                         <li><code>required</code> - Campo obrigatório (padrão: false)</li>
                         <li><code>disabled</code> - Campo desabilitado (padrão: false)</li>
                         <li><code>readonly</code> - Campo somente leitura (padrão: false)</li>
@@ -356,14 +366,18 @@
 
                     <p class="mb-2 mt-3"><strong>Radio buttons:</strong></p>
                     <ul>
-                        <li><code>radio_style</code> - Estilo dos radio: <code>'default'</code> ou <code>'buttons'</code></li>
-                        <li><code>radio_layout</code> - Layout para radio default: <code>'vertical'</code> (padrão) ou <code>'horizontal'</code></li>
-                        <li><code>radio_icons</code> - Dict com ícones Bootstrap para radio buttons: <code>{'valor': 'bi-icon'}</code></li>
+                        <li><code>radio_style</code> - Estilo dos radio: <code>'default'</code> ou
+                            <code>'buttons'</code></li>
+                        <li><code>radio_layout</code> - Layout para radio default: <code>'vertical'</code> (padrão) ou
+                            <code>'horizontal'</code></li>
+                        <li><code>radio_icons</code> - Dict com ícones Bootstrap para radio buttons:
+                            <code>{'valor': 'bi-icon'}</code></li>
                     </ul>
 
                     <p class="mb-2 mt-3"><strong>Checkbox:</strong></p>
                     <ul>
-                        <li><code>checkbox_style</code> - Estilo do checkbox: <code>'default'</code> ou <code>'switch'</code></li>
+                        <li><code>checkbox_style</code> - Estilo do checkbox: <code>'default'</code> ou
+                            <code>'switch'</code></li>
                     </ul>
 
                     <p class="mb-2 mt-3"><strong>Máscaras de digitação:</strong></p>
@@ -383,13 +397,16 @@
 
                     <p class="mb-2 mt-3"><strong>Eventos JavaScript:</strong></p>
                     <ul>
-                        <li><code>oninput, onchange, onblur, onfocus, onkeyup, onkeydown, onpaste</code> - Eventos JavaScript</li>
+                        <li><code>oninput, onchange, onblur, onfocus, onkeyup, onkeydown, onpaste</code> - Eventos
+                            JavaScript</li>
                     </ul>
 
                     <p class="mb-2 mt-3"><strong>Outros:</strong></p>
                     <ul>
-                        <li><code>attributes</code> - Dict com atributos HTML extras (minlength, maxlength, pattern, data-*, etc.)</li>
-                        <li><code>append_icon</code> - Ícone Bootstrap para botão anexado (ex: <code>'bi-eye'</code>)</li>
+                        <li><code>attributes</code> - Dict com atributos HTML extras (minlength, maxlength, pattern,
+                            data-*, etc.)</li>
+                        <li><code>append_icon</code> - Ícone Bootstrap para botão anexado (ex: <code>'bi-eye'</code>)
+                        </li>
                         <li><code>help_text</code> - Texto de ajuda abaixo do campo</li>
                         <li><code>class_extra</code> - Classes CSS adicionais</li>
                         <li><code>wrapper_class</code> - Classes para o wrapper do campo</li>
