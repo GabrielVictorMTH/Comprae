@@ -1,5 +1,5 @@
-{% set erros = {} if not erros %}
-{% set dados = {} if not dados %}
+{% set erros = erros if erros is defined else {} %}
+{% set dados = dados if dados is defined else {} %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 

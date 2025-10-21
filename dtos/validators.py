@@ -224,7 +224,7 @@ def validar_email(
 
         email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         if not re.match(email_regex, valor):
-            raise ValueError("E-mail inválido")
+            raise ValueError("Formato de e-mail inválido")
 
         return valor.lower()
 

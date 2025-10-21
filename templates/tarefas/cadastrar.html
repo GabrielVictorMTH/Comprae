@@ -1,5 +1,5 @@
 {% extends "base_publica.html" %}
-{% from "macros/form_fields.html" import field %}
+{% from "macros/form_fields.html" import field with context %}
 
 {% block titulo %}Cadastrar Tarefa{% endblock %}
 
@@ -17,10 +17,10 @@
                 <div class="card-body p-4">
                     <form method="post" action="/tarefas/cadastrar">
                         {{ field(name='titulo', label='Título', type='text', required=true,
-                                 attributes={'maxlength': 200}) }}
+                                 attributes={'maxlength': 256}) }}
 
                         {{ field(name='descricao', label='Descrição', type='textarea', rows=3,
-                                 attributes={'maxlength': 1000}) }}
+                                 attributes={'maxlength': 1024}) }}
 
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary">

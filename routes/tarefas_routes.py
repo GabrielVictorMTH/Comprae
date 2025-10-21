@@ -41,6 +41,10 @@ async def post_cadastrar(
 ):
     """Cadastra uma nova tarefa"""
     assert usuario_logado is not None
+
+    # Armazena os dados do formulário para reexibição em caso de erro
+    dados_formulario = {"titulo": titulo, "descricao": descricao}
+
     try:
         # Validar com DTO
         dto = CriarTarefaDTO(titulo=titulo, descricao=descricao)
@@ -61,11 +65,11 @@ async def post_cadastrar(
         return RedirectResponse("/tarefas/listar", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        erros = [erro['msg'] for erro in e.errors()]
-        informar_erro(request, " | ".join(erros))
+        erros = { erro["loc"][-1]: erro['msg'].replace("Value error, ", "") for erro in e.errors() }
+        informar_erro(request, "Há campos com erros de validação.")
         return templates.TemplateResponse(
             "tarefas/cadastrar.html",
-            {"request": request, "dados": {"titulo": titulo, "descricao": descricao}}
+            {"request": request, "dados": dados_formulario, "erros": erros}
         )
 
 @router.post("/{id}/concluir")

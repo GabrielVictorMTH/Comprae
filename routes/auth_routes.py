@@ -3,10 +3,15 @@ from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 from datetime import datetime
 
-from dtos.auth_dto import LoginDTO, CadastroDTO, RecuperacaoSenhaDTO, RedefinirSenhaDTO
+from dtos.auth_dto import LoginDTO, CadastroDTO, EsqueciSenhaDTO, RedefinirSenhaDTO
 from model.usuario_model import Usuario
 from repo import usuario_repo
-from util.security import criar_hash_senha, verificar_senha, gerar_token_redefinicao, obter_data_expiracao_token
+from util.security import (
+    criar_hash_senha,
+    verificar_senha,
+    gerar_token_redefinicao,
+    obter_data_expiracao_token,
+)
 from util.email_service import email_service
 from util.flash_messages import informar_sucesso, informar_erro
 from util.template_util import criar_templates
@@ -18,7 +23,7 @@ from util.config import (
     RATE_LIMIT_CADASTRO_MAX,
     RATE_LIMIT_CADASTRO_MINUTOS,
     RATE_LIMIT_ESQUECI_SENHA_MAX,
-    RATE_LIMIT_ESQUECI_SENHA_MINUTOS
+    RATE_LIMIT_ESQUECI_SENHA_MINUTOS,
 )
 
 router = APIRouter()
@@ -27,6 +32,7 @@ templates = criar_templates("templates/auth")
 # Rate limiter simples - em produção usar biblioteca especializada
 from collections import defaultdict
 from datetime import datetime, timedelta
+
 
 class SimpleRateLimiter:
     def __init__(self, max_tentativas: int = 5, janela_minutos: int = 5):
@@ -40,8 +46,7 @@ class SimpleRateLimiter:
 
         # Limpar tentativas antigas
         self.tentativas[identificador] = [
-            t for t in self.tentativas[identificador]
-            if agora - t < self.janela
+            t for t in self.tentativas[identificador] if agora - t < self.janela
         ]
 
         # Verificar limite
@@ -56,18 +61,18 @@ class SimpleRateLimiter:
         """Limpa todas as tentativas registradas (útil para testes)"""
         self.tentativas.clear()
 
+
 login_limiter = SimpleRateLimiter(
-    max_tentativas=RATE_LIMIT_LOGIN_MAX,
-    janela_minutos=RATE_LIMIT_LOGIN_MINUTOS
+    max_tentativas=RATE_LIMIT_LOGIN_MAX, janela_minutos=RATE_LIMIT_LOGIN_MINUTOS
 )
 cadastro_limiter = SimpleRateLimiter(
-    max_tentativas=RATE_LIMIT_CADASTRO_MAX,
-    janela_minutos=RATE_LIMIT_CADASTRO_MINUTOS
+    max_tentativas=RATE_LIMIT_CADASTRO_MAX, janela_minutos=RATE_LIMIT_CADASTRO_MINUTOS
 )
 esqueci_senha_limiter = SimpleRateLimiter(
     max_tentativas=RATE_LIMIT_ESQUECI_SENHA_MAX,
-    janela_minutos=RATE_LIMIT_ESQUECI_SENHA_MINUTOS
+    janela_minutos=RATE_LIMIT_ESQUECI_SENHA_MINUTOS,
 )
+
 
 @router.get("/login")
 async def get_login(request: Request):
@@ -78,26 +83,31 @@ async def get_login(request: Request):
 
     return templates.TemplateResponse("auth/login.html", {"request": request})
 
+
 @router.post("/login")
-async def post_login(
-    request: Request,
-    email: str = Form(...),
-    senha: str = Form(...)
-):
+async def post_login(request: Request, email: str = Form(...), senha: str = Form(...)):
     """Processa login do usuário"""
     try:
         # Rate limiting por IP
         ip = request.client.host if request.client else "unknown"
         if not login_limiter.verificar(ip):
-            informar_erro(request, "Muitas tentativas de login. Aguarde alguns minutos.")
+            informar_erro(
+                request, "Muitas tentativas de login. Aguarde alguns minutos."
+            )
             logger.warning(f"Rate limit excedido para IP: {ip}")
-            return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
-        
+            erros = {
+                "geral": f"Muitas tentativas de login. Aguarde {RATE_LIMIT_LOGIN_MINUTOS} minuto(s)."
+            }
+            return templates.TemplateResponse(
+                "auth/login.html",
+                {"request": request, "dados": {"email": email}, "erros": erros},
+            )
+
         # Armazena os dados do formulário para reexibição em caso de erro
         dados_formulario = {"email": email}
 
         # Validar dados com DTO
-        dto = LoginDTO(email=email, senha=senha)        
+        dto = LoginDTO(email=email, senha=senha)
 
         # Buscar usuário
         usuario = usuario_repo.obter_por_email(dto.email)
@@ -106,14 +116,18 @@ async def post_login(
         if not usuario or not verificar_senha(dto.senha, usuario.senha):
             informar_erro(request, "E-mail ou senha inválidos")
             logger.warning(f"Tentativa de login falhou para: {dto.email}")
-            return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
+            erros = {"geral": "E-mail ou senha inválidos"}
+            return templates.TemplateResponse(
+                "auth/login.html",
+                {"request": request, "dados": dados_formulario, "erros": erros},
+            )
 
         # Salvar sessão
         request.session["usuario_logado"] = {
             "id": usuario.id,
             "nome": usuario.nome,
             "email": usuario.email,
-            "perfil": usuario.perfil
+            "perfil": usuario.perfil,
         }
 
         logger.info(f"Usuário {usuario.email} autenticado com sucesso")
@@ -121,12 +135,16 @@ async def post_login(
         return RedirectResponse("/usuario", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        erros = { erro["loc"][-1]: erro['msg'].replace("Value error, ", "") for erro in e.errors() }
+        erros = {
+            erro["loc"][-1]: erro["msg"].replace("Value error, ", "")
+            for erro in e.errors()
+        }
         informar_erro(request, "Há campos com erros de validação.")
         return templates.TemplateResponse(
             "auth/login.html",
-            {"request": request, "dados": dados_formulario, "erros": erros}
+            {"request": request, "dados": dados_formulario, "erros": erros},
         )
+
 
 @router.get("/logout")
 async def logout(request: Request):
@@ -137,6 +155,7 @@ async def logout(request: Request):
     informar_sucesso(request, "Logout realizado com sucesso!")
     return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
 
+
 @router.get("/cadastrar")
 async def get_cadastrar(request: Request):
     """Exibe formulário de cadastro"""
@@ -146,6 +165,7 @@ async def get_cadastrar(request: Request):
 
     return templates.TemplateResponse("auth/cadastro.html", {"request": request})
 
+
 @router.post("/cadastrar")
 async def post_cadastrar(
     request: Request,
@@ -153,7 +173,7 @@ async def post_cadastrar(
     nome: str = Form(...),
     email: str = Form(...),
     senha: str = Form(...),
-    confirmar_senha: str = Form(...)
+    confirmar_senha: str = Form(...),
 ):
     """Processa cadastro de novo usuário"""
     try:
@@ -162,10 +182,13 @@ async def post_cadastrar(
         if not cadastro_limiter.verificar(ip):
             informar_erro(
                 request,
-                f"Muitas tentativas de cadastro. Aguarde {RATE_LIMIT_CADASTRO_MINUTOS} minuto(s)."
+                f"Muitas tentativas de cadastro. Aguarde {RATE_LIMIT_CADASTRO_MINUTOS} minuto(s).",
             )
             logger.warning(f"Rate limit de cadastro excedido para IP: {ip}")
             return RedirectResponse("/cadastrar", status_code=status.HTTP_303_SEE_OTHER)
+
+        # Armazena os dados do formulário para reexibição em caso de erro
+        dados_formulario = {"perfil": perfil, "nome": nome, "email": email}
 
         # Validar dados com DTO
         dto = CadastroDTO(
@@ -173,15 +196,14 @@ async def post_cadastrar(
             nome=nome,
             email=email,
             senha=senha,
-            confirmar_senha=confirmar_senha
+            confirmar_senha=confirmar_senha,
         )
 
         # Verificar se e-mail já existe
         if usuario_repo.obter_por_email(dto.email):
             informar_erro(request, "Este e-mail já está cadastrado")
             return templates.TemplateResponse(
-                "auth/cadastro.html",
-                {"request": request, "perfil": perfil, "nome": nome, "email": email}
+                "auth/cadastro.html", {"request": request, "dados": dados_formulario}
             )
 
         # Criar usuário com perfil escolhido
@@ -190,7 +212,7 @@ async def post_cadastrar(
             nome=dto.nome,
             email=dto.email,
             senha=criar_hash_senha(dto.senha),
-            perfil=dto.perfil
+            perfil=dto.perfil,
         )
 
         # Inserir no banco
@@ -202,33 +224,36 @@ async def post_cadastrar(
             # Enviar e-mail de boas-vindas
             email_service.enviar_boas_vindas(usuario.email, usuario.nome)
 
-            informar_sucesso(request, "Cadastro realizado com sucesso! Faça login para continuar.")
+            informar_sucesso(
+                request, "Cadastro realizado com sucesso! Faça login para continuar."
+            )
             return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
         else:
             informar_erro(request, "Erro ao realizar cadastro. Tente novamente.")
             return templates.TemplateResponse(
-                "auth/cadastro.html",
-                {"request": request, "nome": nome, "email": email}
+                "auth/cadastro.html", {"request": request, "dados": dados_formulario}
             )
 
     except ValidationError as e:
-        erros = [erro['msg'] for erro in e.errors()]
-        informar_erro(request, " | ".join(erros))
+        erros = {
+            erro["loc"][-1]: erro["msg"].replace("Value error, ", "")
+            for erro in e.errors()
+        }
+        informar_erro(request, "Há campos com erros de validação.")
         return templates.TemplateResponse(
             "auth/cadastro.html",
-            {"request": request, "perfil": perfil, "nome": nome, "email": email}
+            {"request": request, "dados": dados_formulario, "erros": erros},
         )
+
 
 @router.get("/esqueci-senha")
 async def get_esqueci_senha(request: Request):
     """Exibe formulário de recuperação de senha"""
     return templates.TemplateResponse("auth/esqueci_senha.html", {"request": request})
 
+
 @router.post("/esqueci-senha")
-async def post_esqueci_senha(
-    request: Request,
-    email: str = Form(...)
-):
+async def post_esqueci_senha(request: Request, email: str = Form(...)):
     """Processa solicitação de recuperação de senha"""
     try:
         # Rate limiting por IP
@@ -236,13 +261,18 @@ async def post_esqueci_senha(
         if not esqueci_senha_limiter.verificar(ip):
             informar_erro(
                 request,
-                f"Muitas tentativas de recuperação de senha. Aguarde {RATE_LIMIT_ESQUECI_SENHA_MINUTOS} minuto(s)."
+                f"Muitas tentativas de recuperação de senha. Aguarde {RATE_LIMIT_ESQUECI_SENHA_MINUTOS} minuto(s).",
             )
             logger.warning(f"Rate limit de recuperação de senha excedido para IP: {ip}")
-            return RedirectResponse("/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(
+                "/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER
+            )
+
+        # Armazena os dados do formulário para reexibição em caso de erro
+        dados_formulario = {"email": email}
 
         # Validar e-mail com DTO
-        dto = RecuperacaoSenhaDTO(email=email)
+        dto = EsqueciSenhaDTO(email=email)
 
         # Buscar usuário
         usuario = usuario_repo.obter_por_email(dto.email)
@@ -257,30 +287,34 @@ async def post_esqueci_senha(
 
             # Enviar e-mail com link de recuperação
             email_enviado = email_service.enviar_recuperacao_senha(
-                usuario.email,
-                usuario.nome,
-                token
+                usuario.email, usuario.nome, token
             )
 
             if email_enviado:
                 logger.info(f"E-mail de recuperação enviado para: {usuario.email}")
             else:
-                logger.error(f"Falha ao enviar e-mail de recuperação para: {usuario.email}")
+                logger.error(
+                    f"Falha ao enviar e-mail de recuperação para: {usuario.email}"
+                )
 
         # Sempre retornar mesma mensagem (segurança)
         informar_sucesso(
             request,
-            "Se o e-mail estiver cadastrado, você receberá instruções para recuperação de senha."
+            "Se o e-mail estiver cadastrado, você receberá instruções para recuperação de senha.",
         )
         return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        erros = [erro['msg'] for erro in e.errors()]
-        informar_erro(request, " | ".join(erros))
+        erros = {
+            erro["loc"][-1]: erro["msg"].replace("Value error, ", "")
+            for erro in e.errors()
+        }
+        informar_erro(request, "Há campos com erros de validação.")
         return templates.TemplateResponse(
             "auth/esqueci_senha.html",
-            {"request": request, "email": email}
+            {"request": request, "dados": dados_formulario, "erros": erros},
         )
+
 
 @router.get("/redefinir-senha")
 async def get_redefinir_senha(request: Request, token: str):
@@ -296,31 +330,33 @@ async def get_redefinir_senha(request: Request, token: str):
     try:
         data_token = datetime.fromisoformat(usuario.data_token)
         if datetime.now() > data_token:
-            informar_erro(request, "Token expirado. Solicite uma nova recuperação de senha.")
-            return RedirectResponse("/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER)
+            informar_erro(
+                request, "Token expirado. Solicite uma nova recuperação de senha."
+            )
+            return RedirectResponse(
+                "/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER
+            )
     except:
         informar_erro(request, "Token inválido")
         return RedirectResponse("/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER)
 
     return templates.TemplateResponse(
-        "auth/redefinir_senha.html",
-        {"request": request, "token": token}
+        "auth/redefinir_senha.html", {"request": request, "token": token}
     )
+
 
 @router.post("/redefinir-senha")
 async def post_redefinir_senha(
     request: Request,
     token: str = Form(...),
     senha: str = Form(...),
-    confirmar_senha: str = Form(...)
+    confirmar_senha: str = Form(...),
 ):
     """Processa redefinição de senha"""
     try:
         # Validar dados com DTO
         dto = RedefinirSenhaDTO(
-            token=token,
-            senha=senha,
-            confirmar_senha=confirmar_senha
+            token=token, senha=senha, confirmar_senha=confirmar_senha
         )
 
         # Validar token e expiração
@@ -328,16 +364,22 @@ async def post_redefinir_senha(
 
         if not usuario or not usuario.data_token:
             informar_erro(request, "Token inválido")
-            return RedirectResponse("/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(
+                "/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER
+            )
 
         try:
             data_token = datetime.fromisoformat(usuario.data_token)
             if datetime.now() > data_token:
                 informar_erro(request, "Token expirado")
-                return RedirectResponse("/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER)
+                return RedirectResponse(
+                    "/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER
+                )
         except:
             informar_erro(request, "Token inválido")
-            return RedirectResponse("/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(
+                "/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER
+            )
 
         # Atualizar senha
         senha_hash = criar_hash_senha(dto.senha)
@@ -347,13 +389,13 @@ async def post_redefinir_senha(
         usuario_repo.limpar_token(usuario.id)
 
         logger.info(f"Senha redefinida com sucesso para usuário: {usuario.email}")
-        informar_sucesso(request, "Senha redefinida com sucesso! Faça login com sua nova senha.")
+        informar_sucesso(
+            request, "Senha redefinida com sucesso! Faça login com sua nova senha."
+        )
         return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        erros = [erro['msg'] for erro in e.errors()]
-        informar_erro(request, " | ".join(erros))
+        informar_erro(request, "O e-mail informado não está em um formato correto.")
         return RedirectResponse(
-            f"/redefinir-senha?token={token}",
-            status_code=status.HTTP_303_SEE_OTHER
+            f"/redefinir-senha?token={token}", status_code=status.HTTP_303_SEE_OTHER
         )

@@ -35,8 +35,8 @@ def carregar_usuarios_seed():
 
             # Gera dados do usuário baseado no perfil
             nome = f"{perfil_valor} Padrão"
-            email = f"{perfil_valor.lower()}@email.com"
-            senha_plain = "1324aA@#"
+            email = f"padrao@{perfil_valor.lower()}.com"
+            senha_plain = "1234aA@#"
 
             # Criar usuário
             usuario = Usuario(
