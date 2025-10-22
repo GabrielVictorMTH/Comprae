@@ -6,4 +6,4 @@ ALTERAR = """UPDATE..."""
 EXCLUIR = """DELETE FROM..."""
 OBTER_POR_ID = """SELECT * FROM..."""
 OBTER_TODOS = """SELECT * FROM..."""
-# Queries específicas da entidad
+# Queries específicas da entidade
