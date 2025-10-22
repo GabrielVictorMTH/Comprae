@@ -771,3 +771,116 @@ def validar_perfil_usuario(perfil_enum: Any) -> Callable[[Any, Any], Any]:
         return v
 
     return validator
+
+
+def validar_uf() -> Callable[[Any, Any], Any]:
+    """
+    Valida UF (Unidade Federativa) do Brasil.
+
+    Returns:
+        Função validadora para uso com field_validator
+
+    Example:
+        _validar_uf = field_validator('uf')(validar_uf())
+    """
+    UFS_VALIDAS = {
+        "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
+        "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
+        "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+    }
+
+    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+        if not v:
+            raise ValueError("UF é obrigatória.")
+
+        uf = v.strip().upper()
+
+        if uf not in UFS_VALIDAS:
+            raise ValueError(
+                f'UF inválida: "{v}". Deve ser uma sigla de estado brasileiro válida.'
+            )
+
+        return uf
+
+    return validator
+
+
+def validar_valor_monetario(
+    minimo: float = 0.0,
+    maximo: Optional[float] = None,
+    permitir_zero: bool = True
+) -> Callable[[Any, Any], Any]:
+    """
+    Valida valor monetário (float).
+
+    Args:
+        minimo: Valor mínimo permitido (padrão: 0.0)
+        maximo: Valor máximo permitido (opcional)
+        permitir_zero: Se deve permitir valor zero (padrão: True)
+
+    Returns:
+        Função validadora para uso com field_validator
+
+    Example:
+        _validar_preco = field_validator('preco')(validar_valor_monetario(minimo=0.01, maximo=999999.99))
+    """
+
+    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+        if v is None:
+            raise ValueError("Valor é obrigatório.")
+
+        try:
+            valor = float(v)
+        except (TypeError, ValueError):
+            raise ValueError(f'Valor inválido: "{v}". Deve ser um número.')
+
+        if not permitir_zero and valor == 0:
+            raise ValueError("Valor não pode ser zero.")
+
+        if valor < minimo:
+            raise ValueError(f"Valor deve ser no mínimo R$ {minimo:.2f}.")
+
+        if maximo is not None and valor > maximo:
+            raise ValueError(f"Valor deve ser no máximo R$ {maximo:.2f}.")
+
+        return valor
+
+    return validator
+
+
+def validar_numero_positivo(
+    permitir_zero: bool = False,
+    nome_campo: str = "Número"
+) -> Callable[[Any, Any], Any]:
+    """
+    Valida número positivo (int ou float).
+
+    Args:
+        permitir_zero: Se deve permitir valor zero (padrão: False)
+        nome_campo: Nome do campo para mensagens de erro (padrão: "Número")
+
+    Returns:
+        Função validadora para uso com field_validator
+
+    Example:
+        _validar_quantidade = field_validator('quantidade')(validar_numero_positivo(permitir_zero=True))
+    """
+
+    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+        if v is None:
+            raise ValueError(f"{nome_campo} é obrigatório.")
+
+        try:
+            valor = float(v)
+        except (TypeError, ValueError):
+            raise ValueError(f'{nome_campo} inválido: "{v}". Deve ser um número.')
+
+        if not permitir_zero and valor <= 0:
+            raise ValueError(f"{nome_campo} deve ser maior que zero.")
+
+        if permitir_zero and valor < 0:
+            raise ValueError(f"{nome_campo} não pode ser negativo.")
+
+        return valor
+
+    return validator
