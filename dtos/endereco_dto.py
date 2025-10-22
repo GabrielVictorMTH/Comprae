@@ -1,6 +1,7 @@
 """
 DTOs para operações com Endereços.
 """
+from typing import Optional
 from pydantic import BaseModel, field_validator
 from dtos.validators import (
     validar_string_obrigatoria,
@@ -16,7 +17,7 @@ class CriarEnderecoDTO(BaseModel):
     titulo: str
     logradouro: str
     numero: str
-    complemento: str
+    complemento: Optional[str] = ""
     bairro: str
     cidade: str
     uf: str
@@ -31,7 +32,7 @@ class CriarEnderecoDTO(BaseModel):
     _validar_numero = field_validator("numero")(
         validar_string_obrigatoria("Número", tamanho_maximo=10)
     )
-    # Complemento é opcional, então não validamos como obrigatório
+    # Complemento é opcional
     _validar_bairro = field_validator("bairro")(
         validar_string_obrigatoria("Bairro", tamanho_maximo=50)
     )
@@ -49,7 +50,7 @@ class AlterarEnderecoDTO(BaseModel):
     titulo: str
     logradouro: str
     numero: str
-    complemento: str
+    complemento: Optional[str] = ""
     bairro: str
     cidade: str
     uf: str
