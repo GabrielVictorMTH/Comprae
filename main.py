@@ -82,6 +82,22 @@ if static_path.exists():
     logger.info("Arquivos estáticos montados em /static")
 
 # Criar tabelas do banco de dados
+# Após criar tabelas existentes...
+categoria_repo.criar_tabela()
+logger.info("Tabela 'categoria' criada/verificada")
+
+endereco_repo.criar_tabela()
+logger.info("Tabela 'endereco' criada/verificada")
+
+mensagem_repo.criar_tabela()
+logger.info("Tabela 'mensagem' criada/verificada")
+
+anuncio_repo.criar_tabela()
+logger.info("Tabela 'anuncio' criada/verificada")
+
+pedido_repo.criar_tabela()
+logger.info("Tabela 'pedido' criada/verificada")
+
 logger.info("Criando tabelas do banco de dados...")
 try:
     usuario_repo.criar_tabela()
