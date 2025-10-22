@@ -15,14 +15,15 @@ class Pedido:
     id_anuncio: int
     preco: float
     status: str
-    data_hora_pedido: datetime
-    data_hora_pagamento: datetime
-    data_hora_envio: datetime
-    codigo_rastreio: str
-    nota_avaliacao: int
-    comentario_avaliacao: str
-    data_hora_avaliacao: datetime
-
-    endereco: Optional[Endereco]
-    comprador: Optional[Usuario]
-    anuncio: Optional[Anuncio]
+    # Campos opcionais
+    data_hora_pedido: Optional[datetime] = None
+    data_hora_pagamento: Optional[datetime] = None
+    data_hora_envio: Optional[datetime] = None
+    codigo_rastreio: Optional[str] = None
+    nota_avaliacao: Optional[int] = None
+    comentario_avaliacao: Optional[str] = None
+    data_hora_avaliacao: Optional[datetime] = None
+    # Relacionamentos
+    endereco: Optional[Endereco] = None
+    comprador: Optional[Usuario] = None
+    anuncio: Optional[Anuncio] = None

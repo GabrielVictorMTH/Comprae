@@ -1,4 +1,3 @@
-from argparse import OPTIONAL
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
@@ -8,7 +7,6 @@ from model.usuario_model import Usuario
 
 
 @dataclass
-
 class Anuncio:
     id_anuncio: int
     id_vendedor: int
@@ -20,6 +18,6 @@ class Anuncio:
     estoque: int
     data_cadastro: datetime
     ativo: bool
-    # Relacionamento
-    vendedor: Optional[Usuario]
-    categoria: Optional[Categoria]
+    # Relacionamentos
+    vendedor: Optional[Usuario] = None
+    categoria: Optional[Categoria] = None
