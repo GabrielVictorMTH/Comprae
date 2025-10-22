@@ -78,4 +78,6 @@ prompt*
 
 # Imagens
 static/img/usuarios/*
-backups/
+
+# Arquivos de backup do banco de dados (na raiz)
+/backups/
