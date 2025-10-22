@@ -1,10 +1,15 @@
 """
-Configurações e fixtures para testes pytest
+Configurações e fixtures para testes pytest.
+
+Fornece fixtures reutilizáveis e helpers para testes da aplicação.
 """
 import pytest
 from fastapi.testclient import TestClient
+from fastapi import status
 import os
 import tempfile
+from pathlib import Path
+from typing import Optional
 from util.perfis import Perfil
 
 # Configurar banco de dados de teste ANTES de importar a aplicação
@@ -39,16 +44,29 @@ def limpar_rate_limiter():
     """Limpa o rate limiter antes de cada teste para evitar bloqueios"""
     # Importar após configuração do banco de dados
     from routes.auth_routes import login_limiter, cadastro_limiter, esqueci_senha_limiter
+    from routes.admin_usuarios_routes import admin_usuarios_limiter
+    from routes.admin_backups_routes import admin_backups_limiter
+    from routes.admin_configuracoes_routes import admin_config_limiter
+
+    # Lista de todos os limiters
+    limiters = [
+        login_limiter,
+        cadastro_limiter,
+        esqueci_senha_limiter,
+        admin_usuarios_limiter,
+        admin_backups_limiter,
+        admin_config_limiter,
+    ]
 
     # Limpar antes do teste
-    login_limiter.limpar()
-    cadastro_limiter.limpar()
-    esqueci_senha_limiter.limpar()
+    for limiter in limiters:
+        limiter.limpar()
+
     yield
+
     # Limpar depois do teste também
-    login_limiter.limpar()
-    cadastro_limiter.limpar()
-    esqueci_senha_limiter.limpar()
+    for limiter in limiters:
+        limiter.limpar()
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -230,3 +248,197 @@ def criar_tarefa(cliente_autenticado):
         return response
 
     return _criar_tarefa
+
+
+@pytest.fixture
+def vendedor_teste():
+    """Dados de um vendedor de teste"""
+    return {
+        "nome": "Vendedor Teste",
+        "email": "vendedor@example.com",
+        "senha": "Vendedor@123",
+        "perfil": Perfil.VENDEDOR.value
+    }
+
+
+@pytest.fixture
+def vendedor_autenticado(client, criar_usuario, fazer_login, vendedor_teste):
+    """
+    Fixture que retorna um cliente autenticado como vendedor
+    """
+    # Importar para manipular diretamente o banco
+    from repo import usuario_repo
+    from model.usuario_model import Usuario
+    from util.security import criar_hash_senha
+
+    # Criar vendedor diretamente no banco
+    vendedor = Usuario(
+        id=0,
+        nome=vendedor_teste["nome"],
+        email=vendedor_teste["email"],
+        senha=criar_hash_senha(vendedor_teste["senha"]),
+        perfil=Perfil.VENDEDOR.value
+    )
+    usuario_repo.inserir(vendedor)
+
+    # Fazer login
+    fazer_login(vendedor_teste["email"], vendedor_teste["senha"])
+
+    # Retornar cliente autenticado
+    return client
+
+
+@pytest.fixture
+def foto_teste_base64():
+    """
+    Retorna uma imagem 1x1 pixel PNG válida em base64
+    Útil para testes de upload de foto
+    """
+    # PNG 1x1 pixel transparente em base64
+    return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+
+
+@pytest.fixture
+def criar_backup():
+    """
+    Fixture que retorna uma função para criar backup de teste
+    """
+    def _criar_backup():
+        """Cria um backup via util/backup_util"""
+        from util import backup_util
+        sucesso, mensagem = backup_util.criar_backup()
+        return sucesso, mensagem
+
+    return _criar_backup
+
+
+# ===== TEST HELPERS - Funções auxiliares para assertions =====
+
+def assert_permission_denied(response, expected_redirect: str = "/login"):
+    """
+    Helper para verificar se permissão foi negada.
+
+    Verifica se resposta é 303 e redireciona para login ou página esperada.
+
+    Args:
+        response: Response object do TestClient
+        expected_redirect: URL esperada de redirecionamento (padrão: /login)
+
+    Example:
+        >>> response = client.get("/admin/usuarios")
+        >>> assert_permission_denied(response)
+    """
+    assert response.status_code == status.HTTP_303_SEE_OTHER
+    assert response.headers["location"] == expected_redirect
+
+
+def assert_redirects_to(response, expected_url: str, expected_status: int = status.HTTP_303_SEE_OTHER):
+    """
+    Helper para verificar redirecionamento.
+
+    Args:
+        response: Response object do TestClient
+        expected_url: URL esperada de redirecionamento
+        expected_status: Status code esperado (padrão: 303)
+
+    Example:
+        >>> response = client.post("/login", data={...})
+        >>> assert_redirects_to(response, "/usuario")
+    """
+    assert response.status_code == expected_status
+    assert response.headers.get("location") == expected_url
+
+
+def assert_contains_text(response, text: str, case_sensitive: bool = False):
+    """
+    Helper para verificar se response contém texto.
+
+    Args:
+        response: Response object do TestClient
+        text: Texto esperado no conteúdo
+        case_sensitive: Se deve ser case-sensitive (padrão: False)
+
+    Example:
+        >>> response = client.get("/")
+        >>> assert_contains_text(response, "bem-vindo")
+    """
+    content = response.text
+    if not case_sensitive:
+        assert text.lower() in content.lower()
+    else:
+        assert text in content
+
+
+# ===== FIXTURES AVANÇADAS =====
+
+@pytest.fixture
+def dois_usuarios(client, criar_usuario):
+    """
+    Fixture que cria dois usuários de teste.
+
+    Útil para testes que verificam isolamento de dados entre usuários.
+
+    Returns:
+        Tuple com dados dos dois usuários (dict, dict)
+    """
+    usuario1 = {
+        "nome": "Usuario Um",
+        "email": "usuario1@example.com",
+        "senha": "Senha@123",
+        "perfil": Perfil.CLIENTE.value
+    }
+    usuario2 = {
+        "nome": "Usuario Dois",
+        "email": "usuario2@example.com",
+        "senha": "Senha@456",
+        "perfil": Perfil.CLIENTE.value
+    }
+
+    # Criar ambos usuários
+    criar_usuario(usuario1["nome"], usuario1["email"], usuario1["senha"])
+    criar_usuario(usuario2["nome"], usuario2["email"], usuario2["senha"])
+
+    return usuario1, usuario2
+
+
+@pytest.fixture
+def usuario_com_foto(cliente_autenticado, foto_teste_base64):
+    """
+    Fixture que retorna um cliente autenticado com foto de perfil.
+
+    Returns:
+        TestClient autenticado com foto já salva
+    """
+    # Atualizar foto do perfil
+    response = cliente_autenticado.post(
+        "/perfil/foto/atualizar",
+        json={"imagem": foto_teste_base64},
+        follow_redirects=False
+    )
+
+    # Verificar se foto foi salva com sucesso
+    assert response.status_code in [status.HTTP_200_OK, status.HTTP_303_SEE_OTHER]
+
+    return cliente_autenticado
+
+
+@pytest.fixture
+def obter_ultimo_backup():
+    """
+    Fixture que retorna função para obter último backup criado.
+
+    Returns:
+        Função que retorna dict com dados do último backup ou None
+    """
+    def _obter_ultimo_backup() -> Optional[dict]:
+        """Obtém informações do último backup na pasta backups/"""
+        from util import backup_util
+
+        backups = backup_util.listar_backups()
+        if not backups:
+            return None
+
+        # Retornar o mais recente (primeiro da lista)
+        return backups[0]
+
+    return _obter_ultimo_backup

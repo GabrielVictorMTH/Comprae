@@ -481,6 +481,56 @@ def validar_senha_forte(
     return validator
 
 
+def validar_senhas_coincidem(
+    campo_senha: str = "senha",
+    campo_confirmacao: str = "confirmar_senha",
+    mensagem_erro: str = "As senhas não coincidem.",
+) -> Callable[[Any], Any]:
+    """
+    Valida se dois campos de senha são iguais (model validator).
+
+    Esta é uma função factory que retorna um model_validator para
+    verificar se dois campos de senha coincidem.
+
+    Args:
+        campo_senha: Nome do campo com a senha (padrão: "senha")
+        campo_confirmacao: Nome do campo com a confirmação (padrão: "confirmar_senha")
+        mensagem_erro: Mensagem de erro customizada
+
+    Returns:
+        Função validadora para uso com @model_validator(mode="after")
+
+    Example:
+        class MeuDTO(BaseModel):
+            senha: str
+            confirmar_senha: str
+
+            _validar_match = model_validator(mode="after")(
+                validar_senhas_coincidem()
+            )
+
+        # Para campos com nomes diferentes:
+        class AlterarSenhaDTO(BaseModel):
+            senha_nova: str
+            confirmar_senha: str
+
+            _validar_match = model_validator(mode="after")(
+                validar_senhas_coincidem("senha_nova", "confirmar_senha")
+            )
+    """
+
+    def validator(model: Any) -> Any:  # noqa: ANN401
+        senha = getattr(model, campo_senha, None)
+        confirmacao = getattr(model, campo_confirmacao, None)
+
+        if senha != confirmacao:
+            raise ValueError(mensagem_erro)
+
+        return model
+
+    return validator
+
+
 # ===== VALIDAÇÕES DE IDENTIFICADORES =====
 
 

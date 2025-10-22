@@ -101,11 +101,12 @@ function exibirModalAlerta(mensagem, tipo = 'info', titulo = null, detalhes = nu
     mensagemEl.textContent = mensagem;
 
     // Configurar detalhes (se fornecidos)
+    // SEGURANÇA: Usar textContent em vez de innerHTML para prevenir XSS
     if (detalhes) {
-        detalhesEl.innerHTML = detalhes;
+        detalhesEl.textContent = detalhes;
         detalhesEl.style.display = 'block';
     } else {
-        detalhesEl.innerHTML = '';
+        detalhesEl.textContent = '';
         detalhesEl.style.display = 'none';
     }
 
@@ -151,9 +152,43 @@ function exibirSucesso(mensagem, titulo = null, detalhes = null) {
     exibirModalAlerta(mensagem, 'success', titulo, detalhes);
 }
 
-// Exportar funções globalmente
+/**
+ * Inicializar namespace global do app
+ */
+window.App = window.App || {};
+window.App.Modal = window.App.Modal || {};
+
+/**
+ * API pública do módulo Modal
+ */
+window.App.Modal.show = exibirModalAlerta;
+window.App.Modal.showError = exibirErro;
+window.App.Modal.showWarning = exibirAviso;
+window.App.Modal.showInfo = exibirInfo;
+window.App.Modal.showSuccess = exibirSucesso;
+
+/**
+ * DEPRECATED: Manter retrocompatibilidade
+ * @deprecated Use window.App.Modal.show() em vez disso
+ */
 window.exibirModalAlerta = exibirModalAlerta;
+
+/**
+ * @deprecated Use window.App.Modal.showError() em vez disso
+ */
 window.exibirErro = exibirErro;
+
+/**
+ * @deprecated Use window.App.Modal.showWarning() em vez disso
+ */
 window.exibirAviso = exibirAviso;
+
+/**
+ * @deprecated Use window.App.Modal.showInfo() em vez disso
+ */
 window.exibirInfo = exibirInfo;
+
+/**
+ * @deprecated Use window.App.Modal.showSuccess() em vez disso
+ */
 window.exibirSucesso = exibirSucesso;

@@ -1,5 +1,5 @@
 {% extends "base_publica.html" %}
-{% from 'components/photo_gallery.html' import photo_gallery %}
+{% from 'components/galeria_fotos.html' import galeria_fotos %}
 
 {% block titulo %}Detalhes do Produto{% endblock %}
 
@@ -18,7 +18,7 @@
     <div class="row g-4 mb-5">
         <!-- Coluna Esquerda - Imagens -->
         <div class="col-12 col-md-6">
-            {{ photo_gallery([
+            {{ galeria_fotos([
             {'url': 'https://picsum.photos/seed/product-main/600/600', 'alt': 'Produto Principal'},
             {'url': 'https://picsum.photos/seed/product-2/600/600', 'alt': 'Produto - Visão 2'},
             {'url': 'https://picsum.photos/seed/product-3/600/600', 'alt': 'Produto - Visão 3'},

@@ -690,7 +690,41 @@ const observer = new MutationObserver((mutations) => {
 
 observer.observe(document.body, { childList: true, subtree: true });
 
-// Exportar para uso global
+/**
+ * Cleanup do observer quando página é descarregada
+ * Previne memory leaks em SPAs
+ */
+window.addEventListener('beforeunload', () => {
+    observer.disconnect();
+});
+
+/**
+ * Inicializar namespace global do app
+ */
+window.App = window.App || {};
+window.App.InputMask = window.App.InputMask || {};
+
+/**
+ * API pública do módulo InputMask
+ */
+window.App.InputMask.Mask = InputMask;
+window.App.InputMask.DecimalMask = DecimalMask;
+window.App.InputMask.apply = applyMask;
+window.App.InputMask.observer = observer; // Expor para cleanup manual se necessário
+window.App.InputMask.disconnect = () => observer.disconnect(); // API para parar observação
+
+/**
+ * DEPRECATED: Manter retrocompatibilidade
+ * @deprecated Use window.App.InputMask.Mask em vez disso
+ */
 window.InputMask = InputMask;
+
+/**
+ * @deprecated Use window.App.InputMask.DecimalMask em vez disso
+ */
 window.DecimalMask = DecimalMask;
+
+/**
+ * @deprecated Use window.App.InputMask.apply() em vez disso
+ */
 window.applyMask = applyMask;

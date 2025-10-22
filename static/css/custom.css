@@ -53,11 +53,20 @@
     padding: 60px 15px;
 }
 
+.error-traceback {
+    max-height: 400px;
+}
+
 /* Theme selection cards */
 .tema-card-btn {
     transition: all 0.3s;
     outline: 1px solid var(--secondary-color);
     outline-offset: -1px;
+}
+
+.tema-card-btn:hover:not(.tema-selected) {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .tema-card-btn.tema-selected {

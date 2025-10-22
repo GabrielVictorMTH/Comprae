@@ -1,5 +1,5 @@
 {% extends "base_publica.html" %}
-{% from 'components/photo_gallery.html' import photo_gallery %}
+{% from 'components/galeria_fotos.html' import galeria_fotos %}
 
 {% block titulo %}Detalhes do Imóvel{% endblock %}
 
@@ -17,7 +17,7 @@
     <div class="row g-4 mb-5">
         <!-- Coluna Esquerda - Foto do Imóvel -->
         <div class="col-12 col-md-6">
-            {{ photo_gallery([
+            {{ galeria_fotos([
                 {'url': 'https://picsum.photos/seed/property-main/600/600', 'alt': 'Vista principal do apartamento'}
             ], 'propertyGallery') }}
         </div>

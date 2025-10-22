@@ -11,7 +11,7 @@
                     <h2><i class="bi bi-table"></i> Exemplo de Tabela Responsiva</h2>
                     <p class="text-muted mb-0">Demonstração de tabela com listagem de dados, badges de status e botões de ação</p>
                 </div>
-                <a href="/examples" class="btn btn-outline-secondary">
+                <a href="/exemplos" class="btn btn-outline-secondary">
                     <i class="bi bi-arrow-left"></i> Voltar
                 </a>
             </div>
@@ -33,13 +33,13 @@
                         <table class="table table-hover align-middle">
                             <thead class="table-light">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Nome</th>
-                                    <th>Categoria</th>
-                                    <th>Preço</th>
-                                    <th>Estoque</th>
-                                    <th>Status</th>
-                                    <th class="text-center">Ações</th>
+                                    <th scope="col">ID</th>
+                                    <th scope="col">Nome</th>
+                                    <th scope="col">Categoria</th>
+                                    <th scope="col">Preço</th>
+                                    <th scope="col">Estoque</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" class="text-center">Ações</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -74,15 +74,21 @@
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group btn-group-sm" role="group">
-                                            <button type="button" class="btn btn-outline-info" title="Visualizar"
+                                            <button type="button" class="btn btn-outline-info"
+                                                title="Visualizar"
+                                                aria-label="Visualizar produto {{ produto.nome }}"
                                                 onclick="exibirInfo('Exemplo de visualização de detalhes', 'Visualizar: {{ produto.nome }}')">
                                                 <i class="bi bi-eye"></i>
                                             </button>
-                                            <button type="button" class="btn btn-outline-primary" title="Editar"
+                                            <button type="button" class="btn btn-outline-primary"
+                                                title="Editar"
+                                                aria-label="Editar produto {{ produto.nome }}"
                                                 onclick="exibirInfo('Exemplo de edição de produto', 'Editar: {{ produto.nome }}')">
                                                 <i class="bi bi-pencil"></i>
                                             </button>
-                                            <button type="button" class="btn btn-outline-danger" title="Excluir"
+                                            <button type="button" class="btn btn-outline-danger"
+                                                title="Excluir"
+                                                aria-label="Excluir produto {{ produto.nome }}"
                                                 onclick="excluirProduto({{ produto.id }}, '{{ produto.nome|replace("'", "\\'") }}')">
                                                 <i class="bi bi-trash"></i>
                                             </button>
@@ -181,11 +187,11 @@
             <div class="card-body">
                 <table class="table table-sm table-borderless mb-0">
                     <tr>
-                        <th width="30%">ID:</th>
+                        <th scope="row" width="30%">ID:</th>
                         <td>${produtoId}</td>
                     </tr>
                     <tr>
-                        <th>Nome:</th>
+                        <th scope="row">Nome:</th>
                         <td>${produtoNome}</td>
                     </tr>
                 </table>

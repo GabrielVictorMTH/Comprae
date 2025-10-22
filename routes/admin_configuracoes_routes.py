@@ -12,9 +12,17 @@ from util.template_util import criar_templates
 from util.flash_messages import informar_sucesso, informar_erro
 from util.logger_config import logger
 from util.perfis import Perfil
+from util.rate_limiter import RateLimiter, obter_identificador_cliente
 
 router = APIRouter(prefix="/admin")
 templates = criar_templates("templates/admin")
+
+# Rate limiter para operações de configuração
+admin_config_limiter = RateLimiter(
+    max_tentativas=10,  # 10 operações
+    janela_minutos=1,   # por minuto
+    nome="admin_config",
+)
 
 @router.get("/tema")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -65,6 +73,12 @@ async def post_aplicar_tema(
     """
     assert usuario_logado is not None
 
+    # Rate limiting
+    ip = obter_identificador_cliente(request)
+    if not admin_config_limiter.verificar(ip):
+        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
+        return RedirectResponse("/admin/tema", status_code=status.HTTP_303_SEE_OTHER)
+
     try:
         # Validar se o tema existe
         css_origem = Path(f"static/css/bootswatch/{tema}.bootstrap.min.css")
@@ -78,20 +92,12 @@ async def post_aplicar_tema(
         css_destino = Path("static/css/bootstrap.min.css")
         shutil.copy2(css_origem, css_destino)
 
-        # Atualizar ou inserir configuração no banco
-        config_existente = configuracao_repo.obter_por_chave("theme")
-
-        if config_existente:
-            # Atualizar configuração existente
-            sucesso = configuracao_repo.atualizar("theme", tema)
-        else:
-            # Inserir nova configuração (fallback caso não exista)
-            from util.db_util import get_connection
-            from sql.configuracao_sql import INSERIR
-            with get_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute(INSERIR, ("theme", tema, "Tema visual da aplicação (Bootswatch)"))
-                sucesso = cursor.rowcount > 0
+        # Atualizar ou inserir configuração no banco (upsert)
+        sucesso = configuracao_repo.inserir_ou_atualizar(
+            chave="theme",
+            valor=tema,
+            descricao="Tema visual da aplicação (Bootswatch)"
+        )
 
         if sucesso:
             # Limpar cache de configurações
@@ -198,6 +204,12 @@ async def post_filtrar_auditoria(
         nivel: Nível de log (INFO, WARNING, ERROR, DEBUG, CRITICAL, TODOS)
     """
     assert usuario_logado is not None
+
+    # Rate limiting
+    ip = obter_identificador_cliente(request)
+    if not admin_config_limiter.verificar(ip):
+        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
+        return RedirectResponse("/admin/auditoria", status_code=status.HTTP_303_SEE_OTHER)
 
     # Ler e filtrar logs
     logs, total_linhas, mensagem_erro = _ler_log_arquivo(data, nivel)

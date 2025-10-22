@@ -1,5 +1,5 @@
 {% extends "base_publica.html" %}
-{% from 'components/photo_gallery.html' import photo_gallery %}
+{% from 'components/galeria_fotos.html' import galeria_fotos %}
 
 {% block titulo %}Detalhes do Serviço{% endblock %}
 
@@ -17,7 +17,7 @@
     <div class="row g-4 mb-5">
         <!-- Coluna Esquerda - Foto do Profissional e Portfólio -->
         <div class="col-12 col-md-6">
-            {{ photo_gallery([
+            {{ galeria_fotos([
                 {'url': 'https://picsum.photos/seed/professional/600/600', 'alt': 'Foto do Profissional'},
                 {'url': 'https://picsum.photos/seed/portfolio1/600/600', 'alt': 'Trabalho de Portfólio 1'},
                 {'url': 'https://picsum.photos/seed/portfolio2/600/600', 'alt': 'Trabalho de Portfólio 2'},

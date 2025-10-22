@@ -12,6 +12,7 @@ from util.security import criar_hash_senha, verificar_senha
 from util.foto_util import salvar_foto_cropada_usuario
 from util.logger_config import logger
 from util.exceptions import FormValidationError
+from util.validation_helpers import verificar_email_disponivel
 
 router = APIRouter(prefix="/perfil")
 templates = criar_templates("templates/perfil")
@@ -74,21 +75,16 @@ async def post_editar(
         dto = EditarPerfilDTO(nome=nome, email=email)
 
         # Verificar se o e-mail já está em uso por outro usuário
-        usuario_existente = usuario_repo.obter_por_email(dto.email)
-        if usuario_existente and usuario_existente.id != usuario_logado["id"]:
-            informar_erro(
-                request, "Este e-mail já está sendo usado em outra conta de usuário."
-            )
-            logger.warning(
-                f"Tentativa de alterar e-mail para um já existente: {dto.email} - Usuário ID: {usuario_logado['id']}"
-            )
+        disponivel, mensagem_erro = verificar_email_disponivel(dto.email, usuario_logado["id"])
+        if not disponivel:
+            informar_erro(request, mensagem_erro)
             return templates.TemplateResponse(
                 "perfil/editar.html",
                 {
                     "request": request,
                     "dados": dados_formulario,
                     "erros": {
-                        "email": "Este e-mail já está sendo usado em outra conta de usuário."
+                        "email": mensagem_erro
                     },
                 },
             )
@@ -132,22 +128,7 @@ async def post_editar(
             campo_padrao="email",
             mensagem_flash="Há campos com erros de validação!",
         )
-    except Exception as e:
-        logger.error(f"Erro ao atualizar perfil: {e}")
-        informar_erro(
-            request,
-            "Ocorreu um erro desconhecido ao processar atualização de perfil. A equipe de suporte foi notificada. Tente novamente mais tarde.",
-        )
-        return templates.TemplateResponse(
-            "perfil/editar.html",
-            {
-                "request": request,
-                "dados": dados_formulario,
-                "erros": {
-                    "geral": "Ocorreu um erro desconhecido ao processar atualização de perfil. A equipe de suporte foi notificada. Tente novamente mais tarde."
-                },
-            },
-        )
+    # Removido except Exception duplicado - global handler cuida disso
 
 
 @router.get("/alterar-senha")
@@ -240,24 +221,7 @@ async def post_alterar_senha(
             campo_padrao="confirmar_senha",
             mensagem_flash="Há campos com erros de validação!",
         )
-
-    except Exception as e:
-        logger.error(
-            f"Erro ao alterar senha para usuario ID {usuario_logado['id']}: {e}"
-        )
-        informar_erro(
-            request,
-            "Ocorreu um erro desconhecido ao processar alteração de senha. A equipe de suporte foi notificada. Tente novamente mais tarde.",
-        )
-        return templates.TemplateResponse(
-            "perfil/alterar-senha.html",
-            {
-                "request": request,
-                "erros": {
-                    "geral": "Ocorreu um erro desconhecido ao processar alteração de senha. A equipe de suporte foi notificada. Tente novamente mais tarde."
-                },
-            },
-        )
+    # Removido except Exception duplicado - global handler cuida disso
 
 
 @router.post("/atualizar-foto")

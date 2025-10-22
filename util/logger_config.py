@@ -1,3 +1,9 @@
+"""
+Módulo de configuração do sistema de logging.
+
+Implementa rotação diária de logs com retenção configurável via .env.
+"""
+
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
@@ -5,11 +11,17 @@ from pathlib import Path
 from datetime import datetime
 import time
 
+from util.config import LOG_LEVEL, LOG_RETENTION_DAYS
+
 
 class DailyRotatingFileHandler(TimedRotatingFileHandler):
-    """Handler customizado que cria arquivos com data no nome desde o início"""
+    """
+    Handler customizado que cria arquivos com data no nome desde o início.
 
-    def __init__(self, log_dir='logs', when='midnight', interval=1, backupCount=30):
+    Cria logs no formato: app.YYYY.MM.DD.log
+    """
+
+    def __init__(self, log_dir: str = 'logs', when: str = 'midnight', interval: int = 1, backupCount: int = LOG_RETENTION_DAYS):
         self.log_dir = log_dir
         Path(log_dir).mkdir(exist_ok=True)
 
@@ -56,23 +68,31 @@ class DailyRotatingFileHandler(TimedRotatingFileHandler):
             self.stream = self._open()
 
 
-def configurar_logger():
-    """Configura sistema de logging profissional com rotação diária"""
+def configurar_logger() -> logging.Logger:
+    """
+    Configura sistema de logging profissional com rotação diária.
+
+    Configurações:
+    - Rotação à meia-noite
+    - Retenção de logs configurável via LOG_RETENTION_DAYS (padrão: 30 dias)
+    - Formato padronizado com timestamp
+    - Nível de log configurável via LOG_LEVEL
+
+    Returns:
+        Logger configurado e pronto para uso
+    """
     # Configurar formato
     formato = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-    # Obter configuração de retenção de logs (padrão: 30 dias)
-    retention_days = int(os.getenv('LOG_RETENTION_DAYS', '30'))
-
     # Handler customizado que cria arquivos com data desde o início
     file_handler = DailyRotatingFileHandler(
         log_dir='logs',
         when='midnight',
         interval=1,
-        backupCount=retention_days
+        backupCount=LOG_RETENTION_DAYS
     )
     file_handler.setFormatter(formato)
 
@@ -82,8 +102,7 @@ def configurar_logger():
 
     # Configurar logger raiz
     logger = logging.getLogger()
-    nivel = os.getenv('LOG_LEVEL', 'INFO')
-    logger.setLevel(getattr(logging, nivel))
+    logger.setLevel(getattr(logging, LOG_LEVEL.upper()))
     logger.addHandler(file_handler)
     logger.addHandler(console_handler)
 

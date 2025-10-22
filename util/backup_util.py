@@ -6,6 +6,7 @@ Os backups são armazenados no diretório 'backups/' com nomenclatura padronizad
 """
 import os
 import shutil
+import sqlite3
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, List
@@ -125,6 +126,68 @@ def _extrair_data_do_nome(nome_arquivo: str) -> Optional[datetime]:
         return None
 
 
+def _validar_integridade_backup(caminho: Path) -> tuple[bool, str]:
+    """
+    Valida a integridade de um arquivo de backup SQLite
+
+    Executa PRAGMA integrity_check para verificar se o banco está corrompido.
+
+    Args:
+        caminho: Path para o arquivo de backup a validar
+
+    Returns:
+        Tupla (valido: bool, mensagem: str)
+    """
+    try:
+        # Verificar se arquivo existe
+        if not caminho.exists():
+            return False, f"Arquivo não encontrado: {caminho}"
+
+        # Verificar se arquivo tem tamanho > 0
+        if caminho.stat().st_size == 0:
+            return False, "Arquivo de backup está vazio"
+
+        # Tentar abrir e validar integridade do banco
+        conn = sqlite3.connect(str(caminho))
+        cursor = conn.cursor()
+
+        # PRAGMA integrity_check retorna "ok" se banco está íntegro
+        cursor.execute("PRAGMA integrity_check")
+        result = cursor.fetchone()
+
+        conn.close()
+
+        if result and result[0] == "ok":
+            logger.debug(f"Validação de integridade OK: {caminho.name}")
+            return True, "Backup válido"
+        else:
+            mensagem = f"Falha na verificação de integridade: {result[0] if result else 'unknown'}"
+            logger.error(mensagem)
+            return False, mensagem
+
+    except sqlite3.DatabaseError as e:
+        mensagem = f"Banco corrompido ou inválido: {str(e)}"
+        logger.error(f"Erro de integridade em {caminho.name}: {mensagem}")
+        return False, mensagem
+
+    except Exception as e:
+        mensagem = f"Erro ao validar backup: {str(e)}"
+        logger.error(f"Erro ao validar {caminho.name}: {mensagem}")
+        return False, mensagem
+
+
+def _verificar_database_pos_restauracao() -> bool:
+    """
+    Verifica se o banco de dados atual está válido após restauração
+
+    Returns:
+        True se banco está válido, False caso contrário
+    """
+    db_path = Path(DATABASE_PATH)
+    valido, _ = _validar_integridade_backup(db_path)
+    return valido
+
+
 def criar_backup(automatico: bool = False) -> tuple[bool, str]:
     """
     Cria um novo backup do banco de dados
@@ -224,10 +287,11 @@ def listar_backups() -> List[BackupInfo]:
 
 def restaurar_backup(nome_arquivo: str, criar_backup_antes: bool = True) -> tuple[bool, str, Optional[str]]:
     """
-    Restaura um backup do banco de dados
+    Restaura um backup do banco de dados com validação de integridade
 
     IMPORTANTE: Esta operação sobrescreve o banco de dados atual!
-    Por padrão, cria um backup automático antes de restaurar.
+    Por padrão, cria um backup automático antes de restaurar e valida
+    a integridade do backup antes de aplicar.
 
     Args:
         nome_arquivo: Nome do arquivo de backup a restaurar
@@ -236,6 +300,8 @@ def restaurar_backup(nome_arquivo: str, criar_backup_antes: bool = True) -> tupl
     Returns:
         Tupla (sucesso: bool, mensagem: str, nome_backup_automatico: Optional[str])
     """
+    caminho_backup_seguranca = None
+
     try:
         # Validar nome do arquivo
         if not _validar_nome_arquivo(nome_arquivo):
@@ -250,22 +316,50 @@ def restaurar_backup(nome_arquivo: str, criar_backup_antes: bool = True) -> tupl
             logger.error(mensagem)
             return False, mensagem, None
 
-        # Criar backup do estado atual antes de restaurar
+        # VALIDAÇÃO DE INTEGRIDADE: Verificar se backup está íntegro
+        logger.info(f"Validando integridade do backup: {nome_arquivo}")
+        valido, msg_validacao = _validar_integridade_backup(caminho_backup)
+        if not valido:
+            mensagem = f"Backup corrompido ou inválido! {msg_validacao}. Restauração abortada."
+            logger.error(mensagem)
+            return False, mensagem, None
+
+        logger.info(f"Validação de integridade OK: {nome_arquivo}")
+
+        # Criar backup de segurança do estado atual antes de restaurar
         nome_backup_automatico = None
         if criar_backup_antes:
-            # Gerar nome do backup automático
-            nome_backup_automatico = datetime.now().strftime(BACKUP_AUTO_FILENAME_FORMAT)
             sucesso, msg = criar_backup(automatico=True)
             if sucesso:
-                logger.info(f"Backup automático criado antes da restauração: {msg}")
+                # Obter o último backup criado (que acabamos de criar)
+                backups = listar_backups()
+                if backups and backups[0].tipo == "automático":
+                    nome_backup_automatico = backups[0].nome_arquivo
+                    caminho_backup_seguranca = BACKUP_DIR / nome_backup_automatico
+                    logger.info(f"Backup de segurança criado: {nome_backup_automatico}")
             else:
-                logger.warning(f"Falha ao criar backup automático: {msg}")
-                nome_backup_automatico = None
+                logger.warning(f"Falha ao criar backup de segurança: {msg}")
                 # Continua mesmo se falhar o backup automático
 
         # Restaurar backup (copiar sobre o arquivo atual)
         db_path = Path(DATABASE_PATH)
         shutil.copy2(caminho_backup, db_path)
+
+        # VALIDAÇÃO PÓS-RESTAURAÇÃO: Verificar se banco restaurado está válido
+        logger.info("Verificando integridade do banco após restauração...")
+        if not _verificar_database_pos_restauracao():
+            # ROLLBACK: Restaurar o backup de segurança
+            logger.error("Banco corrompido após restauração! Executando rollback...")
+
+            if caminho_backup_seguranca and caminho_backup_seguranca.exists():
+                shutil.copy2(caminho_backup_seguranca, db_path)
+                mensagem = f"Restauração falhou! Banco revertido para estado anterior. Backup '{nome_arquivo}' pode estar corrompido."
+                logger.error(mensagem)
+                return False, mensagem, nome_backup_automatico
+            else:
+                mensagem = "ERRO CRÍTICO: Restauração falhou e não foi possível reverter! Banco pode estar inconsistente."
+                logger.critical(mensagem)
+                return False, mensagem, None
 
         mensagem = f"Backup restaurado com sucesso: {nome_arquivo}"
         logger.info(mensagem)
@@ -275,6 +369,18 @@ def restaurar_backup(nome_arquivo: str, criar_backup_antes: bool = True) -> tupl
     except Exception as e:
         mensagem = f"Erro ao restaurar backup: {str(e)}"
         logger.error(mensagem)
+
+        # Tentar rollback em caso de exceção
+        if caminho_backup_seguranca and caminho_backup_seguranca.exists():
+            try:
+                db_path = Path(DATABASE_PATH)
+                shutil.copy2(caminho_backup_seguranca, db_path)
+                logger.info("Rollback executado com sucesso após exceção")
+                mensagem += " (Banco revertido para estado anterior)"
+            except Exception as rollback_error:
+                logger.critical(f"Falha no rollback: {rollback_error}")
+                mensagem += " (CRÍTICO: Falha no rollback!)"
+
         return False, mensagem, None
 
 

@@ -17,7 +17,7 @@ set modal_title = "Alterar Foto de Perfil"
 set form_action = "/perfil/atualizar-foto"
 set aspect_ratio = 1.0
 set show_upload_section = false # Para usar input externo
-- Depois faça: include 'components/modal_crop_imagem.html'
+- Depois faça: include 'components/modal_corte_imagem.html'
 #}
 
 {% set aspect_ratio = aspect_ratio if aspect_ratio is defined else 1.0 %}
@@ -94,6 +94,6 @@ set show_upload_section = false # Para usar input externo
     window['config_{{ modal_id }}'] = {
         modalId: '{{ modal_id }}',
         aspectRatio: {{ aspect_ratio }},
-    maxFileSizeMB: { { max_file_size_mb } }
+        maxFileSizeMB: {{ max_file_size_mb }}
     };
 </script>

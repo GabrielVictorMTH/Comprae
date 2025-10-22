@@ -1,32 +1,39 @@
-from pydantic import BaseModel, field_validator, model_validator
+"""
+DTOs para autenticação e gerenciamento de acesso.
+
+Contém validações para login, cadastro, recuperação e redefinição de senha.
+"""
+
+from pydantic import BaseModel, Field, field_validator, model_validator
 from dtos.validators import (
     validar_email,
     validar_perfil_usuario,
     validar_senha_forte,
     validar_nome_pessoa,
     validar_string_obrigatoria,
+    validar_senhas_coincidem,
 )
 from util.perfis import Perfil
 
 
 class LoginDTO(BaseModel):
-    """DTO para validação de dados de login"""
+    """DTO para validação de dados de login."""
 
-    email: str
-    senha: str
+    email: str = Field(..., description="E-mail do usuário", examples=["usuario@exemplo.com"])
+    senha: str = Field(..., description="Senha do usuário", min_length=8, max_length=128)
 
     _validar_email = field_validator("email")(validar_email())
     _validar_senha = field_validator("senha")(validar_senha_forte())
 
 
 class CadastroDTO(BaseModel):
-    """DTO para validação de dados de cadastro"""
+    """DTO para validação de dados de cadastro de novo usuário."""
 
-    perfil: str
-    nome: str
-    email: str
-    senha: str
-    confirmar_senha: str
+    perfil: str = Field(..., description="Perfil/Role do usuário", examples=["Cliente", "Vendedor"])
+    nome: str = Field(..., description="Nome completo do usuário", min_length=4, max_length=128)
+    email: str = Field(..., description="E-mail do usuário", examples=["usuario@exemplo.com"])
+    senha: str = Field(..., description="Senha do usuário", min_length=8, max_length=128)
+    confirmar_senha: str = Field(..., description="Confirmação da senha", min_length=8, max_length=128)
 
     _validar_perfil = field_validator("perfil")(validar_perfil_usuario(Perfil))
     _validar_nome = field_validator("nome")(validar_nome_pessoa())
@@ -38,28 +45,23 @@ class CadastroDTO(BaseModel):
         )
     )
 
-    @model_validator(mode="after")
-    def validar_senhas_coincidem(self) -> "CadastroDTO":
-        """Valida se senha e confirmação são iguais"""
-        if self.senha != self.confirmar_senha:
-            raise ValueError("As senhas não coincidem.")
-        return self
+    _validar_senhas_match = model_validator(mode="after")(validar_senhas_coincidem())
 
 
 class EsqueciSenhaDTO(BaseModel):
-    """DTO para validação de recuperação de senha"""
+    """DTO para validação de solicitação de recuperação de senha."""
 
-    email: str
+    email: str = Field(..., description="E-mail cadastrado do usuário", examples=["usuario@exemplo.com"])
 
     _validar_email = field_validator("email")(validar_email())
 
 
 class RedefinirSenhaDTO(BaseModel):
-    """DTO para validação de redefinição de senha"""
+    """DTO para validação de redefinição de senha via token."""
 
-    token: str
-    senha: str
-    confirmar_senha: str
+    token: str = Field(..., description="Token de redefinição recebido por e-mail", min_length=1)
+    senha: str = Field(..., description="Nova senha do usuário", min_length=8, max_length=128)
+    confirmar_senha: str = Field(..., description="Confirmação da nova senha", min_length=8, max_length=128)
 
     _validar_token = field_validator("token")(
         validar_string_obrigatoria("Token", tamanho_minimo=1)
@@ -69,9 +71,4 @@ class RedefinirSenhaDTO(BaseModel):
         validar_string_obrigatoria()
     )
 
-    @model_validator(mode="after")
-    def validar_senhas_coincidem(self) -> "RedefinirSenhaDTO":
-        """Valida se senha e confirmação são iguais"""
-        if self.senha != self.confirmar_senha:
-            raise ValueError("As senhas não coincidem.")
-        return self
+    _validar_senhas_match = model_validator(mode="after")(validar_senhas_coincidem())

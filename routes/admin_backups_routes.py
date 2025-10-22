@@ -14,10 +14,18 @@ from util.flash_messages import informar_sucesso, informar_erro, informar_aviso
 from util.logger_config import logger
 from util.perfis import Perfil
 from util import backup_util
+from util.rate_limiter import RateLimiter, obter_identificador_cliente
 
 
 router = APIRouter(prefix="/admin/backups")
 templates = criar_templates("templates/admin/backups")
+
+# Rate limiter para operações de backup (MUITO restritivo - operações perigosas)
+admin_backups_limiter = RateLimiter(
+    max_tentativas=5,   # Apenas 5 operações
+    janela_minutos=5,   # a cada 5 minutos
+    nome="admin_backups",
+)
 
 
 @router.get("/listar")
@@ -54,6 +62,12 @@ async def post_criar(request: Request, usuario_logado: Optional[dict] = None):
     """
     assert usuario_logado is not None
 
+    # Rate limiting
+    ip = obter_identificador_cliente(request)
+    if not admin_backups_limiter.verificar(ip):
+        informar_erro(request, "Muitas operações de backup. Aguarde alguns minutos e tente novamente.")
+        return RedirectResponse("/admin/backups/listar", status_code=status.HTTP_303_SEE_OTHER)
+
     # Criar backup
     sucesso, mensagem = backup_util.criar_backup()
 
@@ -87,6 +101,12 @@ async def post_restaurar(
         nome_arquivo: Nome do arquivo de backup a restaurar
     """
     assert usuario_logado is not None
+
+    # Rate limiting
+    ip = obter_identificador_cliente(request)
+    if not admin_backups_limiter.verificar(ip):
+        informar_erro(request, "Muitas operações de backup. Aguarde alguns minutos e tente novamente.")
+        return RedirectResponse("/admin/backups/listar", status_code=status.HTTP_303_SEE_OTHER)
 
     # Log da tentativa de restauração
     logger.warning(
@@ -141,6 +161,12 @@ async def post_excluir(
     """
     assert usuario_logado is not None
 
+    # Rate limiting
+    ip = obter_identificador_cliente(request)
+    if not admin_backups_limiter.verificar(ip):
+        informar_erro(request, "Muitas operações de backup. Aguarde alguns minutos e tente novamente.")
+        return RedirectResponse("/admin/backups/listar", status_code=status.HTTP_303_SEE_OTHER)
+
     # Excluir backup
     sucesso, mensagem = backup_util.excluir_backup(nome_arquivo)
 
@@ -160,6 +186,7 @@ async def post_excluir(
 @router.get("/download/{nome_arquivo}")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def get_download(
+    request: Request,
     nome_arquivo: str,
     usuario_logado: Optional[dict] = None
 ):
