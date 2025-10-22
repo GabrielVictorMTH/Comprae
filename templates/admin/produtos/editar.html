@@ -1,0 +1,81 @@
+{% extends "base_privada.html" %}
+{% from "macros/form_fields.html" import field with context %}
+
+{% block titulo %}Editar Produto{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex align-items-center mb-4">
+            <h2 class="mb-0"><i class="bi bi-pencil-square"></i> Editar Produto</h2>
+        </div>
+
+        <div class="card shadow-sm">
+            <form method="POST" action="/admin/produtos/editar/{{ anuncio.id }}">
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-12">
+                            {% include "components/alerta_erro.html" %}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ field(name='nome', label='Nome do Produto', type='text', required=true,
+                                   value=dados.nome if dados else anuncio.nome) }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {% set categorias_dict = {} %}
+                            {% for cat in categorias %}
+                            {% set _ = categorias_dict.update({cat.id|string: cat.nome}) %}
+                            {% endfor %}
+                            {{ field(name='id_categoria', label='Categoria', type='select', required=true,
+                                   options=categorias_dict,
+                                   value=(dados.id_categoria if dados else anuncio.id_categoria)|string) }}
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            {{ field(name='descricao', label='Descrição', type='textarea', required=true, rows=5,
+                                   value=dados.descricao if dados else anuncio.descricao) }}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ field(name='preco', label='Preço (R$)', type='number', required=true, step='0.01',
+                                   value=dados.preco if dados else anuncio.preco) }}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ field(name='peso', label='Peso (kg)', type='number', required=true, step='0.01',
+                                   value=dados.peso if dados else anuncio.peso) }}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ field(name='estoque', label='Estoque', type='number', required=true,
+                                   value=dados.estoque if dados else anuncio.estoque) }}
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="ativo" name="ativo"
+                                       value="true" {{ 'checked' if (dados.ativo if dados else anuncio.ativo) }}>
+                                <label class="form-check-label" for="ativo">
+                                    Produto Ativo (visível na plataforma)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer p-4">
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Salvar Alterações
+                        </button>
+                        <a href="/admin/produtos/listar" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

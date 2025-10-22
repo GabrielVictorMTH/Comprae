@@ -69,3 +69,15 @@ class FiltroAnuncioDTO(BaseModel):
 
     # Validações opcionais
     _validar_id_categoria = field_validator("id_categoria")(validar_id_positivo())
+
+
+class ModerarProdutoDTO(BaseModel):
+    """DTO para reprovar/moderar produto"""
+
+    id: int
+    motivo_reprovacao: str
+
+    _validar_id = field_validator("id")(validar_id_positivo())
+    _validar_motivo = field_validator("motivo_reprovacao")(
+        validar_string_obrigatoria("Motivo", tamanho_minimo=10, tamanho_maximo=500)
+    )

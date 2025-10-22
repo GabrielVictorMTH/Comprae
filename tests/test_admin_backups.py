@@ -300,8 +300,8 @@ class TestFluxoCompletoBackup:
         admin_autenticado.post("/admin/backups/criar")
         backups_1 = backup_util.listar_backups()
 
-        # Aguardar um pouco para garantir timestamp diferente
-        time.sleep(1)
+        # Aguardar para garantir timestamp diferente (2s para evitar race condition)
+        time.sleep(2)
 
         # Criar segundo backup
         admin_autenticado.post("/admin/backups/criar")

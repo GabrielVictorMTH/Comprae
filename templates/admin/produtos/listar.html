@@ -1,0 +1,96 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Gerenciar Produtos{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-box-seam"></i> Gerenciar Produtos</h2>
+            <a href="/admin/produtos/moderar" class="btn btn-warning">
+                <i class="bi bi-shield-exclamation"></i> Produtos Pendentes
+            </a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {% if anuncios %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Nome</th>
+                                <th scope="col">Categoria</th>
+                                <th scope="col">Vendedor</th>
+                                <th scope="col">Preço</th>
+                                <th scope="col">Estoque</th>
+                                <th scope="col">Status</th>
+                                <th scope="col" class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for anuncio in anuncios %}
+                            <tr>
+                                <td>{{ anuncio.id }}</td>
+                                <td>{{ anuncio.nome }}</td>
+                                <td>{{ anuncio.categoria_nome if anuncio.categoria_nome else '-' }}</td>
+                                <td>{{ anuncio.vendedor_nome if anuncio.vendedor_nome else '-' }}</td>
+                                <td>R$ {{ "%.2f"|format(anuncio.preco) }}</td>
+                                <td>{{ anuncio.estoque }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if anuncio.ativo else 'danger' }}">
+                                        {{ 'Ativo' if anuncio.ativo else 'Inativo' }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="/admin/produtos/editar/{{ anuncio.id }}"
+                                            class="btn btn-outline-primary"
+                                            title="Editar"
+                                            aria-label="Editar produto {{ anuncio.nome }}">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger"
+                                            title="Excluir"
+                                            aria-label="Excluir produto {{ anuncio.nome }}"
+                                            onclick="excluirProduto({{ anuncio.id }}, '{{ anuncio.nome|replace("'", "\\'") }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center mb-0">
+                    <i class="bi bi-info-circle"></i> Nenhum produto cadastrado.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function excluirProduto(produtoId, produtoNome) {
+        const detalhes = `
+        <div class="card bg-light">
+            <div class="card-body">
+                <p class="mb-0"><strong>Produto:</strong> ${produtoNome}</p>
+            </div>
+        </div>
+    `;
+
+        abrirModalConfirmacao({
+            url: `/admin/produtos/excluir/${produtoId}`,
+            mensagem: 'Tem certeza que deseja excluir este produto?',
+            detalhes: detalhes
+        });
+    }
+</script>
+{% endblock %}
