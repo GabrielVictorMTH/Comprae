@@ -29,7 +29,8 @@ from repo import (
     indices_repo,        # Do upstream
     categoria_repo,      # NOVO
     endereco_repo,       # NOVO
-    anuncio_repo         # NOVO
+    anuncio_repo,        # NOVO
+    pedido_repo          # NOVO
 )
 
 # Rotas
@@ -87,6 +88,18 @@ try:
 
     tarefa_repo.criar_tabela()
     logger.info("Tabela 'tarefa' criada/verificada")
+
+    categoria_repo.criar_tabela()
+    logger.info("Tabela 'categoria' criada/verificada")
+
+    endereco_repo.criar_tabela()
+    logger.info("Tabela 'endereco' criada/verificada")
+
+    anuncio_repo.criar_tabela()
+    logger.info("Tabela 'anuncio' criada/verificada")
+
+    pedido_repo.criar_tabela()
+    logger.info("Tabela 'pedido' criada/verificada")
 
     # Criar índices para otimização de performance
     indices_repo.criar_indices()

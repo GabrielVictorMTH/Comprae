@@ -10,13 +10,10 @@ from util.db_util import get_connection
 
 
 def criar_tabela() -> bool:
-    """Cria a tabela de pedidos e índices"""
+    """Cria a tabela de pedidos"""
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(CRIAR_TABELA)
-        cursor.execute(CRIAR_INDICE_COMPRADOR)
-        cursor.execute(CRIAR_INDICE_ANUNCIO)
-        cursor.execute(CRIAR_INDICE_STATUS)
         return True
 
 
