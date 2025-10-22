@@ -266,3 +266,32 @@ async def post_excluir(request: Request, id: int, usuario_logado: Optional[dict]
         informar_erro(request, "Não é possível excluir este produto pois existem pedidos vinculados a ele.")
 
     return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.post("/excluir/{id}")
+@requer_autenticacao([Perfil.ADMIN.value])
+async def post_excluir(request: Request, id: int, usuario_logado: Optional[dict] = None):
+    """Exclui um produto"""
+    assert usuario_logado is not None
+
+    # Rate limiting
+    ip = obter_identificador_cliente(request)
+    if not admin_produtos_limiter.verificar(ip):
+        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
+        return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
+
+    anuncio = anuncio_repo.obter_por_id(id)
+
+    if not anuncio:
+        informar_erro(request, "Produto não encontrado")
+        return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
+
+    try:
+        anuncio_repo.excluir(id)
+        logger.info(f"Produto {id} ({anuncio.nome}) excluído por admin {usuario_logado['id']}")
+        informar_sucesso(request, "Produto excluído com sucesso!")
+    except Exception as e:
+        # Captura erro de FK constraint (produto com pedidos vinculados)
+        logger.error(f"Erro ao excluir produto {id}: {str(e)}")
+        informar_erro(request, "Não é possível excluir este produto pois existem pedidos vinculados a ele.")
+
+    return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
