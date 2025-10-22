@@ -127,13 +127,15 @@ class PasswordValidator {
 
     /**
      * Atualiza indicadores visuais de requisitos de senha
+     * SEGURANÇA: Usa createElement em vez de innerHTML para prevenir XSS
      */
     updateRequirementIndicators(requirements) {
         const reqMap = {
             length: this.config.requirements.length,
             uppercase: this.config.requirements.uppercase,
             lowercase: this.config.requirements.lowercase,
-            number: this.config.requirements.number
+            number: this.config.requirements.number,
+            special: this.config.requirements.special
         };
 
         Object.keys(reqMap).forEach(key => {
@@ -144,23 +146,36 @@ class PasswordValidator {
             if (!element) return;
 
             const isMet = requirements[key];
+
+            // Extrair texto original (sem ícones)
             const originalText = element.textContent
                 .replace(/✓ /g, '')
                 .replace(/<i.*?<\/i>/g, '')
                 .trim();
 
+            // Limpar conteúdo atual
+            element.innerHTML = '';
+
             if (isMet) {
+                // Criar ícone de sucesso usando createElement
+                const icon = document.createElement('i');
+                icon.className = 'bi bi-check-circle-fill';
+                element.appendChild(icon);
+
+                // Adicionar espaço e texto
+                element.appendChild(document.createTextNode(' ' + originalText));
                 element.classList.add('text-success');
-                element.innerHTML = `<i class="bi bi-check-circle-fill"></i> ${originalText}`;
             } else {
+                // Apenas texto, sem ícone
+                element.textContent = originalText;
                 element.classList.remove('text-success');
-                element.innerHTML = originalText;
             }
         });
     }
 
     /**
      * Verifica se as senhas coincidem
+     * SEGURANÇA: Usa createElement em vez de innerHTML para prevenir XSS
      */
     checkPasswordMatch() {
         if (!this.confirmPasswordField || !this.matchMessage) return true;
@@ -169,15 +184,37 @@ class PasswordValidator {
         const confirmPassword = this.confirmPasswordField.value;
 
         if (confirmPassword.length === 0) {
-            this.matchMessage.innerHTML = '';
+            this.matchMessage.textContent = '';
             return true;
         }
 
+        // Limpar conteúdo anterior
+        this.matchMessage.innerHTML = '';
+
+        // Criar span wrapper
+        const span = document.createElement('span');
+
         if (password === confirmPassword) {
-            this.matchMessage.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> As senhas coincidem</span>';
+            // Senhas coincidem - feedback positivo
+            span.className = 'text-success';
+
+            const icon = document.createElement('i');
+            icon.className = 'bi bi-check-circle';
+            span.appendChild(icon);
+
+            span.appendChild(document.createTextNode(' As senhas coincidem'));
+            this.matchMessage.appendChild(span);
             return true;
         } else {
-            this.matchMessage.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> As senhas não coincidem</span>';
+            // Senhas não coincidem - feedback negativo
+            span.className = 'text-danger';
+
+            const icon = document.createElement('i');
+            icon.className = 'bi bi-x-circle';
+            span.appendChild(icon);
+
+            span.appendChild(document.createTextNode(' As senhas não coincidem'));
+            this.matchMessage.appendChild(span);
             return false;
         }
     }
@@ -257,6 +294,25 @@ function togglePassword(fieldId) {
     }
 }
 
-// Exportar para uso global
+/**
+ * Inicializar namespace global do app
+ */
+window.App = window.App || {};
+window.App.Password = window.App.Password || {};
+
+/**
+ * API pública do módulo Password
+ */
+window.App.Password.Validator = PasswordValidator;
+window.App.Password.toggle = togglePassword;
+
+/**
+ * DEPRECATED: Manter retrocompatibilidade
+ * @deprecated Use window.App.Password.Validator em vez disso
+ */
 window.PasswordValidator = PasswordValidator;
+
+/**
+ * @deprecated Use window.App.Password.toggle() em vez disso
+ */
 window.togglePassword = togglePassword;

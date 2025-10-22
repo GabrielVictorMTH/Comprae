@@ -19,12 +19,12 @@
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th>ID</th>
-                                <th>Nome</th>
-                                <th>Email</th>
-                                <th>Perfil</th>
-                                <th>Data Cadastro</th>
-                                <th class="text-center">Ações</th>
+                                <th scope="col">ID</th>
+                                <th scope="col">Nome</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Perfil</th>
+                                <th scope="col">Data Cadastro</th>
+                                <th scope="col" class="text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -43,10 +43,14 @@
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="/admin/usuarios/editar/{{ usuario.id }}"
-                                            class="btn btn-outline-primary" title="Editar">
+                                            class="btn btn-outline-primary"
+                                            title="Editar"
+                                            aria-label="Editar usuário {{ usuario.nome }}">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <button type="button" class="btn btn-outline-danger" title="Excluir"
+                                        <button type="button" class="btn btn-outline-danger"
+                                            title="Excluir"
+                                            aria-label="Excluir usuário {{ usuario.nome }}"
                                             onclick="excluirUsuario({{ usuario.id }}, '{{ usuario.nome|replace("'", "\\'") }}', '{{ usuario.email }}', '{{ usuario.perfil }}')">
                                             <i class="bi bi-trash"></i>
                                         </button>
@@ -83,15 +87,15 @@
             <div class="card-body">
                 <table class="table table-sm table-borderless mb-0">
                     <tr>
-                        <th width="30%">Nome:</th>
+                        <th scope="row" width="30%">Nome:</th>
                         <td>${usuarioNome}</td>
                     </tr>
                     <tr>
-                        <th>Email:</th>
+                        <th scope="row">Email:</th>
                         <td>${usuarioEmail}</td>
                     </tr>
                     <tr>
-                        <th>Perfil:</th>
+                        <th scope="row">Perfil:</th>
                         <td>${perfilBadge}</td>
                     </tr>
                 </table>

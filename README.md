@@ -89,7 +89,7 @@
 
 7. **Explore os exemplos**
    ```
-   http://localhost:8400/examples
+   http://localhost:8400/exemplos
    ```
 
 ## 👥 Usuários Padrão
@@ -128,15 +128,15 @@ abrirModalConfirmacao({
 });
 ```
 
-**Modal de Crop de Imagem** (`components/modal_crop_imagem.html`)
+**Modal de Crop de Imagem** (`components/modal_corte_imagem.html`)
 - Integrado com Cropper.js
 - Upload via drag & drop
 - Redimensionamento automático
 
-**Galeria de Fotos** (`components/photo_gallery.html`)
+**Galeria de Fotos** (`components/galeria_fotos.html`)
 ```jinja
-{% from 'components/photo_gallery.html' import photo_gallery %}
-{{ photo_gallery(images, gallery_id='gallery1') }}
+{% from 'components/galeria_fotos.html' import galeria_fotos %}
+{{ galeria_fotos(images, gallery_id='gallery1') }}
 ```
 
 #### Macros de Formulário (use `{% from ... import ... %}`)
@@ -319,7 +319,7 @@ salvar_foto_cropada_usuario(usuario_id, base64_data)
 
 ### 🎨 28+ Temas Bootswatch Prontos
 
-Acesse `/examples/bootswatch` para visualizar e escolher entre 28+ temas:
+Acesse `/exemplos/bootswatch` para visualizar e escolher entre 28+ temas:
 
 **Temas Claros**: Cerulean, Cosmo, Flatly, Journal, Litera, Lumen, Minty, Pulse, Sandstone, Simplex, Sketchy, United, Yeti, Zephyr, Brite, Morph, Quartz, Spacelab
 
@@ -332,7 +332,7 @@ Para trocar o tema, edite a linha do CSS no `base_publica.html` ou `base_privada
 <link rel="stylesheet" href="/static/css/bootswatch/flatly.bootstrap.min.css">
 ```
 
-### 📋 Páginas de Exemplo (`/examples`)
+### 📋 Páginas de Exemplo (`/exemplos`)
 
 9 exemplos completos e funcionais para você usar como referência:
 
@@ -966,20 +966,20 @@ DefaultWebApp/
 │   │   └── configuracoes/
 │   ├── components/         # ⭐ Componentes reutilizáveis
 │   │   ├── modal_confirmacao.html
-│   │   ├── modal_crop_imagem.html
-│   │   └── photo_gallery.html
+│   │   ├── modal_corte_imagem.html
+│   │   └── galeria_fotos.html
 │   ├── macros/             # ⭐ Macros de formulário
 │   │   └── form_fields.html
-│   ├── examples/           # ⭐ 9 páginas de exemplo
+│   ├── exemplos/           # ⭐ 9 páginas de exemplo
 │   │   ├── index.html
-│   │   ├── form_fields_demo.html
-│   │   ├── cards_grid.html
-│   │   ├── table_list.html
+│   │   ├── demo_campos_formulario.html
+│   │   ├── grade_cartoes.html
+│   │   ├── lista_tabela.html
 │   │   ├── bootswatch.html
-│   │   ├── product_detail.html
-│   │   ├── service_detail.html
-│   │   ├── profile_detail.html
-│   │   └── property_detail.html
+│   │   ├── detalhes_produto.html
+│   │   ├── detalhes_servico.html
+│   │   ├── detalhes_perfil.html
+│   │   └── detalhes_imovel.html
 │   └── errors/             # Páginas de erro
 │       ├── 404.html
 │       └── 500.html
@@ -1104,7 +1104,7 @@ pytest --cov=. --cov-report=html
 - **[docs/CRIAR_CRUD.md](docs/CRIAR_CRUD.md)** - Tutorial detalhado para criar CRUDs
 - **[docs/PERFIS.md](docs/PERFIS.md)** - Como adicionar novos perfis de usuário
 - **[docs/QUICK_START.md](docs/QUICK_START.md)** - Guia de início rápido
-- **[/examples](http://localhost:8400/examples)** - 9 exemplos práticos funcionais
+- **[/exemplos](http://localhost:8400/exemplos)** - 9 exemplos práticos funcionais
 
 ## 🔒 Segurança
 
@@ -1133,10 +1133,10 @@ pytest --cov=. --cov-report=html
 
 Após instalar e explorar o projeto:
 
-1. **Explore os exemplos**: Acesse `/examples` para ver todos os componentes em ação
+1. **Explore os exemplos**: Acesse `/exemplos` para ver todos os componentes em ação
 2. **Leia o CLAUDE.md**: Documentação técnica completa do projeto
 3. **Crie seu primeiro CRUD**: Siga o tutorial em `docs/CRIAR_CRUD.md`
-4. **Customize o tema**: Escolha um tema em `/examples/bootswatch`
+4. **Customize o tema**: Escolha um tema em `/exemplos/bootswatch`
 5. **Adicione suas funcionalidades**: Use os componentes reutilizáveis
 6. **Configure o email**: Obtenha API key gratuita em [resend.com](https://resend.com)
 7. **Execute os testes**: Garanta que tudo está funcionando
@@ -1159,7 +1159,7 @@ Este projeto é um boilerplate educacional livre para uso.
 
 Para dúvidas e suporte:
 - Consulte a documentação em `/docs` e `CLAUDE.md`
-- Explore os exemplos em `/examples`
+- Explore os exemplos em `/exemplos`
 - Verifique os exemplos no código
 - Abra uma issue no GitHub
 

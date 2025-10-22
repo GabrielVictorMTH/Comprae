@@ -1,5 +1,6 @@
-from repo import usuario_repo
+from repo import usuario_repo, categoria_repo
 from model.usuario_model import Usuario
+from model.categoria_model import Categoria
 from util.security import criar_hash_senha
 from util.logger_config import logger
 from util.perfis import Perfil
@@ -62,6 +63,57 @@ def carregar_usuarios_seed():
     # Resumo
     logger.info(f"Resumo do seed de usuários: {usuarios_criados} criados, {usuarios_com_erro} com erro")
 
+
+def carregar_categorias_seed():
+    """
+    Carrega categorias padrão se não houver nenhuma.
+
+    Só insere categorias se não houver nenhuma categoria cadastrada no banco.
+    """
+    # Verificar se já existem categorias cadastradas
+    categorias = categoria_repo.obter_todos()
+    if len(categorias) > 0:
+        logger.info(f"Já existem {len(categorias)} categorias cadastradas. Seed não será executado.")
+        return
+
+    categorias_criadas = 0
+    categorias_com_erro = 0
+
+    logger.info("Nenhuma categoria encontrada. Iniciando seed de categorias padrão...")
+
+    # Definir categorias padrão para marketplace
+    categorias_padrao = [
+        ("Eletrônicos", "Produtos eletrônicos, computadores, celulares e tecnologia"),
+        ("Livros", "Livros, revistas, publicações e materiais educativos"),
+        ("Roupas e Acessórios", "Vestuário, calçados e acessórios de moda"),
+        ("Casa e Decoração", "Móveis, decoração e utensílios domésticos"),
+        ("Esportes", "Artigos esportivos, equipamentos e vestuário esportivo"),
+        ("Alimentos e Bebidas", "Alimentos, bebidas e produtos gastronômicos"),
+        ("Saúde e Beleza", "Produtos de higiene, cosméticos e cuidados pessoais"),
+        ("Brinquedos e Jogos", "Brinquedos, jogos e artigos infantis"),
+        ("Automotivo", "Peças, acessórios e produtos automotivos"),
+        ("Outros", "Produtos diversos e não classificados"),
+    ]
+
+    for nome, descricao in categorias_padrao:
+        try:
+            categoria = Categoria(id=0, nome=nome, descricao=descricao)
+            categoria_id = categoria_repo.inserir(categoria)
+            if categoria_id:
+                logger.info(f"✓ Categoria '{nome}' criada com sucesso (ID: {categoria_id})")
+                categorias_criadas += 1
+            else:
+                logger.error(f"✗ Falha ao inserir categoria '{nome}' no banco")
+                categorias_com_erro += 1
+
+        except Exception as e:
+            logger.error(f"✗ Erro ao criar categoria '{nome}': {e}")
+            categorias_com_erro += 1
+
+    # Resumo
+    logger.info(f"Resumo do seed de categorias: {categorias_criadas} criadas, {categorias_com_erro} com erro")
+
+
 def inicializar_dados():
     """Inicializa todos os dados seed"""
     logger.info("=" * 50)
@@ -70,6 +122,7 @@ def inicializar_dados():
 
     try:
         carregar_usuarios_seed()
+        carregar_categorias_seed()
         logger.info("=" * 50)
         logger.info("Dados seed carregados!")
         logger.info("=" * 50)

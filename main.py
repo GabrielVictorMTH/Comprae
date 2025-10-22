@@ -22,16 +22,16 @@ from util.exception_handlers import (
 from util.exceptions import FormValidationError
 
 # Repositórios
-from repo import usuario_repo, configuracao_repo, tarefa_repo
 from repo import (
     usuario_repo,
     configuracao_repo,
     tarefa_repo,
+    indices_repo,        # Do upstream
     categoria_repo,      # NOVO
     endereco_repo,       # NOVO
     anuncio_repo,        # NOVO
-    mensagem_repo,       # NOVO
-    pedido_repo          # NOVO
+    pedido_repo,         # NOVO
+    mensagem_repo        # NOVO
 )
 
 # Rotas
@@ -40,24 +40,12 @@ from routes.tarefas_routes import router as tarefas_router
 from routes.admin_usuarios_routes import router as admin_usuarios_router
 from routes.admin_configuracoes_routes import router as admin_config_router
 from routes.admin_backups_routes import router as admin_backups_router
+from routes.admin_categorias_routes import router as admin_categorias_router
+from routes.admin_produtos_routes import router as admin_produtos_router
 from routes.perfil_routes import router as perfil_router
 from routes.usuario_routes import router as usuario_router
 from routes.public_routes import router as public_router
 from routes.examples_routes import router as examples_router
-
-from routes.admin_categorias_routes import router as admin_categorias_router
-from routes.enderecos_routes import router as enderecos_router
-from routes.anuncios_routes import router as anuncios_router
-from routes.mensagens_routes import router as mensagens_router
-from routes.pedidos_routes import router as pedidos_router
-
-# ... mais abaixo ...
-
-app.include_router(admin_categorias_router, tags=["Admin - Categorias"])
-app.include_router(enderecos_router, tags=["Endereços"])
-app.include_router(anuncios_router, tags=["Anúncios"])
-app.include_router(mensagens_router, tags=["Mensagens"])
-app.include_router(pedidos_router, tags=["Pedidos"])
 
 # Seeds
 from util.seed_data import inicializar_dados
@@ -67,6 +55,11 @@ app = FastAPI(title=APP_NAME, version=VERSION)
 
 # Configurar SessionMiddleware
 app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY)
+
+# Configurar CSRF Protection Middleware
+from util.csrf_protection import CSRFProtectionMiddleware
+app.add_middleware(CSRFProtectionMiddleware)
+logger.info("CSRF Protection habilitado")
 
 # Registrar Exception Handlers
 app.add_exception_handler(StarletteHTTPException, http_exception_handler)  # type: ignore[arg-type]
@@ -109,6 +102,24 @@ try:
     tarefa_repo.criar_tabela()
     logger.info("Tabela 'tarefa' criada/verificada")
 
+    categoria_repo.criar_tabela()
+    logger.info("Tabela 'categoria' criada/verificada")
+
+    endereco_repo.criar_tabela()
+    logger.info("Tabela 'endereco' criada/verificada")
+
+    anuncio_repo.criar_tabela()
+    logger.info("Tabela 'anuncio' criada/verificada")
+
+    pedido_repo.criar_tabela()
+    logger.info("Tabela 'pedido' criada/verificada")
+
+    mensagem_repo.criar_tabela()
+    logger.info("Tabela 'mensagem' criada/verificada")
+
+    # Criar índices para otimização de performance
+    indices_repo.criar_indices()
+
 except Exception as e:
     logger.error(f"Erro ao criar tabelas: {e}")
     raise
@@ -139,16 +150,21 @@ logger.info("Router admin de configurações incluído")
 app.include_router(admin_backups_router, tags=["Admin - Backups"])
 logger.info("Router admin de backups incluído")
 
+app.include_router(admin_categorias_router, tags=["Admin - Categorias"])
+logger.info("Router admin de categorias incluído")
+
+app.include_router(admin_produtos_router, tags=["Admin - Produtos"])
+logger.info("Router admin de produtos incluído")
+
 app.include_router(usuario_router, tags=["Usuário"])
 logger.info("Router de usuário incluído")
+
+app.include_router(examples_router, tags=["Exemplos"])
+logger.info("Router de exemplos incluído")
 
 # Rotas públicas (deve ser por último para não sobrescrever outras rotas)
 app.include_router(public_router, tags=["Público"])
 logger.info("Router público incluído")
-
-# Rotas públicas (deve ser por último para não sobrescrever outras rotas)
-app.include_router(examples_router, tags=["Exemplos"])
-logger.info("Router de exemplos incluído")
 
 @app.get("/health")
 async def health_check():

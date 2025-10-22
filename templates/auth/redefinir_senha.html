@@ -22,7 +22,7 @@
                             </div>
 
                             <div class="col-12 mb-3">
-                                {% include "components/alert_erro_geral.html" %}
+                                {% include "components/alerta_erro.html" %}
                             </div>
 
                             <div class="col-12 mb-3">
@@ -44,7 +44,7 @@
                             <!-- Indicador de força da senha -->
                             <div class="mb-0">
                                 {% set show_special = true %}
-                                {% include 'components/password_strength_indicator.html' %}
+                                {% include 'components/indicador_senha.html' %}
                             </div>
                         </div>
                     </div>
@@ -83,7 +83,8 @@
             length: 'req-length',
             uppercase: 'req-uppercase',
             lowercase: 'req-lowercase',
-            number: 'req-number'
+            number: 'req-number',
+            special: 'req-special'
         },
         minLength: 8,
         showStrength: true,

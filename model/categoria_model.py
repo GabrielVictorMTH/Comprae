@@ -3,6 +3,6 @@ from dataclasses import dataclass
 
 @dataclass
 class Categoria:
-    id_categoria: int
+    id: int
     nome: str
     descricao: str

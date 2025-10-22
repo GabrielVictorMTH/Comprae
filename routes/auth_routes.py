@@ -18,6 +18,7 @@ from util.template_util import criar_templates
 from util.logger_config import logger
 from util.exceptions import FormValidationError
 from util.perfis import Perfil
+from util.validation_helpers import verificar_email_disponivel
 from util.config import (
     RATE_LIMIT_LOGIN_MAX,
     RATE_LIMIT_LOGIN_MINUTOS,
@@ -30,48 +31,23 @@ from util.config import (
 router = APIRouter()
 templates = criar_templates("templates/auth")
 
-# Rate limiter simples - em produção usar biblioteca especializada
-from collections import defaultdict
-from datetime import datetime, timedelta
+# Rate limiters globais
+from util.rate_limiter import RateLimiter, obter_identificador_cliente
 
-
-class SimpleRateLimiter:
-    def __init__(self, max_tentativas: int = 5, janela_minutos: int = 5):
-        self.max_tentativas = max_tentativas
-        self.janela = timedelta(minutes=janela_minutos)
-        self.tentativas: defaultdict[str, list[datetime]] = defaultdict(list)
-
-    def verificar(self, identificador: str) -> bool:
-        """Retorna True se dentro do limite, False se excedido"""
-        agora = datetime.now()
-
-        # Limpar tentativas antigas
-        self.tentativas[identificador] = [
-            t for t in self.tentativas[identificador] if agora - t < self.janela
-        ]
-
-        # Verificar limite
-        if len(self.tentativas[identificador]) >= self.max_tentativas:
-            return False
-
-        # Registrar tentativa
-        self.tentativas[identificador].append(agora)
-        return True
-
-    def limpar(self):
-        """Limpa todas as tentativas registradas (útil para testes)"""
-        self.tentativas.clear()
-
-
-login_limiter = SimpleRateLimiter(
-    max_tentativas=RATE_LIMIT_LOGIN_MAX, janela_minutos=RATE_LIMIT_LOGIN_MINUTOS
+login_limiter = RateLimiter(
+    max_tentativas=RATE_LIMIT_LOGIN_MAX,
+    janela_minutos=RATE_LIMIT_LOGIN_MINUTOS,
+    nome="login",
 )
-cadastro_limiter = SimpleRateLimiter(
-    max_tentativas=RATE_LIMIT_CADASTRO_MAX, janela_minutos=RATE_LIMIT_CADASTRO_MINUTOS
+cadastro_limiter = RateLimiter(
+    max_tentativas=RATE_LIMIT_CADASTRO_MAX,
+    janela_minutos=RATE_LIMIT_CADASTRO_MINUTOS,
+    nome="cadastro",
 )
-esqueci_senha_limiter = SimpleRateLimiter(
+esqueci_senha_limiter = RateLimiter(
     max_tentativas=RATE_LIMIT_ESQUECI_SENHA_MAX,
     janela_minutos=RATE_LIMIT_ESQUECI_SENHA_MINUTOS,
+    nome="esqueci_senha",
 )
 
 
@@ -90,7 +66,7 @@ async def post_login(request: Request, email: str = Form(), senha: str = Form())
     """Processa login do usuário"""
     try:
         # Rate limiting por IP
-        ip = request.client.host if request.client else "unknown"
+        ip = obter_identificador_cliente(request)
         if not login_limiter.verificar(ip):
             informar_erro(
                 request, "Muitas tentativas de login. Aguarde alguns minutos."
@@ -176,7 +152,7 @@ async def post_cadastrar(
     """Processa cadastro de novo usuário"""
     try:
         # Rate limiting por IP
-        ip = request.client.host if request.client else "unknown"
+        ip = obter_identificador_cliente(request)
         if not cadastro_limiter.verificar(ip):
             informar_erro(
                 request,
@@ -198,8 +174,9 @@ async def post_cadastrar(
         )
 
         # Verificar se e-mail já existe
-        if usuario_repo.obter_por_email(dto.email):
-            informar_erro(request, "Este e-mail já está cadastrado")
+        disponivel, mensagem_erro = verificar_email_disponivel(dto.email)
+        if not disponivel:
+            informar_erro(request, mensagem_erro)
             return templates.TemplateResponse(
                 "auth/cadastro.html", {"request": request, "dados": dados_formulario}
             )
@@ -252,7 +229,7 @@ async def post_esqueci_senha(request: Request, email: str = Form()):
     """Processa solicitação de recuperação de senha"""
     try:
         # Rate limiting por IP
-        ip = request.client.host if request.client else "unknown"
+        ip = obter_identificador_cliente(request)
         if not esqueci_senha_limiter.verificar(ip):
             informar_erro(
                 request,

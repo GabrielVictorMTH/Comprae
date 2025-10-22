@@ -1,0 +1,117 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Moderar Produtos{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-shield-exclamation"></i> Moderar Produtos</h2>
+            <a href="/admin/produtos/listar" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar para Lista Completa
+            </a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {% if anuncios %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">ID</th>
+                                <th scope="col">Nome</th>
+                                <th scope="col">Categoria</th>
+                                <th scope="col">Vendedor</th>
+                                <th scope="col">Preço</th>
+                                <th scope="col" class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for anuncio in anuncios %}
+                            <tr>
+                                <td>{{ anuncio.id }}</td>
+                                <td>{{ anuncio.nome }}</td>
+                                <td>{{ anuncio.categoria_nome if anuncio.categoria_nome else '-' }}</td>
+                                <td>{{ anuncio.vendedor_nome if anuncio.vendedor_nome else '-' }}</td>
+                                <td>R$ {{ "%.2f"|format(anuncio.preco) }}</td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <button type="button" class="btn btn-outline-success"
+                                            title="Aprovar"
+                                            onclick="aprovarProduto({{ anuncio.id }}, '{{ anuncio.nome|replace("'", "\\'") }}')">
+                                            <i class="bi bi-check-circle"></i> Aprovar
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger"
+                                            title="Reprovar"
+                                            onclick="reprovarProduto({{ anuncio.id }}, '{{ anuncio.nome|replace("'", "\\'") }}')">
+                                            <i class="bi bi-x-circle"></i> Reprovar
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success text-center mb-0">
+                    <i class="bi bi-check-circle"></i> Nenhum produto pendente de moderação!
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para reprovar produto -->
+<div class="modal fade" id="modalReprovar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="formReprovar">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reprovar Produto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Produto: <strong id="produtoNomeReprovar"></strong></p>
+                    <div class="mb-3">
+                        <label for="motivo_reprovacao" class="form-label">Motivo da Reprovação *</label>
+                        <textarea class="form-control" id="motivo_reprovacao" name="motivo_reprovacao"
+                                  rows="4" required minlength="10" maxlength="500"
+                                  placeholder="Descreva o motivo da reprovação..."></textarea>
+                        <div class="form-text">Mínimo 10 caracteres, máximo 500.</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">Reprovar Produto</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function aprovarProduto(produtoId, produtoNome) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/produtos/aprovar/${produtoId}`;
+
+        if (confirm(`Deseja aprovar o produto "${produtoNome}"?`)) {
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    function reprovarProduto(produtoId, produtoNome) {
+        document.getElementById('produtoNomeReprovar').textContent = produtoNome;
+        document.getElementById('formReprovar').action = `/admin/produtos/reprovar/${produtoId}`;
+
+        const modal = new bootstrap.Modal(document.getElementById('modalReprovar'));
+        modal.show();
+    }
+</script>
+{% endblock %}

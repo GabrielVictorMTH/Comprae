@@ -94,7 +94,18 @@ function mostrarToast(mensagem, tipo = 'info') {
 }
 
 /**
- * Função global para exibir toasts programaticamente
- * Uso: window.exibirToast('Mensagem', 'success')
+ * Inicializar namespace global do app
+ */
+window.App = window.App || {};
+window.App.Toasts = window.App.Toasts || {};
+
+/**
+ * API pública do módulo Toasts
+ */
+window.App.Toasts.show = mostrarToast;
+
+/**
+ * DEPRECATED: Manter retrocompatibilidade
+ * @deprecated Use window.App.Toasts.show() em vez disso
  */
 window.exibirToast = mostrarToast;

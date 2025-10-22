@@ -1,0 +1,30 @@
+<!-- Dropdown do Usuário - Componente Reutilizável -->
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+        <img src="/static/img/usuarios/{{ '%06d' % request.session.get('usuario_logado')['id'] }}.jpg"
+             alt="Foto do usuário"
+             class="rounded-circle me-2 object-fit-cover"
+             width="32"
+             height="32"
+             onerror="this.src='/static/img/user.jpg'">
+        {{ request.session.get('usuario_logado')['nome'] }}
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end">
+        <li><a class="dropdown-item" href="/perfil/visualizar">
+            <i class="bi bi-person"></i> Meu Perfil
+        </a></li>
+
+        <!-- Opções Admin no dropdown -->
+        {% if request.session.get('usuario_logado')['perfil'] == 'Administrador' %}
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="/usuario">
+            <i class="bi bi-speedometer2"></i> Dashboard
+        </a></li>
+        {% endif %}
+
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="/logout">
+            <i class="bi bi-box-arrow-right"></i> Sair
+        </a></li>
+    </ul>
+</li>

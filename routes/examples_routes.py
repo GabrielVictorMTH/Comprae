@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from util.template_util import criar_templates
 
-router = APIRouter(prefix="/examples")
+router = APIRouter(prefix="/exemplos")
 templates_home = criar_templates("templates")
 
 
@@ -11,29 +11,29 @@ async def home(request: Request):
     Página inicial de exemplos
     """
     return templates_home.TemplateResponse(
-        "examples/index.html",
+        "exemplos/index.html",
         {"request": request}
     )
 
 
-@router.get("/form-fields")
+@router.get("/campos-formulario")
 async def form_fields_demo(request: Request):
     """
     Página de demonstração da macro de campos de formulário
     """
     return templates_home.TemplateResponse(
-        "examples/form_fields_demo.html",
+        "exemplos/demo_campos_formulario.html",
         {"request": request}
     )
 
 
-@router.get("/cards-grid")
+@router.get("/grade-cartoes")
 async def cards_grid_demo(request: Request):
     """
     Página de demonstração de grid de cards responsivo
     """
     return templates_home.TemplateResponse(
-        "examples/cards_grid.html",
+        "exemplos/grade_cartoes.html",
         {"request": request}
     )
 
@@ -44,56 +44,56 @@ async def bootswatch_demo(request: Request):
     Página de demonstração de temas Bootswatch
     """
     return templates_home.TemplateResponse(
-        "examples/bootswatch.html",
+        "exemplos/bootswatch.html",
         {"request": request}
     )
 
 
-@router.get("/product-detail")
+@router.get("/detalhes-produto")
 async def product_detail_demo(request: Request):
     """
     Página de demonstração de detalhes de produto e-commerce
     """
     return templates_home.TemplateResponse(
-        "examples/product_detail.html",
+        "exemplos/detalhes_produto.html",
         {"request": request}
     )
 
 
-@router.get("/service-detail")
+@router.get("/detalhes-servico")
 async def service_detail_demo(request: Request):
     """
     Página de demonstração de detalhes de serviço profissional
     """
     return templates_home.TemplateResponse(
-        "examples/service_detail.html",
+        "exemplos/detalhes_servico.html",
         {"request": request}
     )
 
 
-@router.get("/profile-detail")
+@router.get("/detalhes-perfil")
 async def profile_detail_demo(request: Request):
     """
     Página de demonstração de perfil de pessoa
     """
     return templates_home.TemplateResponse(
-        "examples/profile_detail.html",
+        "exemplos/detalhes_perfil.html",
         {"request": request}
     )
 
 
-@router.get("/property-detail")
+@router.get("/detalhes-imovel")
 async def property_detail_demo(request: Request):
     """
     Página de demonstração de detalhes de imóvel
     """
     return templates_home.TemplateResponse(
-        "examples/property_detail.html",
+        "exemplos/detalhes_imovel.html",
         {"request": request}
     )
 
 
-@router.get("/table-list")
+@router.get("/lista-tabela")
 async def table_list_demo(request: Request):
     """
     Página de demonstração de tabela com listagem de dados
@@ -113,6 +113,6 @@ async def table_list_demo(request: Request):
     ]
 
     return templates_home.TemplateResponse(
-        "examples/table_list.html",
+        "exemplos/lista_tabela.html",
         {"request": request, "produtos": produtos}
     )

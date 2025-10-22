@@ -60,22 +60,7 @@
 
 {% block scripts %}
 <script>
-    // Efeito hover nos cards de tema
-    document.querySelectorAll('.tema-card').forEach(card => {
-        card.addEventListener('mouseenter', function () {
-            if (!this.classList.contains('tema-selected')) {
-                this.style.transform = 'translateY(-5px)';
-                this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-            }
-        });
-
-        card.addEventListener('mouseleave', function () {
-            this.style.transform = 'translateY(0)';
-            this.style.boxShadow = 'none';
-        });
-    });
-
-    // Confirmação antes de aplicar tema (opcional)
+    // Confirmação antes de aplicar tema
     document.querySelectorAll('.tema-card').forEach(card => {
         card.addEventListener('click', function (e) {
             const temaNome = this.querySelector('input[name="tema"]').value;
@@ -89,6 +74,4 @@
         });
     });
 </script>
-
-
 {% endblock %}

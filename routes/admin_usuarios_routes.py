@@ -13,9 +13,18 @@ from util.logger_config import logger
 from util.perfis import Perfil
 from util.security import criar_hash_senha
 from util.exceptions import FormValidationError
+from util.validation_helpers import verificar_email_disponivel
+from util.rate_limiter import RateLimiter, obter_identificador_cliente
 
 router = APIRouter(prefix="/admin/usuarios")
 templates = criar_templates("templates/admin/usuarios")
+
+# Rate limiter para operações admin (mais restritivo)
+admin_usuarios_limiter = RateLimiter(
+    max_tentativas=10,  # 10 operações
+    janela_minutos=1,   # por minuto
+    nome="admin_usuarios",
+)
 
 @router.get("/")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -56,6 +65,12 @@ async def post_cadastrar(
     """Cadastra um novo usuário"""
     assert usuario_logado is not None
 
+    # Rate limiting
+    ip = obter_identificador_cliente(request)
+    if not admin_usuarios_limiter.verificar(ip):
+        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
+        return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+
     # Armazena os dados do formulário para reexibição em caso de erro
     dados_formulario: dict = {"nome": nome, "email": email, "perfil": perfil}
 
@@ -69,9 +84,9 @@ async def post_cadastrar(
         )
 
         # Verificar se e-mail já existe
-        usuario_existente = usuario_repo.obter_por_email(dto.email)
-        if usuario_existente:
-            informar_erro(request, "E-mail já cadastrado no sistema")
+        disponivel, mensagem_erro = verificar_email_disponivel(dto.email)
+        if not disponivel:
+            informar_erro(request, mensagem_erro)
             perfis = Perfil.valores()
             return templates.TemplateResponse(
                 "admin/usuarios/cadastro.html",
@@ -148,6 +163,12 @@ async def post_editar(
     """Altera dados de um usuário"""
     assert usuario_logado is not None
 
+    # Rate limiting
+    ip = obter_identificador_cliente(request)
+    if not admin_usuarios_limiter.verificar(ip):
+        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
+        return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+
     # Verificar se usuário existe
     usuario_atual = usuario_repo.obter_por_id(id)
     if not usuario_atual:
@@ -167,9 +188,9 @@ async def post_editar(
         )
 
         # Verificar se e-mail já existe em outro usuário
-        usuario_email = usuario_repo.obter_por_email(dto.email)
-        if usuario_email and usuario_email.id != id:
-            informar_erro(request, "E-mail já cadastrado em outro usuário")
+        disponivel, mensagem_erro = verificar_email_disponivel(dto.email, id)
+        if not disponivel:
+            informar_erro(request, mensagem_erro)
             perfis = Perfil.valores()
             return templates.TemplateResponse(
                 "admin/usuarios/editar.html",
@@ -212,6 +233,13 @@ async def post_editar(
 async def post_excluir(request: Request, id: int, usuario_logado: Optional[dict] = None):
     """Exclui um usuário"""
     assert usuario_logado is not None
+
+    # Rate limiting
+    ip = obter_identificador_cliente(request)
+    if not admin_usuarios_limiter.verificar(ip):
+        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
+        return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+
     usuario = usuario_repo.obter_por_id(id)
 
     if not usuario:

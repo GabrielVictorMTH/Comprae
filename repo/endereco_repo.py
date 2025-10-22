@@ -8,11 +8,10 @@ from util.db_util import get_connection
 
 
 def criar_tabela() -> bool:
-    """Cria a tabela de endereços e índice"""
+    """Cria a tabela de endereços"""
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(CRIAR_TABELA)
-        cursor.execute(CRIAR_INDICE)
         return True
 
 

@@ -1,4 +1,5 @@
 {% extends "base_privada.html" %}
+{% from "macros/form_fields.html" import field with context %}
 
 {% block titulo %}Auditoria de Logs{% endblock %}
 
@@ -24,30 +25,32 @@
                 <form method="POST" action="/admin/auditoria/filtrar" id="formFiltro">
                     <div class="row g-3">
                         <div class="col-md-4">
-                            <label for="data" class="form-label">
-                                <i class="bi bi-calendar3"></i> Data do Log
-                            </label>
-                            <input type="date" class="form-control" id="data" name="data" value="{{ data_selecionada }}"
-                                required>
+                            {{ field(
+                                name='data',
+                                label='Data do Log',
+                                type='date',
+                                value=data_selecionada,
+                                required=true,
+                                wrapper_class='mb-0'
+                            ) }}
                         </div>
 
                         <div class="col-md-4">
-                            <label for="nivel" class="form-label">
-                                <i class="bi bi-funnel"></i> Nível de Log
-                            </label>
-                            <select class="form-select" id="nivel" name="nivel">
-                                <option value="TODOS" {{ 'selected' if nivel_selecionado=='TODOS' else '' }}>Todos os
-                                    Níveis</option>
-                                <option value="DEBUG" {{ 'selected' if nivel_selecionado=='DEBUG' else '' }}>DEBUG
-                                </option>
-                                <option value="INFO" {{ 'selected' if nivel_selecionado=='INFO' else '' }}>INFO</option>
-                                <option value="WARNING" {{ 'selected' if nivel_selecionado=='WARNING' else '' }}>WARNING
-                                </option>
-                                <option value="ERROR" {{ 'selected' if nivel_selecionado=='ERROR' else '' }}>ERROR
-                                </option>
-                                <option value="CRITICAL" {{ 'selected' if nivel_selecionado=='CRITICAL' else '' }}>
-                                    CRITICAL</option>
-                            </select>
+                            {{ field(
+                                name='nivel',
+                                label='Nível de Log',
+                                type='select',
+                                value=nivel_selecionado,
+                                options={
+                                    'TODOS': 'Todos os Níveis',
+                                    'DEBUG': 'DEBUG',
+                                    'INFO': 'INFO',
+                                    'WARNING': 'WARNING',
+                                    'ERROR': 'ERROR',
+                                    'CRITICAL': 'CRITICAL'
+                                },
+                                wrapper_class='mb-0'
+                            ) }}
                         </div>
 
                         <div class="col-md-4 d-flex align-items-end">

@@ -10,13 +10,10 @@ from util.db_util import get_connection
 
 
 def criar_tabela() -> bool:
-    """Cria a tabela de anúncios e índices"""
+    """Cria a tabela de anúncios"""
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(CRIAR_TABELA)
-        cursor.execute(CRIAR_INDICE_VENDEDOR)
-        cursor.execute(CRIAR_INDICE_CATEGORIA)
-        cursor.execute(CRIAR_INDICE_ATIVO)
         return True
 
 
@@ -30,15 +27,18 @@ def inserir(anuncio: Anuncio) -> Optional[Anuncio]:
                 anuncio.id_vendedor,
                 anuncio.id_categoria,
                 anuncio.nome,
-                anuncio.discricao,  # Note: usar campo do model atual (com typo)
+                anuncio.descricao,
                 anuncio.peso,
                 anuncio.preco,
                 anuncio.estoque
             )
         )
-        if cursor.lastrowid:
-            return obter_por_id(cursor.lastrowid)
-        return None
+        anuncio_id = cursor.lastrowid
+
+    # Buscar o anúncio inserido após commit
+    if anuncio_id:
+        return obter_por_id(anuncio_id)
+    return None
 
 
 def alterar(anuncio: Anuncio) -> bool:
@@ -50,7 +50,7 @@ def alterar(anuncio: Anuncio) -> bool:
             (
                 anuncio.id_categoria,
                 anuncio.nome,
-                anuncio.discricao,
+                anuncio.descricao,
                 anuncio.peso,
                 anuncio.preco,
                 anuncio.estoque,
@@ -167,7 +167,7 @@ def _row_to_anuncio(row) -> Anuncio:
         id_vendedor=row["id_vendedor"],
         id_categoria=row["id_categoria"],
         nome=row["nome"],
-        discricao=row["descricao"],  # Note: SQL usa "descricao" corrigido
+        descricao=row["descricao"],
         peso=row["peso"],
         preco=row["preco"],
         estoque=row["estoque"],

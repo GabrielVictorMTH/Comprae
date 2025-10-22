@@ -5,6 +5,7 @@ Testa login, cadastro, logout e recuperação de senha
 import pytest
 from fastapi import status
 from util.perfis import Perfil
+from tests.test_helpers import assert_redirects_to, assert_permission_denied, assert_contains_text
 
 
 class TestLogin:
@@ -14,7 +15,7 @@ class TestLogin:
         """Deve retornar página de login"""
         response = client.get("/login")
         assert response.status_code == status.HTTP_200_OK
-        assert "login" in response.text.lower()
+        assert_contains_text(response, "login")
 
     def test_login_com_credenciais_validas(self, client, criar_usuario, usuario_teste):
         """Deve fazer login com credenciais válidas"""
@@ -32,8 +33,7 @@ class TestLogin:
         }, follow_redirects=False)
 
         # Deve redirecionar após login bem-sucedido
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/usuario"
+        assert_redirects_to(response, "/usuario")
 
     def test_login_com_email_invalido(self, client):
         """Deve rejeitar login com e-mail inexistente"""
@@ -76,8 +76,7 @@ class TestLogin:
     def test_usuario_logado_nao_acessa_login(self, cliente_autenticado):
         """Usuário já logado deve ser redirecionado ao acessar /login"""
         response = cliente_autenticado.get("/login", follow_redirects=False)
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/usuario"
+        assert_redirects_to(response, "/usuario")
 
 
 class TestCadastro:
@@ -87,7 +86,7 @@ class TestCadastro:
         """Deve retornar página de cadastro"""
         response = client.get("/cadastrar")
         assert response.status_code == status.HTTP_200_OK
-        assert "cadastro" in response.text.lower()
+        assert_contains_text(response, "cadastro")
 
     def test_cadastro_com_dados_validos(self, client):
         """Deve cadastrar usuário com dados válidos"""
@@ -100,8 +99,7 @@ class TestCadastro:
         }, follow_redirects=False)
 
         # Deve redirecionar para login após cadastro
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/login"
+        assert_redirects_to(response, "/login")
 
     def test_cadastro_com_email_duplicado(self, client, criar_usuario, usuario_teste):
         """Deve rejeitar cadastro com e-mail já existente"""
@@ -177,8 +175,7 @@ class TestLogout:
         response = cliente_autenticado.get("/logout", follow_redirects=False)
 
         # Deve redirecionar para login
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/login"
+        assert_redirects_to(response, "/login")
 
     def test_logout_desautentica_usuario(self, cliente_autenticado):
         """Após logout, usuário não deve ter acesso a áreas protegidas"""
@@ -199,6 +196,7 @@ class TestRecuperacaoSenha:
         """Deve retornar página de recuperação de senha"""
         response = client.get("/esqueci-senha")
         assert response.status_code == status.HTTP_200_OK
+        # Verificar que contém pelo menos uma das palavras-chave
         assert "esqueci" in response.text.lower() or "recupera" in response.text.lower()
 
     def test_solicitar_recuperacao_senha_email_existente(self, client, criar_usuario, usuario_teste):
@@ -216,8 +214,7 @@ class TestRecuperacaoSenha:
         }, follow_redirects=False)
 
         # Deve redirecionar para login
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/login"
+        assert_redirects_to(response, "/login")
 
     def test_solicitar_recuperacao_senha_email_inexistente(self, client):
         """Deve retornar mesma mensagem por segurança (não revelar se e-mail existe)"""
@@ -226,8 +223,7 @@ class TestRecuperacaoSenha:
         }, follow_redirects=False)
 
         # Deve redirecionar normalmente (sem revelar que e-mail não existe)
-        assert response.status_code == status.HTTP_303_SEE_OTHER
-        assert response.headers["location"] == "/login"
+        assert_redirects_to(response, "/login")
 
     def test_redefinir_senha_com_token_invalido(self, client):
         """Deve rejeitar token inválido"""
@@ -270,7 +266,7 @@ class TestAutorizacao:
     def test_acesso_sem_autenticacao_redireciona_para_login(self, client):
         """Tentativa de acessar área protegida sem login deve redirecionar"""
         response = client.get("/tarefas/listar", follow_redirects=False)
-        assert response.status_code == status.HTTP_303_SEE_OTHER
+        assert_permission_denied(response)
 
     def test_usuario_autenticado_acessa_area_protegida(self, cliente_autenticado):
         """Usuário autenticado deve acessar áreas protegidas"""

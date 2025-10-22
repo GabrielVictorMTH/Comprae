@@ -11,10 +11,11 @@ class Endereco:
     titulo: str
     logradouro: str
     numero: str
-    complemento: str
     bairro: str
     cidade: str
     uf: str
     cep: str
+    # Campos opcionais
+    complemento: Optional[str] = None
     # Relacionamentos
-    usuario: Optional[Usuario]
+    usuario: Optional[Usuario] = None
