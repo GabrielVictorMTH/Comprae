@@ -25,9 +25,12 @@ def inserir(mensagem: Mensagem) -> Optional[Mensagem]:
             INSERIR,
             (mensagem.id_remetente, mensagem.id_destinatario, mensagem.mensagem)
         )
-        if cursor.lastrowid:
-            return obter_por_id(cursor.lastrowid)
-        return None
+        mensagem_id = cursor.lastrowid
+
+    # Buscar a mensagem inserida após commit
+    if mensagem_id:
+        return obter_por_id(mensagem_id)
+    return None
 
 
 def marcar_como_lida(id_mensagem: int) -> bool:

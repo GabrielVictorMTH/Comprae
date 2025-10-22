@@ -26,9 +26,10 @@ def vendedor_teste():
 @pytest.fixture
 def categoria_teste():
     """Fixture para criar categoria"""
+    import uuid
     categoria = Categoria(
         id=0,
-        nome=f"Categoria_{id(Categoria)}",
+        nome=f"Categoria_{uuid.uuid4().hex[:8]}",
         descricao="Categoria de teste"
     )
     return categoria_repo.inserir(categoria)

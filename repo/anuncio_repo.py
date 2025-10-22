@@ -33,9 +33,12 @@ def inserir(anuncio: Anuncio) -> Optional[Anuncio]:
                 anuncio.estoque
             )
         )
-        if cursor.lastrowid:
-            return obter_por_id(cursor.lastrowid)
-        return None
+        anuncio_id = cursor.lastrowid
+
+    # Buscar o anúncio inserido após commit
+    if anuncio_id:
+        return obter_por_id(anuncio_id)
+    return None
 
 
 def alterar(anuncio: Anuncio) -> bool:

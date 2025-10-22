@@ -43,9 +43,10 @@ def vendedor_teste():
 @pytest.fixture
 def categoria_teste():
     """Fixture para criar categoria"""
+    import uuid
     categoria = Categoria(
         id=0,
-        nome=f"CategoriaPedido_{id(Categoria)}",
+        nome=f"CategoriaPedido_{uuid.uuid4().hex[:8]}",
         descricao="Categoria de teste para pedidos"
     )
     return categoria_repo.inserir(categoria)
@@ -86,7 +87,8 @@ def anuncio_teste(vendedor_teste, categoria_teste):
         vendedor=None,
         categoria=None
     )
-    return anuncio_repo.inserir(anuncio)
+    resultado = anuncio_repo.inserir(anuncio)
+    return resultado.id_anuncio if resultado else None
 
 
 class TestCriarTabela:
@@ -295,7 +297,8 @@ class TestObterPorVendedor:
     def test_obter_pedidos_do_vendedor(self, comprador_teste, endereco_teste, vendedor_teste, categoria_teste):
         # Criar anúncio do vendedor
         anuncio = Anuncio(0, vendedor_teste, categoria_teste, "Produto", "Desc", 1.0, 100.0, 10, datetime.now(), True, None, None)
-        anuncio_id = anuncio_repo.inserir(anuncio)
+        anuncio_resultado = anuncio_repo.inserir(anuncio)
+        anuncio_id = anuncio_resultado.id_anuncio if anuncio_resultado else None
 
         # Criar pedidos
         for i in range(2):
