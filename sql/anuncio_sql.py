@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS anuncio (
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
     ativo BOOLEAN DEFAULT 1,
     FOREIGN KEY (id_vendedor) REFERENCES usuario(id) ON DELETE CASCADE,
-    FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria) ON DELETE RESTRICT
+    FOREIGN KEY (id_categoria) REFERENCES categoria(id) ON DELETE RESTRICT
 )
 """
 

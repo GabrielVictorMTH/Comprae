@@ -30,7 +30,7 @@ def inserir(anuncio: Anuncio) -> Optional[Anuncio]:
                 anuncio.id_vendedor,
                 anuncio.id_categoria,
                 anuncio.nome,
-                anuncio.discricao,  # Note: usar campo do model atual (com typo)
+                anuncio.descricao,
                 anuncio.peso,
                 anuncio.preco,
                 anuncio.estoque
@@ -50,7 +50,7 @@ def alterar(anuncio: Anuncio) -> bool:
             (
                 anuncio.id_categoria,
                 anuncio.nome,
-                anuncio.discricao,
+                anuncio.descricao,
                 anuncio.peso,
                 anuncio.preco,
                 anuncio.estoque,
@@ -167,7 +167,7 @@ def _row_to_anuncio(row) -> Anuncio:
         id_vendedor=row["id_vendedor"],
         id_categoria=row["id_categoria"],
         nome=row["nome"],
-        discricao=row["descricao"],  # Note: SQL usa "descricao" corrigido
+        descricao=row["descricao"],
         peso=row["peso"],
         preco=row["preco"],
         estoque=row["estoque"],

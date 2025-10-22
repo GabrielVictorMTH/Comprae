@@ -46,7 +46,7 @@ from routes.examples_routes import router as examples_router
 from routes.admin_categorias_routes import router as admin_categorias_router
 from routes.enderecos_routes import router as enderecos_router
 from routes.anuncios_routes import router as anuncios_router
-# from routes.pedidos_routes import router as pedidos_router  # COMENTADO: pedido_repo não existe ainda
+from routes.pedidos_routes import router as pedidos_router
 from routes.categorias_routes import router as categorias_router
 
 # Seeds
@@ -141,8 +141,8 @@ logger.info("Router de endereços incluído")
 app.include_router(anuncios_router, tags=["Anúncios"])
 logger.info("Router de anúncios incluído")
 
-# app.include_router(pedidos_router, tags=["Pedidos"])  # COMENTADO: pedido_repo não existe ainda
-# logger.info("Router de pedidos incluído")
+app.include_router(pedidos_router, tags=["Pedidos"])
+logger.info("Router de pedidos incluído")
 
 # Rotas públicas (deve ser por último para não sobrescrever outras rotas)
 app.include_router(examples_router, tags=["Exemplos"])
