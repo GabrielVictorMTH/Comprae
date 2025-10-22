@@ -138,3 +138,14 @@ if __name__ == "__main__":
     except Exception as e:
         logger.error(f"Erro ao iniciar servidor: {e}")
         raise
+
+from repo import (
+    usuario_repo,
+    configuracao_repo,
+    tarefa_repo,
+    categoria_repo,      # NOVO
+    endereco_repo,       # NOVO
+    anuncio_repo,        # NOVO
+    mensagem_repo,       # NOVO
+    pedido_repo          # NOVO
+)
