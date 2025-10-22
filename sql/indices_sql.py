@@ -69,6 +69,17 @@ CREATE INDEX IF NOT EXISTS idx_pedido_status
 ON pedido(status)
 """
 
+# Índices da tabela mensagem
+CRIAR_INDICE_MENSAGEM_REMETENTE = """
+CREATE INDEX IF NOT EXISTS idx_mensagem_remetente
+ON mensagem(id_remetente)
+"""
+
+CRIAR_INDICE_MENSAGEM_DESTINATARIO = """
+CREATE INDEX IF NOT EXISTS idx_mensagem_destinatario
+ON mensagem(id_destinatario)
+"""
+
 # Lista de todos os índices para criação
 TODOS_INDICES = [
     # Upstream
@@ -86,4 +97,7 @@ TODOS_INDICES = [
     CRIAR_INDICE_PEDIDO_COMPRADOR,
     CRIAR_INDICE_PEDIDO_ANUNCIO,
     CRIAR_INDICE_PEDIDO_STATUS,
+    # Compraê - Mensagens
+    CRIAR_INDICE_MENSAGEM_REMETENTE,
+    CRIAR_INDICE_MENSAGEM_DESTINATARIO,
 ]

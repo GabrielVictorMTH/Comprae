@@ -30,7 +30,8 @@ from repo import (
     categoria_repo,      # NOVO
     endereco_repo,       # NOVO
     anuncio_repo,        # NOVO
-    pedido_repo          # NOVO
+    pedido_repo,         # NOVO
+    mensagem_repo        # NOVO
 )
 
 # Rotas
@@ -100,6 +101,9 @@ try:
 
     pedido_repo.criar_tabela()
     logger.info("Tabela 'pedido' criada/verificada")
+
+    mensagem_repo.criar_tabela()
+    logger.info("Tabela 'mensagem' criada/verificada")
 
     # Criar índices para otimização de performance
     indices_repo.criar_indices()
