@@ -45,6 +45,20 @@ from routes.usuario_routes import router as usuario_router
 from routes.public_routes import router as public_router
 from routes.examples_routes import router as examples_router
 
+from routes.admin_categorias_routes import router as admin_categorias_router
+from routes.enderecos_routes import router as enderecos_router
+from routes.anuncios_routes import router as anuncios_router
+from routes.mensagens_routes import router as mensagens_router
+from routes.pedidos_routes import router as pedidos_router
+
+# ... mais abaixo ...
+
+app.include_router(admin_categorias_router, tags=["Admin - Categorias"])
+app.include_router(enderecos_router, tags=["Endereços"])
+app.include_router(anuncios_router, tags=["Anúncios"])
+app.include_router(mensagens_router, tags=["Mensagens"])
+app.include_router(pedidos_router, tags=["Pedidos"])
+
 # Seeds
 from util.seed_data import inicializar_dados
 
