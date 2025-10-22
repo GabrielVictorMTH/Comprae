@@ -202,3 +202,22 @@ async def post_excluir(request: Request, id: int, usuario_logado: Optional[dict]
         informar_erro(request, "Não é possível excluir esta categoria pois existem produtos vinculados a ela.")
 
     return RedirectResponse("/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.get("/editar/{id}")
+@requer_autenticacao([Perfil.ADMIN.value])
+async def get_editar(request: Request, id: int, usuario_logado: Optional[dict] = None):
+    """Exibe formulário de alteração de categoria"""
+    categoria = categoria_repo.obter_por_id(id)
+
+    if not categoria:
+        informar_erro(request, "Categoria não encontrada")
+        return RedirectResponse("/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER)
+
+    return templates.TemplateResponse(
+        "admin/categorias/editar.html",
+        {
+            "request": request,
+            "categoria": categoria,
+            "dados": categoria.__dict__
+        }
+    )
