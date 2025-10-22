@@ -14,10 +14,10 @@ class Anuncio:
     id_vendedor: int
     id_categoria: int
     nome: str
-    discricao: str
-    peso: str
+    descricao: str
+    peso: float
     preco: float
-    estoque: str
+    estoque: int
     data_cadastro: datetime
     ativo: bool
     # Relacionamento
