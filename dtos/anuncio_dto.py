@@ -73,7 +73,6 @@ class FiltroAnuncioDTO(BaseModel):
 
 class ModerarProdutoDTO(BaseModel):
     """DTO para reprovar/moderar produto"""
-
     id: int
     motivo_reprovacao: str
 
