@@ -1,0 +1,6 @@
+services:
+  web:
+    container_name: comprae.cachoeiro.es
+    build: .
+    ports:
+      - "8403:8000"
