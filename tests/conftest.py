@@ -81,11 +81,29 @@ def limpar_banco_dados():
             cursor = conn.cursor()
             # Verificar se tabelas existem antes de limpar
             cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('tarefa', 'chamado', 'chamado_interacao', 'usuario', 'configuracao')"
+                """SELECT name FROM sqlite_master WHERE type='table' AND name IN
+                ('tarefa', 'chamado', 'chamado_interacao', 'usuario', 'configuracao',
+                 'categoria', 'endereco', 'anuncio', 'mensagem', 'pedido',
+                 'chat_sala', 'chat_participante', 'chat_mensagem')"""
             )
             tabelas_existentes = [row[0] for row in cursor.fetchall()]
 
             # Limpar apenas tabelas que existem (respeitando foreign keys)
+            # Ordem: dependentes primeiro, depois as principais
+            if 'pedido' in tabelas_existentes:
+                cursor.execute("DELETE FROM pedido")
+            if 'anuncio' in tabelas_existentes:
+                cursor.execute("DELETE FROM anuncio")
+            if 'mensagem' in tabelas_existentes:
+                cursor.execute("DELETE FROM mensagem")
+            if 'endereco' in tabelas_existentes:
+                cursor.execute("DELETE FROM endereco")
+            if 'chat_mensagem' in tabelas_existentes:
+                cursor.execute("DELETE FROM chat_mensagem")
+            if 'chat_participante' in tabelas_existentes:
+                cursor.execute("DELETE FROM chat_participante")
+            if 'chat_sala' in tabelas_existentes:
+                cursor.execute("DELETE FROM chat_sala")
             if 'tarefa' in tabelas_existentes:
                 cursor.execute("DELETE FROM tarefa")
             # Limpar chamado_interacao antes de chamado (devido à FK)
@@ -93,6 +111,8 @@ def limpar_banco_dados():
                 cursor.execute("DELETE FROM chamado_interacao")
             if 'chamado' in tabelas_existentes:
                 cursor.execute("DELETE FROM chamado")
+            if 'categoria' in tabelas_existentes:
+                cursor.execute("DELETE FROM categoria")
             if 'usuario' in tabelas_existentes:
                 cursor.execute("DELETE FROM usuario")
             if 'configuracao' in tabelas_existentes:
