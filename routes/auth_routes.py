@@ -58,11 +58,21 @@ async def get_login(request: Request):
     if request.session.get("usuario_logado"):
         return RedirectResponse("/usuario", status_code=status.HTTP_303_SEE_OTHER)
 
-    return templates.TemplateResponse("auth/login.html", {"request": request})
+    # Capturar o parâmetro redirect da query string
+    redirect_url = request.query_params.get("redirect", "/usuario")
+
+    return templates.TemplateResponse(
+        "auth/login.html", {"request": request, "redirect": redirect_url}
+    )
 
 
 @router.post("/login")
-async def post_login(request: Request, email: str = Form(), senha: str = Form()):
+async def post_login(
+    request: Request,
+    email: str = Form(),
+    senha: str = Form(),
+    redirect: str = Form(default="/usuario"),
+):
     """Processa login do usuário"""
     try:
         # Rate limiting por IP
@@ -77,11 +87,16 @@ async def post_login(request: Request, email: str = Form(), senha: str = Form())
             }
             return templates.TemplateResponse(
                 "auth/login.html",
-                {"request": request, "dados": {"email": email}, "erros": erros},
+                {
+                    "request": request,
+                    "dados": {"email": email},
+                    "erros": erros,
+                    "redirect": redirect,
+                },
             )
 
         # Armazena os dados do formulário para reexibição em caso de erro
-        dados_formulario = {"email": email}
+        dados_formulario = {"email": email, "redirect": redirect}
 
         # Validar dados com DTO
         dto = LoginDTO(email=email, senha=senha)
@@ -96,7 +111,12 @@ async def post_login(request: Request, email: str = Form(), senha: str = Form())
             erros = {"geral": "E-mail ou senha inválidos"}
             return templates.TemplateResponse(
                 "auth/login.html",
-                {"request": request, "dados": dados_formulario, "erros": erros},
+                {
+                    "request": request,
+                    "dados": dados_formulario,
+                    "erros": erros,
+                    "redirect": redirect,
+                },
             )
 
         # Salvar sessão
@@ -109,13 +129,13 @@ async def post_login(request: Request, email: str = Form(), senha: str = Form())
 
         logger.info(f"Usuário {usuario.email} autenticado com sucesso")
         informar_sucesso(request, f"Bem-vindo(a), {usuario.nome}!")
-        return RedirectResponse("/usuario", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(redirect, status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
         raise FormValidationError(
             validation_error=e,
             template_path="auth/login.html",
-            dados_formulario=dados_formulario,
+            dados_formulario={**dados_formulario, "redirect": redirect},
             campo_padrao="senha",
         )
 
