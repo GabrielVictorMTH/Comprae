@@ -4,7 +4,7 @@ Queries SQL para tabela de Mensagens.
 
 CRIAR_TABELA = """
 CREATE TABLE IF NOT EXISTS mensagem (
-    id_mensagem INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_remetente INTEGER NOT NULL,
     id_destinatario INTEGER NOT NULL,
     mensagem TEXT NOT NULL,
@@ -34,12 +34,12 @@ VALUES (?, ?, ?)
 MARCAR_COMO_LIDA = """
 UPDATE mensagem
 SET visualizada = 1
-WHERE id_mensagem = ?
+WHERE id = ?
 """
 
 OBTER_POR_ID = """
 SELECT * FROM mensagem
-WHERE id_mensagem = ?
+WHERE id = ?
 """
 
 OBTER_CONVERSA = """

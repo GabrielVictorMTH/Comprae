@@ -4,7 +4,7 @@ Queries SQL para tabela de Pedidos.
 
 CRIAR_TABELA = """
 CREATE TABLE IF NOT EXISTS pedido (
-    id_pedido INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_endereco INTEGER NOT NULL,
     id_comprador INTEGER NOT NULL,
     id_anuncio INTEGER NOT NULL,
@@ -17,9 +17,9 @@ CREATE TABLE IF NOT EXISTS pedido (
     nota_avaliacao INTEGER,
     comentario_avaliacao TEXT,
     data_hora_avaliacao DATETIME,
-    FOREIGN KEY (id_endereco) REFERENCES endereco(id_endereco) ON DELETE RESTRICT,
+    FOREIGN KEY (id_endereco) REFERENCES endereco(id) ON DELETE RESTRICT,
     FOREIGN KEY (id_comprador) REFERENCES usuario(id) ON DELETE RESTRICT,
-    FOREIGN KEY (id_anuncio) REFERENCES anuncio(id_anuncio) ON DELETE RESTRICT,
+    FOREIGN KEY (id_anuncio) REFERENCES anuncio(id) ON DELETE RESTRICT,
     CHECK (nota_avaliacao IS NULL OR (nota_avaliacao >= 1 AND nota_avaliacao <= 5))
 )
 """
@@ -48,36 +48,36 @@ VALUES (?, ?, ?, ?, 'Pendente')
 ATUALIZAR_STATUS = """
 UPDATE pedido
 SET status = ?
-WHERE id_pedido = ?
+WHERE id = ?
 """
 
 ATUALIZAR_PARA_PAGO = """
 UPDATE pedido
 SET status = 'Pago', data_hora_pagamento = CURRENT_TIMESTAMP
-WHERE id_pedido = ?
+WHERE id = ?
 """
 
 ATUALIZAR_PARA_ENVIADO = """
 UPDATE pedido
 SET status = 'Enviado', data_hora_envio = CURRENT_TIMESTAMP, codigo_rastreio = ?
-WHERE id_pedido = ?
+WHERE id = ?
 """
 
 CANCELAR_PEDIDO = """
 UPDATE pedido
 SET status = 'Cancelado'
-WHERE id_pedido = ?
+WHERE id = ?
 """
 
 AVALIAR_PEDIDO = """
 UPDATE pedido
 SET nota_avaliacao = ?, comentario_avaliacao = ?, data_hora_avaliacao = CURRENT_TIMESTAMP
-WHERE id_pedido = ?
+WHERE id = ?
 """
 
 OBTER_POR_ID = """
 SELECT * FROM pedido
-WHERE id_pedido = ?
+WHERE id = ?
 """
 
 OBTER_POR_COMPRADOR = """
@@ -113,8 +113,8 @@ SELECT
     u_comprador.email as email_comprador,
     e.logradouro, e.numero, e.cidade, e.uf
 FROM pedido p
-INNER JOIN anuncio a ON p.id_anuncio = a.id_anuncio
+INNER JOIN anuncio a ON p.id_anuncio = a.id
 INNER JOIN usuario u_comprador ON p.id_comprador = u_comprador.id
-INNER JOIN endereco e ON p.id_endereco = e.id_endereco
-WHERE p.id_pedido = ?
+INNER JOIN endereco e ON p.id_endereco = e.id
+WHERE p.id = ?
 """

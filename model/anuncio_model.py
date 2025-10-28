@@ -8,7 +8,7 @@ from model.usuario_model import Usuario
 
 @dataclass
 class Anuncio:
-    id_anuncio: int
+    id: int
     id_vendedor: int
     id_categoria: int
     nome: str

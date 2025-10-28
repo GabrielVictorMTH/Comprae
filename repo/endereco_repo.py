@@ -46,7 +46,7 @@ def alterar(endereco: Endereco) -> bool:
             endereco.cidade,
             endereco.uf,
             endereco.cep,
-            endereco.id_endereco
+            endereco.id
         ))
         return cursor.rowcount > 0
 
@@ -67,7 +67,7 @@ def obter_por_id(id: int) -> Optional[Endereco]:
         row = cursor.fetchone()
         if row:
             return Endereco(
-                id_endereco=row["id_endereco"],
+                id=row["id"],
                 id_usuario=row["id_usuario"],
                 titulo=row["titulo"],
                 logradouro=row["logradouro"],
@@ -90,7 +90,7 @@ def obter_por_usuario(id_usuario: int) -> list[Endereco]:
         rows = cursor.fetchall()
         return [
             Endereco(
-                id_endereco=row["id_endereco"],
+                id=row["id"],
                 id_usuario=row["id_usuario"],
                 titulo=row["titulo"],
                 logradouro=row["logradouro"],
@@ -114,7 +114,7 @@ def obter_todos() -> list[Endereco]:
         rows = cursor.fetchall()
         return [
             Endereco(
-                id_endereco=row["id_endereco"],
+                id=row["id"],
                 id_usuario=row["id_usuario"],
                 titulo=row["titulo"],
                 logradouro=row["logradouro"],

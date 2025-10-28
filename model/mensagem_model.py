@@ -7,7 +7,7 @@ from model.usuario_model import Usuario
 
 @dataclass
 class Mensagem:
-    id_mensagem: int
+    id: int
     id_remetente: int
     id_destinatario: int
     mensagem: str
