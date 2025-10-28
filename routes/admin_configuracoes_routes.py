@@ -80,6 +80,9 @@ async def post_aplicar_tema(
         return RedirectResponse("/admin/tema", status_code=status.HTTP_303_SEE_OTHER)
 
     try:
+        # Obter tema anterior para o log
+        config_existente = configuracao_repo.obter_por_chave("theme")
+
         # Validar se o tema existe
         css_origem = Path(f"static/css/bootswatch/{tema}.bootstrap.min.css")
 

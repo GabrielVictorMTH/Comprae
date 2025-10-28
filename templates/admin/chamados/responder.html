@@ -2,39 +2,6 @@
 
 {% block titulo %}Responder Chamado #{{ chamado.id }}{% endblock %}
 
-{% block styles %}
-<style>
-    /* Melhorias para botões de status em telas pequenas */
-    @media (max-width: 768px) {
-        .btn-group {
-            flex-direction: column;
-        }
-        .btn-group .btn {
-            border-radius: 0.375rem !important;
-            margin-bottom: 0.5rem;
-        }
-    }
-
-    /* Estilo para botão selecionado */
-    .btn-check:checked + .btn-outline-secondary {
-        background-color: #6c757d;
-        border-color: #6c757d;
-    }
-    .btn-check:checked + .btn-outline-info {
-        background-color: #0dcaf0;
-        border-color: #0dcaf0;
-    }
-    .btn-check:checked + .btn-outline-success {
-        background-color: #198754;
-        border-color: #198754;
-    }
-    .btn-check:checked + .btn-outline-dark {
-        background-color: #212529;
-        border-color: #212529;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="container">
     <div class="row">
@@ -103,50 +70,51 @@
                 </div>
                 <div class="card-body">
                     {% if interacoes %}
-                        {% for interacao in interacoes %}
-                        <div class="mb-4 pb-4 {% if not loop.last %}border-bottom{% endif %}">
-                            <div class="d-flex align-items-start gap-3">
-                                <!-- Avatar/Ícone -->
-                                <div>
-                                    {% if interacao.tipo.value == 'Resposta do Administrador' %}
-                                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
-                                         style="width: 45px; height: 45px;">
-                                        <i class="bi bi-headset fs-5"></i>
-                                    </div>
-                                    {% else %}
-                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                         style="width: 45px; height: 45px;">
-                                        <i class="bi bi-person-fill fs-5"></i>
-                                    </div>
-                                    {% endif %}
+                    {% for interacao in interacoes %}
+                    <div class="mb-4 pb-4 {% if not loop.last %}border-bottom{% endif %}">
+                        <div class="d-flex align-items-start gap-3">
+                            <!-- Avatar/Ícone -->
+                            <div>
+                                {% if interacao.tipo.value == 'Resposta do Administrador' %}
+                                <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width: 45px; height: 45px;">
+                                    <i class="bi bi-headset fs-5"></i>
                                 </div>
-                                <!-- Conteúdo -->
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <div>
-                                            <strong>{{ interacao.usuario_nome }}</strong>
-                                            <span class="badge bg-secondary ms-2">{{ interacao.tipo.value }}</span>
-                                        </div>
-                                        {% if interacao.data_interacao %}
-                                        <small class="text-muted text-nowrap ms-2">
-                                            <i class="bi bi-clock"></i> {{ interacao.data_interacao|format_data_as_hora }}
-                                        </small>
-                                        {% endif %}
+                                {% else %}
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width: 45px; height: 45px;">
+                                    <i class="bi bi-person-fill fs-5"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <!-- Conteúdo -->
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <strong>{{ interacao.usuario_nome }}</strong>
+                                        <span class="badge bg-secondary ms-2">{{ interacao.tipo.value }}</span>
                                     </div>
-                                    <div class="bg-light rounded p-3">
-                                        <p class="mb-0" style="white-space: pre-wrap;">{{ interacao.mensagem }}</p>
-                                    </div>
-                                    {% if interacao.status_resultante %}
-                                    <small class="text-muted d-block mt-2">
-                                        <i class="bi bi-arrow-right"></i> Status alterado para: <strong>{{ interacao.status_resultante }}</strong>
+                                    {% if interacao.data_interacao %}
+                                    <small class="text-muted text-nowrap ms-2">
+                                        <i class="bi bi-clock"></i> {{ interacao.data_interacao|format_data_as_hora }}
                                     </small>
                                     {% endif %}
                                 </div>
+                                <div class="bg-light rounded p-3">
+                                    <p class="mb-0" style="white-space: pre-wrap;">{{ interacao.mensagem }}</p>
+                                </div>
+                                {% if interacao.status_resultante %}
+                                <small class="text-muted d-block mt-2">
+                                    <i class="bi bi-arrow-right"></i> Status alterado para: <strong>{{
+                                        interacao.status_resultante }}</strong>
+                                </small>
+                                {% endif %}
                             </div>
                         </div>
-                        {% endfor %}
+                    </div>
+                    {% endfor %}
                     {% else %}
-                        <p class="text-muted mb-0">Nenhuma mensagem registrada.</p>
+                    <p class="text-muted mb-0">Nenhuma mensagem registrada.</p>
                     {% endif %}
                 </div>
             </div>
@@ -164,12 +132,8 @@
 
                         <div class="mb-3">
                             <label for="mensagem" class="form-label">Mensagem</label>
-                            <textarea
-                                class="form-control {% if erros and 'mensagem' in erros %}is-invalid{% endif %}"
-                                id="mensagem"
-                                name="mensagem"
-                                rows="5"
-                                placeholder="Digite sua resposta ao usuário..."
+                            <textarea class="form-control {% if erros and 'mensagem' in erros %}is-invalid{% endif %}"
+                                id="mensagem" name="mensagem" rows="5" placeholder="Digite sua resposta ao usuário..."
                                 required>{{ dados.mensagem if dados and dados.mensagem else '' }}</textarea>
                             {% if erros and 'mensagem' in erros %}
                             <div class="invalid-feedback">{{ erros['mensagem'] }}</div>
@@ -179,31 +143,37 @@
 
                         <div class="mb-3">
                             <label class="form-label d-block">Novo Status</label>
-                            <div class="btn-group w-100 {% if erros and 'status_chamado' in erros %}is-invalid{% endif %}" role="group" aria-label="Status do chamado">
+                            <div class="btn-group w-100 {% if erros and 'status_chamado' in erros %}is-invalid{% endif %}"
+                                role="group" aria-label="Status do chamado">
                                 <!-- Aberto -->
-                                <input type="radio" class="btn-check" name="status_chamado" id="status_aberto" value="Aberto"
-                                       {% if (dados and dados.status_chamado == 'Aberto') or chamado.status.value == 'Aberto' %}checked{% endif %}>
+                                <input type="radio" class="btn-check" name="status_chamado" id="status_aberto"
+                                    value="Aberto" {% if (dados and dados.status_chamado=='Aberto' ) or
+                                    chamado.status.value=='Aberto' %}checked{% endif %}>
                                 <label class="btn btn-outline-secondary" for="status_aberto">
                                     <i class="bi bi-folder2-open"></i> Aberto
                                 </label>
 
                                 <!-- Em Análise -->
-                                <input type="radio" class="btn-check" name="status_chamado" id="status_analise" value="Em Análise"
-                                       {% if (dados and dados.status_chamado == 'Em Análise') or (not dados and chamado.status.value != 'Aberto' and chamado.status.value != 'Resolvido' and chamado.status.value != 'Fechado') %}checked{% endif %}>
+                                <input type="radio" class="btn-check" name="status_chamado" id="status_analise"
+                                    value="Em Análise" {% if (dados and dados.status_chamado=='Em Análise' ) or (not
+                                    dados and chamado.status.value !='Aberto' and chamado.status.value !='Resolvido' and
+                                    chamado.status.value !='Fechado' ) %}checked{% endif %}>
                                 <label class="btn btn-outline-info" for="status_analise">
                                     <i class="bi bi-hourglass-split"></i> Em Análise
                                 </label>
 
                                 <!-- Resolvido -->
-                                <input type="radio" class="btn-check" name="status_chamado" id="status_resolvido" value="Resolvido"
-                                       {% if dados and dados.status_chamado == 'Resolvido' %}checked{% endif %}>
+                                <input type="radio" class="btn-check" name="status_chamado" id="status_resolvido"
+                                    value="Resolvido" {% if dados and dados.status_chamado=='Resolvido' %}checked{%
+                                    endif %}>
                                 <label class="btn btn-outline-success" for="status_resolvido">
                                     <i class="bi bi-check-circle"></i> Resolvido
                                 </label>
 
                                 <!-- Fechado -->
-                                <input type="radio" class="btn-check" name="status_chamado" id="status_fechado" value="Fechado"
-                                       {% if dados and dados.status_chamado == 'Fechado' %}checked{% endif %}>
+                                <input type="radio" class="btn-check" name="status_chamado" id="status_fechado"
+                                    value="Fechado" {% if dados and dados.status_chamado=='Fechado' %}checked{% endif
+                                    %}>
                                 <label class="btn btn-outline-dark" for="status_fechado">
                                     <i class="bi bi-lock-fill"></i> Fechado
                                 </label>

@@ -36,7 +36,8 @@
                             <small class="text-muted">
                                 <i class="bi bi-calendar3"></i> Criada em: {{ tarefa.data_criacao|format_data_hora }}
                                 {% if tarefa.concluida and tarefa.data_conclusao %}
-                                | <i class="bi bi-check2-circle"></i> Concluída em: {{ tarefa.data_conclusao|format_data_hora }}
+                                | <i class="bi bi-check2-circle"></i> Concluída em: {{
+                                tarefa.data_conclusao|format_data_hora }}
                                 {% endif %}
                             </small>
                         </div>
@@ -84,9 +85,6 @@
 
 {% block scripts %}
 <script>
-    /**
-     * Função para excluir uma tarefa
-     */
     function excluirTarefa(tarefaId, tarefaTitulo) {
         const detalhes = `
         <div class="card bg-light">

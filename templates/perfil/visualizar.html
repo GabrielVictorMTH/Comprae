@@ -3,64 +3,58 @@
 {% block titulo %}Meu Perfil{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row">
-        <div class="col-md-8 mx-auto">
-            <!-- Cabeçalho do Perfil -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-body text-center py-5">
-                    <div class="mb-4">
-                        <img src="{{ usuario.id|foto_usuario }}" alt="Foto de Perfil"
-                            id="profile-photo"
-                            class="rounded-circle border border-3 border-primary object-fit-cover" width="150" height="150"
-                            title="Clique para alterar a foto">
-                    </div>
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <!-- Cabeçalho do Perfil -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body text-center py-5">
+                <div class="mb-4">
+                    <img src="{{ usuario.id|foto_usuario }}" alt="Foto de Perfil" id="profile-photo"
+                        class="rounded-circle border border-3 border-primary object-fit-cover" width="150" height="150"
+                        title="Clique para alterar a foto">
+                </div>
 
-                    <h2 class="mb-2">{{ usuario.nome }}</h2>
-                    <p class="text-muted mb-3">
-                        <i class="bi bi-envelope"></i> {{ usuario.email }}
-                    </p>
-                    <p class="mb-3">
-                        <span
-                            class="badge bg-{% if usuario.perfil == 'Administrador' %}danger{% else %}info{% endif %} px-3 py-2">
-                            <i class="bi bi-person-badge"></i>
-                            {{ usuario.perfil }}
-                        </span>
-                    </p>
-                    {% if usuario.data_cadastro %}
-                    <p class="text-muted small">
-                        <i class="bi bi-calendar-check"></i> Membro desde {{ usuario.data_cadastro|data_br }}
-                    </p>
-                    {% endif %}
-                </div>
+                <h2 class="mb-2">{{ usuario.nome }}</h2>
+                <p class="text-muted mb-3">
+                    <i class="bi bi-envelope"></i> {{ usuario.email }}
+                </p>
+                <p class="mb-3">
+                    <span
+                        class="badge bg-{% if usuario.perfil == 'Administrador' %}danger{% else %}info{% endif %} px-3 py-2">
+                        <i class="bi bi-person-badge"></i>
+                        {{ usuario.perfil }}
+                    </span>
+                </p>
+                {% if usuario.data_cadastro %}
+                <p class="text-muted small">
+                    <i class="bi bi-calendar-check"></i> Membro desde {{ usuario.data_cadastro|data_br }}
+                </p>
+                {% endif %}
             </div>
-            <!-- Ações do Perfil -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <a href="/usuario/perfil/editar" class="btn btn-primary w-100 btn-lg">
-                        <i class="bi bi-pencil-square"></i> Editar Dados
-                    </a>
-                </div>
-                <div class="col-md-4">
-                    <a href="/usuario/perfil/alterar-senha" class="btn btn-warning w-100 btn-lg">
-                        <i class="bi bi-key-fill"></i> Alterar Senha
-                    </a>
-                </div>
-                <div class="col-md-4">
-                    <button type="button" class="btn btn-info w-100 btn-lg" id="btn-change-photo">
-                        <i class="bi bi-camera-fill"></i> Alterar Foto
-                    </button>
-                </div>
+        </div>
+        <!-- Ações do Perfil -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <a href="/usuario/perfil/editar" class="btn btn-primary w-100 btn-lg">
+                    <i class="bi bi-pencil-square"></i> Editar Dados
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a href="/usuario/perfil/alterar-senha" class="btn btn-warning w-100 btn-lg">
+                    <i class="bi bi-key-fill"></i> Alterar Senha
+                </a>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="btn btn-info w-100 btn-lg" id="btn-change-photo">
+                    <i class="bi bi-camera-fill"></i> Alterar Foto
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Input file oculto para seleção direta de arquivo -->
-<input type="file"
-       id="hidden-photo-input"
-       accept=".jpg,.jpeg,.png,.gif,.webp"
-       class="d-none">
+<input type="file" id="hidden-photo-input" accept=".jpg,.jpeg,.png,.gif,.webp" class="d-none">
 
 <!-- Modal de Crop de Foto -->
 {% set modal_id = "modalFotoPerfil" %}

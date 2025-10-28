@@ -27,15 +27,15 @@ QUALIDADE_FOTO = 90
 
 def obter_caminho_foto_usuario(id: int) -> str:
     """
-    Retorna o caminho relativo da foto do usuário para uso em templates.
+    Retorna o caminho absoluto da foto do usuário para uso em templates.
 
     Args:
         id: ID do usuário
 
     Returns:
-        String com caminho relativo (ex: /static/img/usuarios/000001.jpg)
+        String com caminho absoluto (ex: /static/img/usuarios/000001.jpg)
     """
-    return f"{PASTA_FOTOS}/{id:06d}.jpg"
+    return f"/{PASTA_FOTOS}/{id:06d}.jpg"
 
 
 def obter_path_absoluto_foto(id: int) -> Path:
