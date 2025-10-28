@@ -15,6 +15,7 @@ from util.chat_manager import chat_manager
 from util.foto_util import obter_caminho_foto_usuario
 from util.datetime_util import agora
 from util.logger_config import logger
+from util.perfis import Perfil
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
@@ -348,6 +349,8 @@ async def buscar_usuarios(
 ):
     """
     Busca usuários por termo (para autocomplete).
+    Exclui o próprio usuário e administradores dos resultados.
+    Administradores só podem ser contactados via sistema de chamados.
     """
     if len(q) < 2:
         return JSONResponse(
@@ -358,8 +361,11 @@ async def buscar_usuarios(
     # Buscar usuários
     usuarios = usuario_repo.buscar_por_termo(q, limit=10)
 
-    # Excluir o próprio usuário dos resultados
-    usuarios_filtrados = [u for u in usuarios if u.id != usuario_logado["id"]]
+    # Excluir o próprio usuário e administradores dos resultados
+    usuarios_filtrados = [
+        u for u in usuarios
+        if u.id != usuario_logado["id"] and u.perfil != Perfil.ADMIN.value
+    ]
 
     usuarios_json = [
         {
