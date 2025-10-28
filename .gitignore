@@ -28,8 +28,10 @@ venv/
 .venv/
 ENV/
 env/
+.env
 
 # IDE
+.vscode/
 .idea/
 *.swp
 *.swo
@@ -73,10 +75,10 @@ codebase.md
 .mcp/
 .aidigestignore
 codebase*
-prompt*
 
 # Imagens
 static/img/usuarios/*
+backups/
 
-# Arquivos de backup do banco de dados (na raiz)
-/backups/
+# Tema
+static/css/bootstrap.min.css

@@ -43,7 +43,7 @@ async def dashboard(request: Request, usuario_logado: Optional[dict] = None):
         context["chamados_abertos"] = chamado_repo.contar_abertos_por_usuario(usuario_logado["id"])
         context["tarefas_pendentes"] = tarefa_repo.contar_pendentes_por_usuario(usuario_logado["id"])
 
-    return templates_usuario.TemplateResponse("home.html", context)
+    return templates_usuario.TemplateResponse("dashboard.html", context)
 
 
 @router.get("/usuario/perfil/visualizar")

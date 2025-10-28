@@ -2,15 +2,15 @@ from fastapi import APIRouter, Request
 from util.template_util import criar_templates
 
 router = APIRouter(prefix="/exemplos")
-templates_home = criar_templates("templates")
+templates_public = criar_templates("templates")
 
 
-@router.get("")
-async def home(request: Request):
+@router.get("/")
+async def index(request: Request):
     """
     Página inicial de exemplos
     """
-    return templates_home.TemplateResponse(
+    return templates_public.TemplateResponse(
         "exemplos/index.html",
         {"request": request}
     )
@@ -21,7 +21,7 @@ async def form_fields_demo(request: Request):
     """
     Página de demonstração da macro de campos de formulário
     """
-    return templates_home.TemplateResponse(
+    return templates_public.TemplateResponse(
         "exemplos/demo_campos_formulario.html",
         {"request": request}
     )
@@ -32,7 +32,7 @@ async def cards_grid_demo(request: Request):
     """
     Página de demonstração de grid de cards responsivo
     """
-    return templates_home.TemplateResponse(
+    return templates_public.TemplateResponse(
         "exemplos/grade_cartoes.html",
         {"request": request}
     )
@@ -43,7 +43,7 @@ async def bootswatch_demo(request: Request):
     """
     Página de demonstração de temas Bootswatch
     """
-    return templates_home.TemplateResponse(
+    return templates_public.TemplateResponse(
         "exemplos/bootswatch.html",
         {"request": request}
     )
@@ -54,7 +54,7 @@ async def product_detail_demo(request: Request):
     """
     Página de demonstração de detalhes de produto e-commerce
     """
-    return templates_home.TemplateResponse(
+    return templates_public.TemplateResponse(
         "exemplos/detalhes_produto.html",
         {"request": request}
     )
@@ -65,7 +65,7 @@ async def service_detail_demo(request: Request):
     """
     Página de demonstração de detalhes de serviço profissional
     """
-    return templates_home.TemplateResponse(
+    return templates_public.TemplateResponse(
         "exemplos/detalhes_servico.html",
         {"request": request}
     )
@@ -76,7 +76,7 @@ async def profile_detail_demo(request: Request):
     """
     Página de demonstração de perfil de pessoa
     """
-    return templates_home.TemplateResponse(
+    return templates_public.TemplateResponse(
         "exemplos/detalhes_perfil.html",
         {"request": request}
     )
@@ -87,7 +87,7 @@ async def property_detail_demo(request: Request):
     """
     Página de demonstração de detalhes de imóvel
     """
-    return templates_home.TemplateResponse(
+    return templates_public.TemplateResponse(
         "exemplos/detalhes_imovel.html",
         {"request": request}
     )
@@ -112,7 +112,7 @@ async def table_list_demo(request: Request):
         {"id": 10, "nome": "Cadeira Gamer", "categoria": "Mobília", "preco": 899.90, "estoque": 18, "ativo": True},
     ]
 
-    return templates_home.TemplateResponse(
+    return templates_public.TemplateResponse(
         "exemplos/lista_tabela.html",
         {"request": request, "produtos": produtos}
     )
