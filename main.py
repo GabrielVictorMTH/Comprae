@@ -23,7 +23,7 @@ from util.exceptions import FormValidationError
 
 # Repositórios
 from repo import usuario_repo, configuracao_repo, tarefa_repo, chamado_repo, chamado_interacao_repo, indices_repo
-from repo import chat_sala_repo, chat_participante_repo, chat_mensagem_repo
+from repo import chat_sala_repo, chat_participante_repo, chat_mensagem_repo, categoria_repo
 
 # Rotas
 from routes.auth_routes import router as auth_router
@@ -76,6 +76,9 @@ try:
 
     tarefa_repo.criar_tabela()
     logger.info("Tabela 'tarefa' criada/verificada")
+
+    categoria_repo.criar_tabela()
+    logger.info("Tabela 'categoria' criada/verificada")
 
     chamado_repo.criar_tabela()
     logger.info("Tabela 'chamado' criada/verificada")
