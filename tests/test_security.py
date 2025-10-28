@@ -385,7 +385,7 @@ class TestSessionSecurity:
 
         # Fazer logout
         response_logout = cliente_autenticado.get("/logout", follow_redirects=False)
-        assert_redirects_to(response_logout, "/login")
+        assert_redirects_to(response_logout, "/")
 
         # Tentar acessar área protegida com mesma sessão
         response_protegido = cliente_autenticado.get("/usuario", follow_redirects=False)
