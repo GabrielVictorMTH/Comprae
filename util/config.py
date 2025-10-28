@@ -6,6 +6,7 @@ do sistema em um único local, facilitando a manutenção e evitando duplicaçã
 """
 import os
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 
 # Carregar variáveis de ambiente do arquivo .env
@@ -71,3 +72,7 @@ RATE_LIMIT_ESQUECI_SENHA_MINUTOS = int(os.getenv("RATE_LIMIT_ESQUECI_SENHA_MINUT
 
 # === Versão da Aplicação ===
 VERSION = "1.0.0"
+
+# === Configurações de Timezone ===
+TIMEZONE = os.getenv("TIMEZONE", "America/Sao_Paulo")
+APP_TIMEZONE = ZoneInfo(TIMEZONE)

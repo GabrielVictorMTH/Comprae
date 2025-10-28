@@ -10,17 +10,12 @@
         {{ request.session.get('usuario_logado')['nome'] }}
     </a>
     <ul class="dropdown-menu dropdown-menu-end">
-        <li><a class="dropdown-item" href="/perfil/visualizar">
-            <i class="bi bi-person"></i> Meu Perfil
-        </a></li>
-
-        <!-- Opções Admin no dropdown -->
-        {% if request.session.get('usuario_logado')['perfil'] == 'Administrador' %}
-        <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item" href="/usuario">
             <i class="bi bi-speedometer2"></i> Dashboard
         </a></li>
-        {% endif %}
+        <li><a class="dropdown-item" href="/usuario/perfil/visualizar">
+            <i class="bi bi-person"></i> Meu Perfil
+        </a></li>
 
         <li><hr class="dropdown-divider"></li>
         <li><a class="dropdown-item" href="/logout">

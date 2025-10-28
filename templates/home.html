@@ -3,158 +3,189 @@
 {% block titulo %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="container">
-    <!-- Cabeçalho de Boas-Vindas -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="bg-primary text-white rounded p-4 shadow-sm">
-                <h1 class="mb-2">
-                    <i class="bi bi-house-door"></i>
-                    Bem-vindo(a), {{ usuario.nome }}!
-                </h1>
-                <p class="mb-0 lead">Este é o seu painel de controle pessoal.</p>
+
+<!-- Cabeçalho de Boas-Vindas -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="bg-primary text-white rounded p-4 shadow-sm">
+            <h1 class="mb-2">
+                <i class="bi bi-house-door"></i>
+                Bem-vindo(a), {{ usuario.nome }}!
+            </h1>
+            <p class="mb-0 lead">Este é o seu painel de controle pessoal.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Cards de Ação Rápida -->
+<div class="row g-4 mb-4">
+    <!-- Meu Perfil -->
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-person-circle text-primary display-3"></i>
+                </div>
+                <h5 class="card-title">Meu Perfil</h5>
+                <p class="card-text text-muted">
+                    Visualize e edite suas informações pessoais
+                </p>
+                <a href="/usuario/perfil/visualizar" class="btn btn-primary">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- Cards de Ação Rápida -->
-    <div class="row g-4 mb-4">
-        <!-- Meu Perfil -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="bi bi-person-circle text-primary display-3"></i>
-                    </div>
-                    <h5 class="card-title">Meu Perfil</h5>
-                    <p class="card-text text-muted">
-                        Visualize e edite suas informações pessoais
-                    </p>
-                    <a href="/perfil/visualizar" class="btn btn-primary">
-                        <i class="bi bi-arrow-right-circle"></i> Acessar
-                    </a>
+    <!-- Configurações (apenas para admin) -->
+    {% if usuario.perfil == 'Administrador' %}
+    <!-- Usuários -->
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-people text-success display-3"></i>
                 </div>
+                <h5 class="card-title">Usuários</h5>
+                <p class="card-text text-muted">
+                    Gerencie os usuários cadastrados no sistema
+                </p>
+                <a href="/admin/usuarios/listar" class="btn btn-success">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
             </div>
         </div>
-
-        <!-- Configurações (apenas para admin) -->
-        {% if usuario.perfil == 'Administrador' %}
-        <!-- Usuários -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="bi bi-people text-success display-3"></i>
-                    </div>
-                    <h5 class="card-title">Usuários</h5>
-                    <p class="card-text text-muted">
-                        Gerencie os usuários cadastrados no sistema
-                    </p>
-                    <a href="/admin/usuarios/listar" class="btn btn-success">
-                        <i class="bi bi-arrow-right-circle"></i> Acessar
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="bi bi-palette text-danger display-3"></i>
-                    </div>
-                    <h5 class="card-title">Personalizar Tema</h5>
-                    <p class="card-text text-muted">
-                        Escolha entre diversos temas visuais para personalizar a aplicação
-                    </p>
-                    <a href="/admin/tema" class="btn btn-danger">
-                        <i class="bi bi-arrow-right-circle"></i> Acessar
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="bi bi-journal-text text-warning display-3"></i>
-                    </div>
-                    <h5 class="card-title">Auditoria de Logs</h5>
-                    <p class="card-text text-muted">
-                        Visualize e filtre logs do sistema por data e severidade
-                    </p>
-                    <a href="/admin/auditoria" class="btn btn-warning">
-                        <i class="bi bi-arrow-right-circle"></i> Acessar
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="bi bi-database text-info display-3"></i>
-                    </div>
-                    <h5 class="card-title">Backup do Banco</h5>
-                    <p class="card-text text-muted">
-                        Crie, gerencie e restaure backups do banco de dados
-                    </p>
-                    <a href="/admin/backups/listar" class="btn btn-info">
-                        <i class="bi bi-arrow-right-circle"></i> Acessar
-                    </a>
-                </div>
-            </div>
-        </div>
-        {% else %}
-        <!-- Minhas Tarefas -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="bi bi-people text-success display-3"></i>
-                    </div>
-                    <h5 class="card-title">Minhas Tarefas</h5>
-                    <p class="card-text text-muted">
-                        Gerencie suas tarefas pendentes e concluídas
-                    </p>
-                    <a href="/tarefas/listar" class="btn btn-success">
-                        <i class="bi bi-arrow-right-circle"></i> Acessar
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <!-- Ajuda/Suporte para usuários comuns -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover">
-                <div class="card-body text-center">
-                    <div class="mb-3">
-                        <i class="bi bi-question-circle text-info display-3"></i>
-                    </div>
-                    <h5 class="card-title">Ajuda</h5>
-                    <p class="card-text text-muted">
-                        Precisa de ajuda? Consulte nossa documentação
-                    </p>
-                    <button class="btn btn-info" disabled>
-                        <i class="bi bi-book"></i> Em Breve
-                    </button>
-                </div>
-            </div>
-        </div>
-        {% endif %}
     </div>
 
-    <!-- Estatísticas ou Informações Adicionais -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="alert alert-info" role="alert">
-                <i class="bi bi-lightbulb"></i>
-                <strong>Dica do Dia:</strong>
-                Mantenha suas informações sempre atualizadas em "Meu Perfil" para garantir uma melhor experiência no
-                sistema.
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-palette text-danger display-3"></i>
+                </div>
+                <h5 class="card-title">Personalizar Tema</h5>
+                <p class="card-text text-muted">
+                    Escolha entre diversos temas visuais para personalizar a aplicação
+                </p>
+                <a href="/admin/tema" class="btn btn-danger">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
             </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-journal-text text-warning display-3"></i>
+                </div>
+                <h5 class="card-title">Auditoria de Logs</h5>
+                <p class="card-text text-muted">
+                    Visualize e filtre logs do sistema por data e severidade
+                </p>
+                <a href="/admin/auditoria" class="btn btn-warning">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-database text-info display-3"></i>
+                </div>
+                <h5 class="card-title">Backup do Banco</h5>
+                <p class="card-text text-muted">
+                    Crie, gerencie e restaure backups do banco de dados
+                </p>
+                <a href="/admin/backups/listar" class="btn btn-info">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-headset text-danger display-3"></i>
+                </div>
+                <h5 class="card-title">Chamados</h5>
+                <p class="card-text text-muted">
+                    Gerencie chamados de suporte dos usuários
+                </p>
+                {% if chamados_pendentes > 0 %}
+                <div class="mb-3">
+                    <span class="badge bg-danger">{{ chamados_pendentes }} pendente(s)</span>
+                </div>
+                {% endif %}
+                <a href="/admin/chamados/listar" class="btn btn-danger">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Minhas Tarefas -->
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-list-task text-success display-3"></i>
+                </div>
+                <h5 class="card-title">Minhas Tarefas</h5>
+                <p class="card-text text-muted">
+                    Gerencie suas tarefas pendentes e concluídas
+                </p>
+                {% if tarefas_pendentes > 0 %}
+                <div class="mb-3">
+                    <span class="badge bg-success">{{ tarefas_pendentes }} pendente(s)</span>
+                </div>
+                {% endif %}
+                <a href="/tarefas/listar" class="btn btn-success">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chamados para usuários comuns -->
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-headset text-danger display-3"></i>
+                </div>
+                <h5 class="card-title">Meus Chamados</h5>
+                <p class="card-text text-muted">
+                    Abra chamados de suporte e acompanhe suas solicitações
+                </p>
+                {% if chamados_abertos > 0 %}
+                <div class="mb-3">
+                    <span class="badge bg-danger">{{ chamados_abertos }} em aberto</span>
+                </div>
+                {% endif %}
+                <a href="/chamados/listar" class="btn btn-danger">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Estatísticas ou Informações Adicionais -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-lightbulb"></i>
+            <strong>Dica do Dia:</strong>
+            Mantenha suas informações sempre atualizadas em "Meu Perfil" para garantir uma melhor experiência no
+            sistema.
         </div>
     </div>
 </div>

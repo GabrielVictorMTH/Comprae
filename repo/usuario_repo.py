@@ -1,8 +1,33 @@
+from datetime import datetime
 from typing import Optional
 from model.usuario_model import Usuario
 from sql.usuario_sql import *
 from util.db_util import get_connection
 from util.foto_util import criar_foto_padrao_usuario
+
+
+def _row_to_usuario(row) -> Usuario:
+    """
+    Converte uma linha do banco de dados em objeto Usuario.
+
+    Args:
+        row: Linha do cursor SQLite (sqlite3.Row)
+
+    Returns:
+        Objeto Usuario populado
+    """
+    return Usuario(
+        id=row["id"],
+        nome=row["nome"],
+        email=row["email"],
+        senha=row["senha"],
+        perfil=row["perfil"],
+        token_redefinicao=row["token_redefinicao"] if "token_redefinicao" in row.keys() else None,
+        data_token=row["data_token"] if "data_token" in row.keys() else None,
+        data_cadastro=row["data_cadastro"] if "data_cadastro" in row.keys() else None,
+        data_atualizacao=row["data_atualizacao"] if "data_atualizacao" in row.keys() else None
+    )
+
 
 def criar_tabela() -> bool:
     with get_connection() as conn:
@@ -56,16 +81,7 @@ def obter_por_id(id: int) -> Optional[Usuario]:
         cursor.execute(OBTER_POR_ID, (id,))
         row = cursor.fetchone()
         if row:
-            return Usuario(
-                id=row["id"],
-                nome=row["nome"],
-                email=row["email"],
-                senha=row["senha"],
-                perfil=row["perfil"],
-                token_redefinicao=row["token_redefinicao"] if "token_redefinicao" in row.keys() else None,
-                data_token=row["data_token"] if "data_token" in row.keys() else None,
-                data_cadastro=row["data_cadastro"] if "data_cadastro" in row.keys() else None
-            )
+            return _row_to_usuario(row)
         return None
 
 def obter_todos() -> list[Usuario]:
@@ -73,19 +89,7 @@ def obter_todos() -> list[Usuario]:
         cursor = conn.cursor()
         cursor.execute(OBTER_TODOS)
         rows = cursor.fetchall()
-        return [
-            Usuario(
-                id=row["id"],
-                nome=row["nome"],
-                email=row["email"],
-                senha=row["senha"],
-                perfil=row["perfil"],
-                token_redefinicao=row["token_redefinicao"] if "token_redefinicao" in row.keys() else None,
-                data_token=row["data_token"] if "data_token" in row.keys() else None,
-                data_cadastro=row["data_cadastro"] if "data_cadastro" in row.keys() else None
-            )
-            for row in rows
-        ]
+        return [_row_to_usuario(row) for row in rows]
 
 def obter_quantidade() -> int:
     with get_connection() as conn:
@@ -100,19 +104,10 @@ def obter_por_email(email: str) -> Optional[Usuario]:
         cursor.execute(OBTER_POR_EMAIL, (email,))
         row = cursor.fetchone()
         if row:
-            return Usuario(
-                id=row["id"],
-                nome=row["nome"],
-                email=row["email"],
-                senha=row["senha"],
-                perfil=row["perfil"],
-                token_redefinicao=row["token_redefinicao"] if "token_redefinicao" in row.keys() else None,
-                data_token=row["data_token"] if "data_token" in row.keys() else None,
-                data_cadastro=row["data_cadastro"] if "data_cadastro" in row.keys() else None
-            )
+            return _row_to_usuario(row)
         return None
 
-def atualizar_token(email: str, token: str, data_expiracao: str) -> bool:
+def atualizar_token(email: str, token: str, data_expiracao: datetime) -> bool:
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(ATUALIZAR_TOKEN, (token, data_expiracao, email))
@@ -124,15 +119,7 @@ def obter_por_token(token: str) -> Optional[Usuario]:
         cursor.execute(OBTER_POR_TOKEN, (token,))
         row = cursor.fetchone()
         if row:
-            return Usuario(
-                id=row["id"],
-                nome=row["nome"],
-                email=row["email"],
-                senha=row["senha"],
-                perfil=row["perfil"],
-                token_redefinicao=row["token_redefinicao"],
-                data_token=row["data_token"]
-            )
+            return _row_to_usuario(row)
         return None
 
 def limpar_token(id: int) -> bool:
@@ -146,14 +133,29 @@ def obter_todos_por_perfil(perfil: str) -> list[Usuario]:
         cursor = conn.cursor()
         cursor.execute(OBTER_TODOS_POR_PERFIL, (perfil,))
         rows = cursor.fetchall()
-        return [
-            Usuario(
-                id=row["id"],
-                nome=row["nome"],
-                email=row["email"],
-                senha=row["senha"],
-                perfil=row["perfil"],
-                data_cadastro=row["data_cadastro"]
-            )
-            for row in rows
-        ]
+        return [_row_to_usuario(row) for row in rows]
+
+def buscar_por_termo(termo: str, limit: int = 10) -> list[Usuario]:
+    """
+    Busca usuários por termo (pesquisa em nome e email).
+
+    Args:
+        termo: Termo de busca
+        limit: Número máximo de resultados
+
+    Returns:
+        Lista de usuários que correspondem à busca
+    """
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """SELECT id, nome, email, senha, perfil,
+                      token_redefinicao, data_token,
+                      data_cadastro[timestamp], data_atualizacao[timestamp]
+               FROM usuario
+               WHERE (LOWER(nome) LIKE LOWER(?) OR LOWER(email) LIKE LOWER(?))
+               LIMIT ?""",
+            (f"%{termo}%", f"%{termo}%", limit)
+        )
+        rows = cursor.fetchall()
+        return [_row_to_usuario(row) for row in rows]

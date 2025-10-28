@@ -1,9 +1,3 @@
-"""
-DTOs para gerenciamento de perfil do usuário.
-
-Contém validações para edição de dados pessoais e alteração de senha.
-"""
-
 from pydantic import BaseModel, Field, field_validator, model_validator
 from dtos.validators import (
     validar_email,
@@ -15,8 +9,6 @@ from dtos.validators import (
 
 
 class EditarPerfilDTO(BaseModel):
-    """DTO para edição de dados do perfil do usuário."""
-
     nome: str = Field(..., description="Nome completo do usuário", min_length=4, max_length=128)
     email: str = Field(..., description="E-mail do usuário", examples=["usuario@exemplo.com"])
 
@@ -25,8 +17,6 @@ class EditarPerfilDTO(BaseModel):
 
 
 class AlterarSenhaDTO(BaseModel):
-    """DTO para alteração de senha do usuário."""
-
     senha_atual: str = Field(..., description="Senha atual do usuário", min_length=1, max_length=128)
     senha_nova: str = Field(..., description="Nova senha desejada", min_length=8, max_length=128)
     confirmar_senha: str = Field(..., description="Confirmação da nova senha", min_length=8, max_length=128)

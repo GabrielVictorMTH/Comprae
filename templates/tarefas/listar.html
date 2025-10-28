@@ -1,4 +1,4 @@
-{% extends 'base_publica.html' %}
+{% extends 'base_privada.html' %}
 
 {% block titulo %}Lista de Tarefas{% endblock %}
 
@@ -34,11 +34,9 @@
                             </p>
                             {% endif %}
                             <small class="text-muted">
-                                <i class="bi bi-calendar3"></i> Criada em: {{ tarefa.data_criacao.strftime('%d/%m/%Y
-                                %H:%M') }}
+                                <i class="bi bi-calendar3"></i> Criada em: {{ tarefa.data_criacao|format_data_hora }}
                                 {% if tarefa.concluida and tarefa.data_conclusao %}
-                                | <i class="bi bi-check2-circle"></i> Concluída em: {{
-                                tarefa.data_conclusao.strftime('%d/%m/%Y %H:%M') }}
+                                | <i class="bi bi-check2-circle"></i> Concluída em: {{ tarefa.data_conclusao|format_data_hora }}
                                 {% endif %}
                             </small>
                         </div>

@@ -1,0 +1,166 @@
+{% extends 'base_privada.html' %}
+
+{% block titulo %}Detalhes do Chamado #{{ chamado.id }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <!-- Cabeçalho -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-ticket-detailed"></i> Chamado #{{ chamado.id }}</h2>
+                <a href="/chamados/listar" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar
+                </a>
+            </div>
+
+            <!-- Card Principal -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ chamado.titulo }}</h5>
+                        <div class="d-flex gap-2">
+                            <!-- Badge de Status -->
+                            {% if chamado.status.value == 'Aberto' %}
+                            <span class="badge bg-light text-dark">{{ chamado.status.value }}</span>
+                            {% elif chamado.status.value == 'Em Análise' %}
+                            <span class="badge bg-info">{{ chamado.status.value }}</span>
+                            {% elif chamado.status.value == 'Resolvido' %}
+                            <span class="badge bg-success">{{ chamado.status.value }}</span>
+                            {% elif chamado.status.value == 'Fechado' %}
+                            <span class="badge bg-secondary">{{ chamado.status.value }}</span>
+                            {% endif %}
+                            <!-- Badge de Prioridade -->
+                            {% if chamado.prioridade.value == 'Urgente' %}
+                            <span class="badge bg-danger">{{ chamado.prioridade.value }}</span>
+                            {% elif chamado.prioridade.value == 'Alta' %}
+                            <span class="badge bg-warning text-dark">{{ chamado.prioridade.value }}</span>
+                            {% elif chamado.prioridade.value == 'Média' %}
+                            <span class="badge bg-info">{{ chamado.prioridade.value }}</span>
+                            {% elif chamado.prioridade.value == 'Baixa' %}
+                            <span class="badge bg-light text-dark">{{ chamado.prioridade.value }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-calendar3"></i> Data de Abertura
+                            </small>
+                            <strong>{{ chamado.data_abertura|format_data_as_hora }}</strong>
+                        </div>
+                        {% if chamado.data_fechamento %}
+                        <div class="col-md-6 mb-3">
+                            <small class="text-muted d-block mb-1">
+                                <i class="bi bi-check2-circle"></i> Data de Fechamento
+                            </small>
+                            <strong>{{ chamado.data_fechamento|format_data_as_hora }}</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histórico de Interações -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-chat-dots"></i> Histórico de Mensagens</h5>
+                </div>
+                <div class="card-body">
+                    {% if interacoes %}
+                        {% for interacao in interacoes %}
+                        <div class="mb-4 pb-4 {% if not loop.last %}border-bottom{% endif %}">
+                            <div class="d-flex align-items-start gap-3">
+                                <!-- Avatar/Ícone -->
+                                <div>
+                                    {% if interacao.tipo.value == 'Abertura' or interacao.tipo.value == 'Resposta do Usuário' %}
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 45px; height: 45px;">
+                                        <i class="bi bi-person-fill fs-5"></i>
+                                    </div>
+                                    {% else %}
+                                    <div class="bg-success text-white rounded-circle d-flex align-items-center justify-content-center"
+                                         style="width: 45px; height: 45px;">
+                                        <i class="bi bi-headset fs-5"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <!-- Conteúdo -->
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            <strong>{{ interacao.usuario_nome }}</strong>
+                                            <span class="badge bg-secondary ms-2">{{ interacao.tipo.value }}</span>
+                                        </div>
+                                        {% if interacao.data_interacao %}
+                                        <small class="text-muted text-nowrap ms-2">
+                                            <i class="bi bi-clock"></i> {{ interacao.data_interacao|format_data_as_hora }}
+                                        </small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="bg-light rounded p-3">
+                                        <p class="mb-0" style="white-space: pre-wrap;">{{ interacao.mensagem }}</p>
+                                    </div>
+                                    {% if interacao.status_resultante %}
+                                    <small class="text-muted d-block mt-2">
+                                        <i class="bi bi-arrow-right"></i> Status: <strong>{{ interacao.status_resultante }}</strong>
+                                    </small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted mb-0">Nenhuma mensagem registrada.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Formulário para Responder -->
+            {% if chamado.status.value != 'Fechado' %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0"><i class="bi bi-reply"></i> Adicionar Mensagem</h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="/chamados/{{ chamado.id }}/responder">
+                        <!-- CSRF Token -->
+                        <input type="hidden" name="csrf_token" value="{{ request.session.get('csrf_token') }}">
+
+                        <div class="mb-3">
+                            <label for="mensagem" class="form-label">Sua Mensagem</label>
+                            <textarea
+                                class="form-control {% if erros and 'mensagem' in erros %}is-invalid{% endif %}"
+                                id="mensagem"
+                                name="mensagem"
+                                rows="5"
+                                placeholder="Digite sua mensagem..."
+                                required>{{ dados.mensagem if dados and dados.mensagem else '' }}</textarea>
+                            {% if erros and 'mensagem' in erros %}
+                            <div class="invalid-feedback">{{ erros['mensagem'] }}</div>
+                            {% endif %}
+                            <div class="form-text">Mínimo 10 caracteres, máximo 2000 caracteres</div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="/chamados/listar" class="btn btn-secondary">Cancelar</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-send"></i> Enviar Mensagem
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-secondary mb-4" role="alert">
+                <i class="bi bi-lock-fill"></i>
+                <strong>Chamado Fechado</strong>
+                <p class="mb-0 mt-2">Este chamado foi fechado e não aceita mais mensagens.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

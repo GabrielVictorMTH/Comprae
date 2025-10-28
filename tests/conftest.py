@@ -76,35 +76,34 @@ def limpar_banco_dados():
     from util.db_util import get_connection
 
     def _limpar_tabelas():
-        """Limpa tabelas se elas existirem"""
+        """Limpa tabelas se elas existirem e reseta autoincrement"""
         with get_connection() as conn:
             cursor = conn.cursor()
             # Verificar se tabelas existem antes de limpar
             cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table'"
+                "SELECT name FROM sqlite_master WHERE type='table' AND name IN ('tarefa', 'chamado', 'chamado_interacao', 'usuario', 'configuracao')"
             )
             tabelas_existentes = [row[0] for row in cursor.fetchall()]
 
-            # Limpar tabelas na ordem correta (respeitando foreign keys)
-            # Primeiro: tabelas que dependem de outras
-            if 'mensagem' in tabelas_existentes:
-                cursor.execute("DELETE FROM mensagem")
-            if 'pedido' in tabelas_existentes:
-                cursor.execute("DELETE FROM pedido")
-            if 'anuncio' in tabelas_existentes:
-                cursor.execute("DELETE FROM anuncio")
-            if 'endereco' in tabelas_existentes:
-                cursor.execute("DELETE FROM endereco")
+            # Limpar apenas tabelas que existem (respeitando foreign keys)
             if 'tarefa' in tabelas_existentes:
                 cursor.execute("DELETE FROM tarefa")
-
-            # Depois: tabelas base
-            if 'categoria' in tabelas_existentes:
-                cursor.execute("DELETE FROM categoria")
+            # Limpar chamado_interacao antes de chamado (devido à FK)
+            if 'chamado_interacao' in tabelas_existentes:
+                cursor.execute("DELETE FROM chamado_interacao")
+            if 'chamado' in tabelas_existentes:
+                cursor.execute("DELETE FROM chamado")
             if 'usuario' in tabelas_existentes:
                 cursor.execute("DELETE FROM usuario")
             if 'configuracao' in tabelas_existentes:
                 cursor.execute("DELETE FROM configuracao")
+
+            # Resetar autoincrement (limpar sqlite_sequence se existir)
+            cursor.execute(
+                "SELECT name FROM sqlite_master WHERE type='table' AND name='sqlite_sequence'"
+            )
+            if cursor.fetchone():
+                cursor.execute("DELETE FROM sqlite_sequence")
 
             conn.commit()
 

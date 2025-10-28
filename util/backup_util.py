@@ -14,6 +14,7 @@ from dataclasses import dataclass
 
 from util.config import DATABASE_PATH
 from util.logger_config import logger
+from util.datetime_util import agora
 
 
 # Diretório onde os backups são armazenados
@@ -212,7 +213,7 @@ def criar_backup(automatico: bool = False) -> tuple[bool, str]:
 
         # Gerar nome do arquivo de backup com timestamp
         formato = BACKUP_AUTO_FILENAME_FORMAT if automatico else BACKUP_FILENAME_FORMAT
-        nome_backup = datetime.now().strftime(formato)
+        nome_backup = agora().strftime(formato)
         caminho_backup = BACKUP_DIR / nome_backup
 
         # Copiar arquivo do banco de dados

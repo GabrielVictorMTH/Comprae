@@ -5,6 +5,25 @@ from sql.configuracao_sql import *
 from util.db_util import get_connection
 from util.logger_config import logger
 
+
+def _row_to_configuracao(row) -> Configuracao:
+    """
+    Converte uma linha do banco de dados em objeto Configuracao.
+
+    Args:
+        row: Linha do cursor SQLite (sqlite3.Row)
+
+    Returns:
+        Objeto Configuracao populado
+    """
+    return Configuracao(
+        id=row["id"],
+        chave=row["chave"],
+        valor=row["valor"],
+        descricao=row["descricao"] if "descricao" in row.keys() else None
+    )
+
+
 def criar_tabela() -> bool:
     with get_connection() as conn:
         cursor = conn.cursor()
@@ -17,12 +36,7 @@ def obter_por_chave(chave: str) -> Optional[Configuracao]:
         cursor.execute(OBTER_POR_CHAVE, (chave,))
         row = cursor.fetchone()
         if row:
-            return Configuracao(
-                id=row["id"],
-                chave=row["chave"],
-                valor=row["valor"],
-                descricao=row["descricao"]
-            )
+            return _row_to_configuracao(row)
         return None
 
 def obter_todos() -> list[Configuracao]:
@@ -30,15 +44,7 @@ def obter_todos() -> list[Configuracao]:
         cursor = conn.cursor()
         cursor.execute(OBTER_TODOS)
         rows = cursor.fetchall()
-        return [
-            Configuracao(
-                id=row["id"],
-                chave=row["chave"],
-                valor=row["valor"],
-                descricao=row["descricao"]
-            )
-            for row in rows
-        ]
+        return [_row_to_configuracao(row) for row in rows]
 
 def atualizar(chave: str, valor: str) -> bool:
     """

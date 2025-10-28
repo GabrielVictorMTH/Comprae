@@ -14,9 +14,6 @@
     <!-- CSS Customizado -->
     <link rel="stylesheet" href="/static/css/custom.css">
 
-    <!-- Bootstrap 5.3.8 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-
     {% block head %}{% endblock %}
 </head>
 
@@ -44,12 +41,6 @@
                         <a class="nav-link {{ 'active' if request.path == '/sobre' else '' }}"
                             href="/sobre">Sobre</a>
                     </li>
-                    {% if request.session.get('usuario_logado') %}
-                    <li class="nav-item">
-                        <a class="nav-link {{ 'active' if '/tarefas/' in request.path else '' }}"
-                            href="/tarefas/listar">Tarefas</a>
-                    </li>
-                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/exemplos' in request.path else '' }}"
                             href="/exemplos">Exemplos</a>

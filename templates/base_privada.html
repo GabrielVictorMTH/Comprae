@@ -14,6 +14,9 @@
     <!-- CSS Customizado -->
     <link rel="stylesheet" href="/static/css/custom.css">
 
+    <!-- Chat Widget CSS -->
+    <link rel="stylesheet" href="/static/css/chat-widget.css">
+
     {% block head %}{% endblock %}
 </head>
 
@@ -39,21 +42,17 @@
                             href="/usuario">Dashboard</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if '/perfil/' in request.path else '' }}"
-                            href="/perfil/visualizar">Perfil</a>
+                        <a class="nav-link {{ 'active' if '/usuario/perfil/' in request.path else '' }}"
+                            href="/usuario/perfil/visualizar">Perfil</a>
                     </li>
                     {% if request.session.get('usuario_logado')['perfil'] == 'Administrador' %}
                     <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/admin/chamados/' in request.path else '' }}"
+                            href="/admin/chamados/listar">Chamados</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/usuarios/' in request.path else '' }}"
                             href="/admin/usuarios/listar">Usuários</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ 'active' if '/admin/categorias/' in request.path else '' }}"
-                            href="/admin/categorias/listar">Categorias</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ 'active' if '/admin/produtos/' in request.path else '' }}"
-                            href="/admin/produtos/listar">Produtos</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/tema' in request.path else '' }}"
@@ -66,6 +65,15 @@
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/backups/' in request.path else '' }}"
                             href="/admin/backups/listar">Backup</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/tarefas/' in request.path else '' }}"
+                            href="/tarefas/listar">Tarefas</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/chamados/' in request.path else '' }}"
+                            href="/chamados/listar">Chamados</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -92,6 +100,9 @@
 
     <!-- Modal de Alerta (componente genérico) -->
     {% include 'components/modal_alerta.html' %}
+
+    <!-- Chat Widget -->
+    {% include 'components/chat_widget.html' %}
 
     <!-- Footer -->
     <footer class="bg-light text-center text-muted py-3 mt-auto">
@@ -122,6 +133,22 @@
 
     <!-- Script de Máscaras de Input -->
     <script src="/static/js/input-mask.js"></script>
+
+    <!-- Chat Widget JS -->
+    <script src="/static/js/chat-widget.js" defer></script>
+    <script>
+        // Guardar ID do usuário logado no body para o chat
+        {% if request.session.get('usuario_logado') %}
+        document.body.dataset.usuarioId = {{ request.session.get('usuario_logado')['id'] }};
+        {% endif %}
+
+        // Inicializar chat quando DOM estiver pronto
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof chatWidget !== 'undefined') {
+                chatWidget.init();
+            }
+        });
+    </script>
 
     {% block scripts %}{% endblock %}
 </body>

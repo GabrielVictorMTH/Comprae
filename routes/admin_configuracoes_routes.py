@@ -1,7 +1,6 @@
 from typing import Optional
 import shutil
 from pathlib import Path
-from datetime import datetime
 from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse
 
@@ -12,6 +11,7 @@ from util.template_util import criar_templates
 from util.flash_messages import informar_sucesso, informar_erro
 from util.logger_config import logger
 from util.perfis import Perfil
+from util.datetime_util import agora
 from util.rate_limiter import RateLimiter, obter_identificador_cliente
 
 router = APIRouter(prefix="/admin")
@@ -176,7 +176,7 @@ def _ler_log_arquivo(data: str, nivel: str) -> tuple[str, int, Optional[str]]:
 async def get_auditoria(request: Request, usuario_logado: Optional[dict] = None):
     """Exibe página de auditoria de logs do sistema"""
     # Data padrão: hoje
-    data_hoje = datetime.now().strftime('%Y-%m-%d')
+    data_hoje = agora().strftime('%Y-%m-%d')
 
     return templates.TemplateResponse(
         "admin/auditoria.html",

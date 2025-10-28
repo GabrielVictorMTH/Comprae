@@ -8,10 +8,10 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 import os
 from pathlib import Path
-from datetime import datetime
 import time
 
 from util.config import LOG_LEVEL, LOG_RETENTION_DAYS
+from util.datetime_util import agora
 
 
 class DailyRotatingFileHandler(TimedRotatingFileHandler):
@@ -26,7 +26,7 @@ class DailyRotatingFileHandler(TimedRotatingFileHandler):
         Path(log_dir).mkdir(exist_ok=True)
 
         # Nome do arquivo com data de hoje
-        filename = self._get_filename_for_date(datetime.now())
+        filename = self._get_filename_for_date(agora())
 
         super().__init__(
             filename=filename,
@@ -49,7 +49,7 @@ class DailyRotatingFileHandler(TimedRotatingFileHandler):
             self.stream = None  # type: ignore[assignment]
 
         # Novo arquivo com data atual (após meia-noite)
-        self.baseFilename = self._get_filename_for_date(datetime.now())
+        self.baseFilename = self._get_filename_for_date(agora())
 
         # Deletar arquivos antigos além do backupCount
         if self.backupCount > 0:
