@@ -56,7 +56,7 @@ def categoria_teste():
 def endereco_teste(comprador_teste):
     """Fixture para criar endereço do comprador"""
     endereco = Endereco(
-        id_endereco=0,
+        id=0,
         id_usuario=comprador_teste,
         titulo="Casa",
         logradouro="Rua Teste",
@@ -74,7 +74,7 @@ def endereco_teste(comprador_teste):
 def anuncio_teste(vendedor_teste, categoria_teste):
     """Fixture para criar anúncio"""
     anuncio = Anuncio(
-        id_anuncio=0,
+        id=0,
         id_vendedor=vendedor_teste,
         id_categoria=categoria_teste,
         nome="Produto Teste",
@@ -88,7 +88,7 @@ def anuncio_teste(vendedor_teste, categoria_teste):
         categoria=None
     )
     resultado = anuncio_repo.inserir(anuncio)
-    return resultado.id_anuncio if resultado else None
+    return resultado.id if resultado else None
 
 
 class TestCriarTabela:
@@ -99,7 +99,7 @@ class TestCriarTabela:
 class TestInserir:
     def test_inserir_pedido_valido(self, comprador_teste, endereco_teste, anuncio_teste):
         pedido = Pedido(
-            id_pedido=0,
+            id=0,
             id_endereco=endereco_teste,
             id_comprador=comprador_teste,
             id_anuncio=anuncio_teste,
@@ -112,7 +112,7 @@ class TestInserir:
 
     def test_inserir_pedido_fk_endereco_invalida(self, comprador_teste, anuncio_teste):
         pedido = Pedido(
-            id_pedido=0,
+            id=0,
             id_endereco=99999,
             id_comprador=comprador_teste,
             id_anuncio=anuncio_teste,
@@ -124,7 +124,7 @@ class TestInserir:
 
     def test_inserir_pedido_fk_comprador_invalida(self, endereco_teste, anuncio_teste):
         pedido = Pedido(
-            id_pedido=0,
+            id=0,
             id_endereco=endereco_teste,
             id_comprador=99999,
             id_anuncio=anuncio_teste,
@@ -136,7 +136,7 @@ class TestInserir:
 
     def test_inserir_pedido_fk_anuncio_invalida(self, comprador_teste, endereco_teste):
         pedido = Pedido(
-            id_pedido=0,
+            id=0,
             id_endereco=endereco_teste,
             id_comprador=comprador_teste,
             id_anuncio=99999,
@@ -149,7 +149,7 @@ class TestInserir:
     def test_inserir_pedido_status_default(self, comprador_teste, endereco_teste, anuncio_teste):
         """Testa que o status padrão é 'Pendente'"""
         pedido = Pedido(
-            id_pedido=0,
+            id=0,
             id_endereco=endereco_teste,
             id_comprador=comprador_teste,
             id_anuncio=anuncio_teste,
@@ -267,7 +267,7 @@ class TestObterPorId:
 
         recuperado = pedido_repo.obter_por_id(pedido_id)
         assert recuperado is not None
-        assert recuperado.id_pedido == pedido_id
+        assert recuperado.id == pedido_id
         assert recuperado.preco == 150.0
 
     def test_obter_pedido_inexistente(self):
@@ -296,9 +296,22 @@ class TestObterPorComprador:
 class TestObterPorVendedor:
     def test_obter_pedidos_do_vendedor(self, comprador_teste, endereco_teste, vendedor_teste, categoria_teste):
         # Criar anúncio do vendedor
-        anuncio = Anuncio(0, vendedor_teste, categoria_teste, "Produto", "Desc", 1.0, 100.0, 10, datetime.now(), True, None, None)
+        anuncio = Anuncio(
+            id=0,
+            id_vendedor=vendedor_teste,
+            id_categoria=categoria_teste,
+            nome="Produto",
+            descricao="Desc",
+            peso=1.0,
+            preco=100.0,
+            estoque=10,
+            data_cadastro=datetime.now(),
+            ativo=True,
+            vendedor=None,
+            categoria=None
+        )
         anuncio_resultado = anuncio_repo.inserir(anuncio)
-        anuncio_id = anuncio_resultado.id_anuncio if anuncio_resultado else None
+        anuncio_id = anuncio_resultado.id if anuncio_resultado else None
 
         # Criar pedidos
         for i in range(2):
@@ -326,12 +339,12 @@ class TestObterPorStatus:
         pedido_repo.marcar_como_pago(p2_id)
 
         pedidos_pendentes = pedido_repo.obter_por_status("Pendente")
-        ids_pendentes = [p.id_pedido for p in pedidos_pendentes]
+        ids_pendentes = [p.id for p in pedidos_pendentes]
         assert p1_id in ids_pendentes
         assert p2_id not in ids_pendentes
 
         pedidos_pagos = pedido_repo.obter_por_status("Pago")
-        ids_pagos = [p.id_pedido for p in pedidos_pagos]
+        ids_pagos = [p.id for p in pedidos_pagos]
         assert p2_id in ids_pagos
 
     def test_obter_pedidos_status_inexistente(self):
@@ -413,7 +426,7 @@ class TestModelValidation:
     def test_pedido_model_atributos(self):
         """Testa se o model tem os atributos corretos"""
         pedido = Pedido(
-            id_pedido=1,
+            id=1,
             id_endereco=1,
             id_comprador=1,
             id_anuncio=1,
@@ -421,7 +434,7 @@ class TestModelValidation:
             status="Pendente"
         )
 
-        assert hasattr(pedido, 'id_pedido')
+        assert hasattr(pedido, 'id')
         assert hasattr(pedido, 'id_endereco')
         assert hasattr(pedido, 'id_comprador')
         assert hasattr(pedido, 'id_anuncio')

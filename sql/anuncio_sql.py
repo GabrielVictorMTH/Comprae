@@ -4,7 +4,7 @@ Queries SQL para tabela de Anúncios (Produtos).
 
 CRIAR_TABELA = """
 CREATE TABLE IF NOT EXISTS anuncio (
-    id_anuncio INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_vendedor INTEGER NOT NULL,
     id_categoria INTEGER NOT NULL,
     nome TEXT NOT NULL,
@@ -43,17 +43,17 @@ VALUES (?, ?, ?, ?, ?, ?, ?)
 ALTERAR = """
 UPDATE anuncio
 SET id_categoria = ?, nome = ?, descricao = ?, peso = ?, preco = ?, estoque = ?, ativo = ?
-WHERE id_anuncio = ?
+WHERE id = ?
 """
 
 EXCLUIR = """
 DELETE FROM anuncio
-WHERE id_anuncio = ?
+WHERE id = ?
 """
 
 OBTER_POR_ID = """
 SELECT * FROM anuncio
-WHERE id_anuncio = ?
+WHERE id = ?
 """
 
 OBTER_TODOS = """
@@ -98,5 +98,5 @@ ORDER BY data_cadastro DESC
 ATUALIZAR_ESTOQUE = """
 UPDATE anuncio
 SET estoque = estoque - ?
-WHERE id_anuncio = ? AND estoque >= ?
+WHERE id = ? AND estoque >= ?
 """

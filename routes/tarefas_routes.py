@@ -11,9 +11,30 @@ from util.template_util import criar_templates
 from util.flash_messages import informar_sucesso, informar_erro
 from util.logger_config import logger
 from util.exceptions import FormValidationError
+from util.rate_limit_decorator import aplicar_rate_limit
+from util.repository_helpers import obter_ou_404
+from util.permission_helpers import verificar_propriedade
 
 router = APIRouter(prefix="/tarefas")
 templates = criar_templates("templates/tarefas")
+
+# Rate limiters
+from util.rate_limiter import DynamicRateLimiter
+
+tarefa_criar_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_tarefa_criar_max",
+    chave_minutos="rate_limit_tarefa_criar_minutos",
+    padrao_max=20,
+    padrao_minutos=10,
+    nome="tarefa_criar",
+)
+tarefa_operacao_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_tarefa_operacao_max",
+    chave_minutos="rate_limit_tarefa_operacao_minutos",
+    padrao_max=30,
+    padrao_minutos=5,
+    nome="tarefa_operacao",
+)
 
 @router.get("/listar")
 @requer_autenticacao()
@@ -33,6 +54,11 @@ async def get_cadastrar(request: Request, usuario_logado: Optional[dict] = None)
     return templates.TemplateResponse("tarefas/cadastrar.html", {"request": request})
 
 @router.post("/cadastrar")
+@aplicar_rate_limit(
+    limiter=tarefa_criar_limiter,
+    mensagem_erro="Muitas tentativas de criação de tarefas. Aguarde alguns minutos.",
+    redirect_url="/tarefas/listar"
+)
 @requer_autenticacao()
 async def post_cadastrar(
     request: Request,
@@ -74,16 +100,34 @@ async def post_cadastrar(
         )
 
 @router.post("/{id}/concluir")
+@aplicar_rate_limit(
+    limiter=tarefa_operacao_limiter,
+    mensagem_erro="Muitas operações em tarefas. Aguarde alguns minutos.",
+    redirect_url="/tarefas/listar"
+)
 @requer_autenticacao()
 async def concluir(request: Request, id: int, usuario_logado: Optional[dict] = None):
     """Marca tarefa como concluída"""
     assert usuario_logado is not None
-    tarefa = tarefa_repo.obter_por_id(id)
 
-    # Verificar se tarefa existe e pertence ao usuário
-    if not tarefa or tarefa.usuario_id != usuario_logado["id"]:
-        informar_erro(request, "Tarefa não encontrada")
-        logger.warning(f"Usuário {usuario_logado['id']} tentou concluir tarefa {id} sem permissão")
+    # Obter tarefa ou retornar 404
+    tarefa = obter_ou_404(
+        tarefa_repo.obter_por_id(id),
+        request,
+        "Tarefa não encontrada",
+        "/tarefas/listar"
+    )
+    if isinstance(tarefa, RedirectResponse):
+        return tarefa
+
+    # Verificar propriedade
+    if not verificar_propriedade(
+        tarefa,
+        usuario_logado["id"],
+        request,
+        "Você não tem permissão para concluir esta tarefa",
+        "/tarefas/listar"
+    ):
         return RedirectResponse("/tarefas/listar", status_code=status.HTTP_303_SEE_OTHER)
 
     tarefa_repo.marcar_concluida(id)
@@ -92,19 +136,37 @@ async def concluir(request: Request, id: int, usuario_logado: Optional[dict] = N
     return RedirectResponse("/tarefas/listar", status_code=status.HTTP_303_SEE_OTHER)
 
 @router.post("/{id}/excluir")
+@aplicar_rate_limit(
+    limiter=tarefa_operacao_limiter,
+    mensagem_erro="Muitas operações em tarefas. Aguarde alguns minutos.",
+    redirect_url="/tarefas/listar"
+)
 @requer_autenticacao()
 async def post_excluir(request: Request, id: int, usuario_logado: Optional[dict] = None):
     """Exclui tarefa"""
     assert usuario_logado is not None
-    tarefa = tarefa_repo.obter_por_id(id)
 
-    # Verificar se tarefa existe e pertence ao usuário
-    if tarefa and tarefa.usuario_id == usuario_logado["id"]:
-        tarefa_repo.excluir(id)
-        logger.info(f"Tarefa {id} excluída por usuário {usuario_logado['id']}")
-        informar_sucesso(request, "Tarefa excluída com sucesso!")
-    else:
-        informar_erro(request, "Tarefa não encontrada")
-        logger.warning(f"Usuário {usuario_logado['id']} tentou excluir tarefa {id} sem permissão")
+    # Obter tarefa ou retornar 404
+    tarefa = obter_ou_404(
+        tarefa_repo.obter_por_id(id),
+        request,
+        "Tarefa não encontrada",
+        "/tarefas/listar"
+    )
+    if isinstance(tarefa, RedirectResponse):
+        return tarefa
 
+    # Verificar propriedade
+    if not verificar_propriedade(
+        tarefa,
+        usuario_logado["id"],
+        request,
+        "Você não tem permissão para excluir esta tarefa",
+        "/tarefas/listar"
+    ):
+        return RedirectResponse("/tarefas/listar", status_code=status.HTTP_303_SEE_OTHER)
+
+    tarefa_repo.excluir(id)
+    logger.info(f"Tarefa {id} excluída por usuário {usuario_logado['id']}")
+    informar_sucesso(request, "Tarefa excluída com sucesso!")
     return RedirectResponse("/tarefas/listar", status_code=status.HTTP_303_SEE_OTHER)

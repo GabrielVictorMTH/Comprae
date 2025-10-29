@@ -43,7 +43,7 @@ class TestCriarTabela:
 class TestInserir:
     def test_inserir_anuncio_valido(self, vendedor_teste, categoria_teste):
         anuncio = Anuncio(
-            id_anuncio=0,
+            id=0,
             id_vendedor=vendedor_teste,
             id_categoria=categoria_teste,
             nome="Produto Teste",
@@ -58,11 +58,11 @@ class TestInserir:
         )
         resultado = anuncio_repo.inserir(anuncio)
         assert resultado is not None
-        assert resultado.id_anuncio > 0
+        assert resultado.id > 0
 
     def test_inserir_anuncio_fk_vendedor_invalida(self, categoria_teste):
         anuncio = Anuncio(
-            id_anuncio=0,
+            id=0,
             id_vendedor=99999,
             id_categoria=categoria_teste,
             nome="Teste",
@@ -80,7 +80,7 @@ class TestInserir:
 
     def test_inserir_anuncio_fk_categoria_invalida(self, vendedor_teste):
         anuncio = Anuncio(
-            id_anuncio=0,
+            id=0,
             id_vendedor=vendedor_teste,
             id_categoria=99999,
             nome="Teste",
@@ -100,7 +100,7 @@ class TestInserir:
 class TestAlterar:
     def test_alterar_anuncio_existente(self, vendedor_teste, categoria_teste):
         anuncio = Anuncio(
-            id_anuncio=0,
+            id=0,
             id_vendedor=vendedor_teste,
             id_categoria=categoria_teste,
             nome="Original",
@@ -116,7 +116,7 @@ class TestAlterar:
         resultado = anuncio_repo.inserir(anuncio)
 
         anuncio_alterado = Anuncio(
-            id_anuncio=resultado.id_anuncio,
+            id=resultado.id,
             id_vendedor=vendedor_teste,
             id_categoria=categoria_teste,
             nome="Alterado",
@@ -131,7 +131,7 @@ class TestAlterar:
         )
         assert anuncio_repo.alterar(anuncio_alterado) is True
 
-        recuperado = anuncio_repo.obter_por_id(resultado.id_anuncio)
+        recuperado = anuncio_repo.obter_por_id(resultado.id)
         assert recuperado.nome == "Alterado"
         assert recuperado.preco == 100.0
         assert recuperado.ativo is False
@@ -140,7 +140,7 @@ class TestAlterar:
 class TestExcluir:
     def test_excluir_anuncio_existente(self, vendedor_teste, categoria_teste):
         anuncio = Anuncio(
-            id_anuncio=0,
+            id=0,
             id_vendedor=vendedor_teste,
             id_categoria=categoria_teste,
             nome="ParaExcluir",
@@ -155,14 +155,14 @@ class TestExcluir:
         )
         resultado = anuncio_repo.inserir(anuncio)
 
-        assert anuncio_repo.excluir(resultado.id_anuncio) is True
-        assert anuncio_repo.obter_por_id(resultado.id_anuncio) is None
+        assert anuncio_repo.excluir(resultado.id) is True
+        assert anuncio_repo.obter_por_id(resultado.id) is None
 
 
 class TestObterPorId:
     def test_obter_anuncio_existente(self, vendedor_teste, categoria_teste):
         anuncio = Anuncio(
-            id_anuncio=0,
+            id=0,
             id_vendedor=vendedor_teste,
             id_categoria=categoria_teste,
             nome="BuscaId",
@@ -177,7 +177,7 @@ class TestObterPorId:
         )
         resultado = anuncio_repo.inserir(anuncio)
 
-        recuperado = anuncio_repo.obter_por_id(resultado.id_anuncio)
+        recuperado = anuncio_repo.obter_por_id(resultado.id)
         assert recuperado is not None
         assert recuperado.nome == "BuscaId"
 
@@ -186,7 +186,7 @@ class TestObterTodos:
     def test_obter_todos_anuncios(self, vendedor_teste, categoria_teste):
         for i in range(3):
             anuncio = Anuncio(
-                id_anuncio=0,
+                id=0,
                 id_vendedor=vendedor_teste,
                 id_categoria=categoria_teste,
                 nome=f"Anuncio{i}",
@@ -209,7 +209,7 @@ class TestObterTodosAtivos:
     def test_obter_apenas_ativos(self, vendedor_teste, categoria_teste):
         # Criar ativo
         ativo = Anuncio(
-            id_anuncio=0,
+            id=0,
             id_vendedor=vendedor_teste,
             id_categoria=categoria_teste,
             nome="Ativo",
@@ -226,7 +226,7 @@ class TestObterTodosAtivos:
 
         # Criar inativo
         inativo = Anuncio(
-            id_anuncio=0,
+            id=0,
             id_vendedor=vendedor_teste,
             id_categoria=categoria_teste,
             nome="Inativo",
@@ -242,8 +242,8 @@ class TestObterTodosAtivos:
         resultado_inativo = anuncio_repo.inserir(inativo)
 
         ativos = anuncio_repo.obter_todos_ativos()
-        ids_ativos = [a.id_anuncio for a in ativos]
-        assert resultado_inativo.id_anuncio not in ids_ativos
+        ids_ativos = [a.id for a in ativos]
+        assert resultado_inativo.id not in ids_ativos
 
 
 class TestObterPorVendedor:
@@ -287,16 +287,16 @@ class TestAtualizarEstoque:
         anuncio = Anuncio(0, vendedor_teste, categoria_teste, "Estoque", "Desc", 1.0, 10.0, 10, datetime.now(), True, None, None)
         resultado = anuncio_repo.inserir(anuncio)
 
-        assert anuncio_repo.atualizar_estoque(resultado.id_anuncio, 3) is True
+        assert anuncio_repo.atualizar_estoque(resultado.id, 3) is True
 
-        recuperado = anuncio_repo.obter_por_id(resultado.id_anuncio)
+        recuperado = anuncio_repo.obter_por_id(resultado.id)
         assert recuperado.estoque == 7
 
     def test_atualizar_estoque_insuficiente(self, vendedor_teste, categoria_teste):
         anuncio = Anuncio(0, vendedor_teste, categoria_teste, "Estoque", "Desc", 1.0, 10.0, 2, datetime.now(), True, None, None)
         resultado = anuncio_repo.inserir(anuncio)
 
-        assert anuncio_repo.atualizar_estoque(resultado.id_anuncio, 5) is False
+        assert anuncio_repo.atualizar_estoque(resultado.id, 5) is False
 
 
 class TestCascadeDelete:
@@ -306,4 +306,4 @@ class TestCascadeDelete:
         resultado = anuncio_repo.inserir(anuncio)
 
         usuario_repo.excluir(vendedor)
-        assert anuncio_repo.obter_por_id(resultado.id_anuncio) is None
+        assert anuncio_repo.obter_por_id(resultado.id) is None

@@ -1,0 +1,141 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Detecção de Fraudes - Endereços Duplicados{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin/enderecos/listar">Endereços</a></li>
+                <li class="breadcrumb-item active">Detecção de Fraudes</li>
+            </ol>
+        </nav>
+
+        <h2 class="mb-4">
+            <i class="bi bi-shield-exclamation text-warning"></i> Detecção de Fraudes - Endereços Duplicados
+        </h2>
+
+        <div class="alert alert-warning">
+            <h5 class="alert-heading"><i class="bi bi-info-circle"></i> O que são endereços duplicados?</h5>
+            <p class="mb-0">
+                Endereços com o mesmo <strong>CEP + número</strong> mas vinculados a <strong>usuários diferentes</strong>.
+                Isso pode indicar tentativas de fraude com múltiplas contas usando o mesmo endereço de entrega.
+            </p>
+        </div>
+
+        {% if duplicados %}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    {{ total_grupos }} grupo(s) de endereços duplicados encontrado(s)
+                </h5>
+            </div>
+        </div>
+
+        {% for grupo in duplicados %}
+        <div class="card shadow-sm mb-4 border-warning">
+            <div class="card-header bg-light">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">
+                            <i class="bi bi-geo-alt-fill text-danger"></i>
+                            {{ grupo.logradouro }}, {{ grupo.numero }}
+                        </h5>
+                        <p class="text-muted mb-0">
+                            {{ grupo.bairro }} - {{ grupo.cidade }}/{{ grupo.uf }} - CEP: {{ grupo.cep }}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <span class="badge bg-danger fs-6">
+                            {{ grupo.total_usuarios }} usuários diferentes
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID Endereço</th>
+                                <th>Título</th>
+                                <th>Complemento</th>
+                                <th>Usuário</th>
+                                <th>Email</th>
+                                <th class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for endereco in grupo.enderecos %}
+                            <tr {% if loop.index > 1 %}class="table-warning"{% endif %}>
+                                <td><strong>#{{ endereco.id }}</strong></td>
+                                <td>{{ endereco.titulo }}</td>
+                                <td>
+                                    {% if endereco.complemento %}
+                                        {{ endereco.complemento }}
+                                    {% else %}
+                                        <em class="text-muted">-</em>
+                                    {% endif %}
+                                </td>
+                                <td>{{ endereco.nome_usuario }}</td>
+                                <td><small>{{ endereco.email_usuario }}</small></td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="/admin/enderecos/detalhes/{{ endereco.id }}"
+                                           class="btn btn-outline-primary"
+                                           title="Ver Endereço">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="/admin/usuarios/detalhes/{{ endereco.id_usuario }}"
+                                           class="btn btn-outline-info"
+                                           title="Ver Usuário">
+                                            <i class="bi bi-person"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-danger mt-3 mb-0">
+                    <i class="bi bi-exclamation-octagon"></i>
+                    <strong>Alerta de Fraude:</strong> Este endereço está sendo utilizado por {{ grupo.total_usuarios }} usuários diferentes.
+                    Verifique se não se trata de múltiplas contas fraudulentas.
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% else %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="alert alert-success text-center mb-0">
+                    <h5 class="alert-heading">
+                        <i class="bi bi-check-circle"></i> Nenhum endereço duplicado encontrado
+                    </h5>
+                    <p class="mb-0">
+                        Não foram detectados endereços suspeitos (mesmo CEP + número com usuários diferentes).
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Botões de Ação -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <a href="/admin/enderecos/listar" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar para Lista
+                </a>
+                <a href="/admin/enderecos/estatisticas" class="btn btn-info">
+                    <i class="bi bi-bar-chart"></i> Ver Estatísticas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

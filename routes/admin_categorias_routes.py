@@ -202,32 +202,3 @@ async def post_excluir(request: Request, id: int, usuario_logado: Optional[dict]
         informar_erro(request, "Não é possível excluir esta categoria pois existem produtos vinculados a ela.")
 
     return RedirectResponse("/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER)
-
-@router.post("/excluir/{id}")
-@requer_autenticacao([Perfil.ADMIN.value])
-async def post_excluir(request: Request, id: int, usuario_logado: Optional[dict] = None):
-    """Exclui uma categoria"""
-    assert usuario_logado is not None
-
-    # Rate limiting
-    ip = obter_identificador_cliente(request)
-    if not admin_categorias_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER)
-
-    categoria = categoria_repo.obter_por_id(id)
-
-    if not categoria:
-        informar_erro(request, "Categoria não encontrada")
-        return RedirectResponse("/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER)
-
-    try:
-        categoria_repo.excluir(id)
-        logger.info(f"Categoria {id} ({categoria.nome}) excluída por admin {usuario_logado['id']}")
-        informar_sucesso(request, "Categoria excluída com sucesso!")
-    except Exception as e:
-        # Captura erro de FK constraint (categoria com produtos vinculados)
-        logger.error(f"Erro ao excluir categoria {id}: {str(e)}")
-        informar_erro(request, "Não é possível excluir esta categoria pois existem produtos vinculados a ela.")
-
-    return RedirectResponse("/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER)

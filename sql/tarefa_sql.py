@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS tarefa (
     descricao TEXT,
     concluida INTEGER DEFAULT 0,
     usuario_id INTEGER NOT NULL,
-    data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    data_conclusao DATETIME,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_conclusao TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 )
 """

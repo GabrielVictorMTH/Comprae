@@ -1,0 +1,90 @@
+<!-- Widget de Chat - Componente retrátil no canto inferior direito -->
+
+<!-- Botão flutuante (estado retraído) -->
+<div id="chat-widget-button" class="position-fixed bottom-0 end-0 m-3" style="z-index: 1050; display: flex;" onclick="toggleChatWidget()">
+    <button type="button" class="btn btn-primary rounded-circle position-relative" style="width: 60px; height: 60px;">
+        <i class="bi bi-chat-dots-fill fs-4"></i>
+        <span id="chat-badge" class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger" style="display: none;">
+            0
+        </span>
+    </button>
+</div>
+
+<!-- Painel expandido -->
+<div id="chat-widget-panel" class="position-fixed bottom-0 end-0 m-3 border rounded shadow-lg bg-white" style="width: 585px; height: 600px; z-index: 1049; display: none;">
+
+    <!-- Cabeçalho -->
+    <div class="d-flex align-items-center justify-content-between p-3 border-bottom bg-primary text-white">
+        <h5 class="mb-0">
+            <i class="bi bi-chat-dots me-2"></i>Chat
+        </h5>
+        <button type="button" class="btn btn-sm btn-primary" onclick="toggleChatWidget()" aria-label="Minimizar">
+            <i class="bi bi-dash-lg"></i>
+        </button>
+    </div>
+
+    <!-- Corpo do chat -->
+    <div class="d-flex" style="height: calc(100% - 64px);">
+
+        <!-- Painel de conversas -->
+        <div class="border-end bg-light d-flex flex-column" style="width: 234px; flex-shrink: 0;">
+
+            <!-- Campo de busca de usuários -->
+            <div class="p-2">
+                <div class="position-relative">
+                    <input
+                        type="text"
+                        id="chat-user-search"
+                        class="form-control form-control-sm"
+                        placeholder="Buscar usuário..."
+                        autocomplete="off"
+                    >
+                    <div id="chat-search-suggestions" class="position-absolute w-100 bg-white border rounded-bottom shadow-sm" style="z-index: 1000; max-height: 200px; overflow-y: auto; display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Lista de conversas -->
+            <div id="chat-conversations-list" class="flex-grow-1 overflow-auto">
+                <!-- Conversas serão inseridas aqui via JS -->
+            </div>
+
+            <!-- Botão carregar mais -->
+            <div class="p-2 border-top">
+                <button type="button" class="btn btn-sm btn-outline-secondary w-100" onclick="carregarMaisConversas()">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Carregar mais
+                </button>
+            </div>
+        </div>
+
+        <!-- Painel de mensagens -->
+        <div class="d-flex flex-column flex-grow-1">
+
+            <!-- Container de mensagens -->
+            <div id="chat-messages-container" class="flex-grow-1 overflow-auto p-3" style="background-color: #f8f9fa;">
+                <!-- Mensagens serão inseridas aqui via JS -->
+                <!-- Mensagens mais antigas no topo, mais recentes embaixo -->
+            </div>
+
+            <!-- Campo de entrada -->
+            <div class="p-2 border-top bg-white">
+                <form id="chat-message-form" onsubmit="enviarMensagem(event); return false;">
+                    <div class="input-group">
+                        <textarea
+                            id="chat-message-input"
+                            class="form-control"
+                            placeholder="Digite sua mensagem..."
+                            rows="2"
+                            style="resize: none;"
+                        ></textarea>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send-fill"></i>
+                        </button>
+                    </div>
+                    <small class="text-muted" style="font-size: 0.7rem;">
+                        <kbd>Enter</kbd> envia • <kbd>Shift+Enter</kbd> quebra linha
+                    </small>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

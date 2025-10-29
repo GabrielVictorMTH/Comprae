@@ -11,3 +11,6 @@ class Tarefa:
     usuario_id: int
     data_criacao: Optional[datetime] = None
     data_conclusao: Optional[datetime] = None
+    # Campos do JOIN (para exibição)
+    usuario_nome: Optional[str] = None
+    usuario_email: Optional[str] = None

@@ -55,25 +55,25 @@ def alterar(anuncio: Anuncio) -> bool:
                 anuncio.preco,
                 anuncio.estoque,
                 anuncio.ativo,
-                anuncio.id_anuncio
+                anuncio.id
             )
         )
         return cursor.rowcount > 0
 
 
-def excluir(id_anuncio: int) -> bool:
+def excluir(id: int) -> bool:
     """Exclui um anúncio"""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(EXCLUIR, (id_anuncio,))
+        cursor.execute(EXCLUIR, (id,))
         return cursor.rowcount > 0
 
 
-def obter_por_id(id_anuncio: int) -> Optional[Anuncio]:
+def obter_por_id(id: int) -> Optional[Anuncio]:
     """Obtém um anúncio por ID"""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(OBTER_POR_ID, (id_anuncio,))
+        cursor.execute(OBTER_POR_ID, (id,))
         row = cursor.fetchone()
         if row:
             return _row_to_anuncio(row)
@@ -149,21 +149,21 @@ def buscar_com_filtros(
         return [_row_to_anuncio(row) for row in rows]
 
 
-def atualizar_estoque(id_anuncio: int, quantidade: int) -> bool:
+def atualizar_estoque(id: int, quantidade: int) -> bool:
     """
     Diminui o estoque de um anúncio de forma atômica.
     Retorna True se conseguiu atualizar (estoque suficiente).
     """
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(ATUALIZAR_ESTOQUE, (quantidade, id_anuncio, quantidade))
+        cursor.execute(ATUALIZAR_ESTOQUE, (quantidade, id, quantidade))
         return cursor.rowcount > 0
 
 
 def _row_to_anuncio(row) -> Anuncio:
     """Converte row do banco para objeto Anuncio"""
     return Anuncio(
-        id_anuncio=row["id_anuncio"],
+        id=row["id"],
         id_vendedor=row["id_vendedor"],
         id_categoria=row["id_categoria"],
         nome=row["nome"],

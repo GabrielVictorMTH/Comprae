@@ -1,0 +1,171 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Estatísticas de Endereços - Admin{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin/enderecos/listar">Endereços</a></li>
+                <li class="breadcrumb-item active">Estatísticas</li>
+            </ol>
+        </nav>
+
+        <h2 class="mb-4"><i class="bi bi-bar-chart"></i> Estatísticas de Endereços</h2>
+
+        <!-- Cards de Resumo -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted">Total de Endereços</h6>
+                        <h2 class="display-4 text-primary">{{ stats.total_enderecos }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted">Usuários com Endereço</h6>
+                        <h2 class="display-4 text-success">{{ stats.usuarios_com_endereco }}</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm text-center">
+                    <div class="card-body">
+                        <h6 class="card-title text-muted">Média de Endereços/Usuário</h6>
+                        <h2 class="display-4 text-info">{{ stats.media_enderecos_por_usuario }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Distribuição por UF -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-map"></i> Distribuição por Estado (UF)</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if por_uf %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>UF</th>
+                                        <th class="text-end">Quantidade</th>
+                                        <th>Distribuição</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in por_uf %}
+                                    <tr>
+                                        <td><strong>{{ item.uf }}</strong></td>
+                                        <td class="text-end">{{ item.total }}</td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar bg-primary"
+                                                     role="progressbar"
+                                                     style="width: {{ (item.total / stats.total_enderecos * 100)|round(1) }}%"
+                                                     aria-valuenow="{{ item.total }}"
+                                                     aria-valuemin="0"
+                                                     aria-valuemax="{{ stats.total_enderecos }}">
+                                                    {{ (item.total / stats.total_enderecos * 100)|round(1) }}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle"></i> Nenhum endereço cadastrado.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top 10 Cidades -->
+            <div class="col-md-6 mb-3">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-building"></i> Top 10 Cidades</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if por_cidade %}
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Cidade</th>
+                                        <th>UF</th>
+                                        <th class="text-end">Quantidade</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in por_cidade %}
+                                    <tr>
+                                        <td>
+                                            {% if loop.index <= 3 %}
+                                                <span class="badge bg-warning text-dark">{{ loop.index }}º</span>
+                                            {% else %}
+                                                {{ loop.index }}º
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ item.cidade }}</td>
+                                        <td><span class="badge bg-secondary">{{ item.uf }}</span></td>
+                                        <td class="text-end"><strong>{{ item.total }}</strong></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info mb-0">
+                            <i class="bi bi-info-circle"></i> Nenhum endereço cadastrado.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Link para Detecção de Fraudes -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm border-warning">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">
+                            <i class="bi bi-shield-exclamation text-warning"></i> Detecção de Fraudes
+                        </h5>
+                        <p class="card-text">
+                            Identifique endereços duplicados (mesmo CEP + número) que podem indicar múltiplas contas fraudulentas.
+                        </p>
+                        <a href="/admin/enderecos/duplicados" class="btn btn-warning">
+                            <i class="bi bi-search"></i> Ver Endereços Duplicados
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="row">
+            <div class="col-12">
+                <a href="/admin/enderecos/listar" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Voltar para Lista
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

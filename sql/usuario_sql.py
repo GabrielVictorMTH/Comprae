@@ -1,16 +1,14 @@
-# IMPORTANTE: O valor padrão 'cliente' deve corresponder a Perfil.CLIENTE.value
-# Fonte única da verdade: util.perfis.Perfil
-# Valores válidos: 'admin' (Perfil.ADMIN.value), 'cliente' (Perfil.CLIENTE.value)
 CRIAR_TABELA = """
 CREATE TABLE IF NOT EXISTS usuario (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     nome TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     senha TEXT NOT NULL,
-    perfil TEXT DEFAULT 'cliente',
+    perfil TEXT NOT NULL,
     token_redefinicao TEXT,
-    data_token DATETIME,
-    data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+    data_token TIMESTAMP,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_atualizacao TIMESTAMP
 )
 """
 
@@ -21,13 +19,13 @@ VALUES (?, ?, ?, ?)
 
 ALTERAR = """
 UPDATE usuario
-SET nome = ?, email = ?, perfil = ?
+SET nome = ?, email = ?, perfil = ?, data_atualizacao = CURRENT_TIMESTAMP
 WHERE id = ?
 """
 
 ALTERAR_SENHA = """
 UPDATE usuario
-SET senha = ?
+SET senha = ?, data_atualizacao = CURRENT_TIMESTAMP
 WHERE id = ?
 """
 

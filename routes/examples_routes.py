@@ -1,16 +1,40 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, status
+
 from util.template_util import criar_templates
+from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
+from util.flash_messages import informar_erro
+from util.logger_config import logger
 
 router = APIRouter(prefix="/exemplos")
-templates_home = criar_templates("templates")
+templates_public = criar_templates("templates")
+
+# Rate limiter para páginas de exemplos (proteção contra DDoS)
+examples_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_examples_max",
+    chave_minutos="rate_limit_examples_minutos",
+    padrao_max=100,
+    padrao_minutos=1,
+    nome="examples_pages",
+)
 
 
-@router.get("")
-async def home(request: Request):
+@router.get("/")
+async def index(request: Request):
     """
     Página inicial de exemplos
     """
-    return templates_home.TemplateResponse(
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not examples_limiter.verificar(ip):
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
+        logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
+        return templates_public.TemplateResponse(
+            "errors/429.html",
+            {"request": request},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+
+    return templates_public.TemplateResponse(
         "exemplos/index.html",
         {"request": request}
     )
@@ -21,7 +45,18 @@ async def form_fields_demo(request: Request):
     """
     Página de demonstração da macro de campos de formulário
     """
-    return templates_home.TemplateResponse(
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not examples_limiter.verificar(ip):
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
+        logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
+        return templates_public.TemplateResponse(
+            "errors/429.html",
+            {"request": request},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+
+    return templates_public.TemplateResponse(
         "exemplos/demo_campos_formulario.html",
         {"request": request}
     )
@@ -32,7 +67,18 @@ async def cards_grid_demo(request: Request):
     """
     Página de demonstração de grid de cards responsivo
     """
-    return templates_home.TemplateResponse(
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not examples_limiter.verificar(ip):
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
+        logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
+        return templates_public.TemplateResponse(
+            "errors/429.html",
+            {"request": request},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+
+    return templates_public.TemplateResponse(
         "exemplos/grade_cartoes.html",
         {"request": request}
     )
@@ -43,7 +89,18 @@ async def bootswatch_demo(request: Request):
     """
     Página de demonstração de temas Bootswatch
     """
-    return templates_home.TemplateResponse(
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not examples_limiter.verificar(ip):
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
+        logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
+        return templates_public.TemplateResponse(
+            "errors/429.html",
+            {"request": request},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+
+    return templates_public.TemplateResponse(
         "exemplos/bootswatch.html",
         {"request": request}
     )
@@ -54,7 +111,18 @@ async def product_detail_demo(request: Request):
     """
     Página de demonstração de detalhes de produto e-commerce
     """
-    return templates_home.TemplateResponse(
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not examples_limiter.verificar(ip):
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
+        logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
+        return templates_public.TemplateResponse(
+            "errors/429.html",
+            {"request": request},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+
+    return templates_public.TemplateResponse(
         "exemplos/detalhes_produto.html",
         {"request": request}
     )
@@ -65,7 +133,18 @@ async def service_detail_demo(request: Request):
     """
     Página de demonstração de detalhes de serviço profissional
     """
-    return templates_home.TemplateResponse(
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not examples_limiter.verificar(ip):
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
+        logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
+        return templates_public.TemplateResponse(
+            "errors/429.html",
+            {"request": request},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+
+    return templates_public.TemplateResponse(
         "exemplos/detalhes_servico.html",
         {"request": request}
     )
@@ -76,7 +155,18 @@ async def profile_detail_demo(request: Request):
     """
     Página de demonstração de perfil de pessoa
     """
-    return templates_home.TemplateResponse(
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not examples_limiter.verificar(ip):
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
+        logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
+        return templates_public.TemplateResponse(
+            "errors/429.html",
+            {"request": request},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+
+    return templates_public.TemplateResponse(
         "exemplos/detalhes_perfil.html",
         {"request": request}
     )
@@ -87,7 +177,18 @@ async def property_detail_demo(request: Request):
     """
     Página de demonstração de detalhes de imóvel
     """
-    return templates_home.TemplateResponse(
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not examples_limiter.verificar(ip):
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
+        logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
+        return templates_public.TemplateResponse(
+            "errors/429.html",
+            {"request": request},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+
+    return templates_public.TemplateResponse(
         "exemplos/detalhes_imovel.html",
         {"request": request}
     )
@@ -98,6 +199,17 @@ async def table_list_demo(request: Request):
     """
     Página de demonstração de tabela com listagem de dados
     """
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not examples_limiter.verificar(ip):
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
+        logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
+        return templates_public.TemplateResponse(
+            "errors/429.html",
+            {"request": request},
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+        )
+
     # Dados mockados para demonstração
     produtos = [
         {"id": 1, "nome": "Notebook Dell Inspiron 15", "categoria": "Informática", "preco": 3499.90, "estoque": 75, "ativo": True},
@@ -112,7 +224,7 @@ async def table_list_demo(request: Request):
         {"id": 10, "nome": "Cadeira Gamer", "categoria": "Mobília", "preco": 899.90, "estoque": 18, "ativo": True},
     ]
 
-    return templates_home.TemplateResponse(
+    return templates_public.TemplateResponse(
         "exemplos/lista_tabela.html",
         {"request": request, "produtos": produtos}
     )

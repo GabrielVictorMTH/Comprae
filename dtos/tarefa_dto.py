@@ -7,8 +7,6 @@ from dtos.validators import (
 
 
 class CriarTarefaDTO(BaseModel):
-    """DTO para criação de tarefa"""
-
     titulo: str
     descricao: str = ""
 
@@ -23,8 +21,6 @@ class CriarTarefaDTO(BaseModel):
 
 
 class AlterarTarefaDTO(BaseModel):
-    """DTO para alteração de tarefa"""
-
     id: int
     titulo: str
     descricao: str = ""

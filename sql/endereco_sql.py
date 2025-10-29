@@ -4,7 +4,7 @@ Queries SQL para tabela de Endereços.
 
 CRIAR_TABELA = """
 CREATE TABLE IF NOT EXISTS endereco (
-    id_endereco INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     id_usuario INTEGER NOT NULL,
     titulo TEXT NOT NULL,
     logradouro TEXT NOT NULL,
@@ -33,17 +33,17 @@ ALTERAR = """
 UPDATE endereco
 SET titulo = ?, logradouro = ?, numero = ?, complemento = ?,
     bairro = ?, cidade = ?, uf = ?, cep = ?
-WHERE id_endereco = ?
+WHERE id = ?
 """
 
 EXCLUIR = """
 DELETE FROM endereco
-WHERE id_endereco = ?
+WHERE id = ?
 """
 
 OBTER_POR_ID = """
 SELECT * FROM endereco
-WHERE id_endereco = ?
+WHERE id = ?
 """
 
 OBTER_TODOS_POR_USUARIO = """

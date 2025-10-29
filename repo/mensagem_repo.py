@@ -33,23 +33,23 @@ def inserir(mensagem: Mensagem) -> Optional[Mensagem]:
     return None
 
 
-def marcar_como_lida(id_mensagem: int) -> bool:
+def marcar_como_lida(id: int) -> bool:
     """Marca uma mensagem como lida"""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(MARCAR_COMO_LIDA, (id_mensagem,))
+        cursor.execute(MARCAR_COMO_LIDA, (id,))
         return cursor.rowcount > 0
 
 
-def obter_por_id(id_mensagem: int) -> Optional[Mensagem]:
+def obter_por_id(id: int) -> Optional[Mensagem]:
     """Obtém uma mensagem por ID"""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(OBTER_POR_ID, (id_mensagem,))
+        cursor.execute(OBTER_POR_ID, (id,))
         row = cursor.fetchone()
         if row:
             return Mensagem(
-                id_mensagem=row["id_mensagem"],
+                id=row["id"],
                 id_remetente=row["id_remetente"],
                 id_destinatario=row["id_destinatario"],
                 mensagem=row["mensagem"],
@@ -69,7 +69,7 @@ def obter_conversa(id_usuario1: int, id_usuario2: int) -> list[Mensagem]:
         rows = cursor.fetchall()
         return [
             Mensagem(
-                id_mensagem=row["id_mensagem"],
+                id=row["id"],
                 id_remetente=row["id_remetente"],
                 id_destinatario=row["id_destinatario"],
                 mensagem=row["mensagem"],
@@ -90,7 +90,7 @@ def obter_mensagens_recebidas(id_usuario: int) -> list[Mensagem]:
         rows = cursor.fetchall()
         return [
             Mensagem(
-                id_mensagem=row["id_mensagem"],
+                id=row["id"],
                 id_remetente=row["id_remetente"],
                 id_destinatario=row["id_destinatario"],
                 mensagem=row["mensagem"],
@@ -111,7 +111,7 @@ def obter_mensagens_nao_lidas(id_usuario: int) -> list[Mensagem]:
         rows = cursor.fetchall()
         return [
             Mensagem(
-                id_mensagem=row["id_mensagem"],
+                id=row["id"],
                 id_remetente=row["id_remetente"],
                 id_destinatario=row["id_destinatario"],
                 mensagem=row["mensagem"],

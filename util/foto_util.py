@@ -15,6 +15,7 @@ from PIL import Image
 
 from util.logger_config import logger
 from util.config import FOTO_PERFIL_TAMANHO_MAX
+from util.config_cache import config
 
 
 # Configurações
@@ -27,15 +28,15 @@ QUALIDADE_FOTO = 90
 
 def obter_caminho_foto_usuario(id: int) -> str:
     """
-    Retorna o caminho relativo da foto do usuário para uso em templates.
+    Retorna o caminho absoluto da foto do usuário para uso em templates.
 
     Args:
         id: ID do usuário
 
     Returns:
-        String com caminho relativo (ex: /static/img/usuarios/000001.jpg)
+        String com caminho absoluto (ex: /static/img/usuarios/000001.jpg)
     """
-    return f"{PASTA_FOTOS}/{id:06d}.jpg"
+    return f"/{PASTA_FOTOS}/{id:06d}.jpg"
 
 
 def obter_path_absoluto_foto(id: int) -> Path:
@@ -121,7 +122,8 @@ def salvar_foto_cropada_usuario(id: int, conteudo_base64: str) -> bool:
             imagem = imagem.convert("RGB")  # type: ignore
 
         # Redimensionar se necessário (mantendo aspect ratio)
-        tamanho_max = FOTO_PERFIL_TAMANHO_MAX
+        # Lê tamanho máximo do cache (database → .env)
+        tamanho_max = config.obter_int("foto_perfil_tamanho_max", FOTO_PERFIL_TAMANHO_MAX)
         if imagem.width > tamanho_max or imagem.height > tamanho_max:
             # thumbnail redimensiona mantendo aspect ratio
             imagem.thumbnail((tamanho_max, tamanho_max), Image.Resampling.LANCZOS)

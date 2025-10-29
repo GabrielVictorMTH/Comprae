@@ -6,7 +6,7 @@ from model.usuario_model import Usuario
 
 @dataclass
 class Endereco:
-    id_endereco: int
+    id: int
     id_usuario: int
     titulo: str
     logradouro: str
