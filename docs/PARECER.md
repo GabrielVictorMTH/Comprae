@@ -564,7 +564,7 @@ Entidades com workflows complexos possuem mais de 2 DTOs.
 
 ---
 
-#### ℹ️ OBS-003: Verificação Defensiva em row.keys()
+#### ℹ️ OBS-003: Verificação Defensiva em row.keys() - ✅ ANÁLISE CONCLUÍDA
 
 **Arquivo:** `repo/pedido_repo.py:143-148`
 
@@ -578,15 +578,19 @@ data_hora_pagamento=_converter_data(
 Verificação se campo existe em row antes de acessar.
 
 **Análise:**
-Esta abordagem é necessária quando:
+Esta abordagem é **NECESSÁRIA e CORRETA** porque:
+- `sqlite3.Row` não possui método `.get()` (diferente de dicts Python)
 - Queries diferentes retornam colunas diferentes
 - SQLite não garante estrutura fixa de rows
 
-**Alternativa Sugerida:**
+**Alternativa Testada:**
 ```python
-data_hora_pagamento=_converter_data(row.get("data_hora_pagamento"))
+data_hora_pagamento=_converter_data(row.get("data_hora_pagamento"))  # ❌ NÃO FUNCIONA
 ```
-Mais pythônico e conciso.
+
+**Resultado:** `AttributeError: 'sqlite3.Row' object has no attribute 'get'`
+
+**Conclusão:** A implementação atual é a **abordagem correta** para SQLite. Não há melhoria possível sem mudar a biblioteca de banco de dados.
 
 ---
 
