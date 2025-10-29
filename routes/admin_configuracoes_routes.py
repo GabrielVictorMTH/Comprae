@@ -13,18 +13,20 @@ from util.flash_messages import informar_sucesso, informar_erro, informar_aviso
 from util.logger_config import logger
 from util.perfis import Perfil
 from util.datetime_util import agora
-from util.rate_limiter import RateLimiter, obter_identificador_cliente
+from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
 from util.exceptions import FormValidationError
 from util.validation_util import processar_erros_validacao
-from dtos.configuracao_dto import EditarConfiguracaoDTO
+from dtos.configuracao_dto import EditarConfiguracaoDTO, SalvarConfiguracaoLoteDTO
 
 router = APIRouter(prefix="/admin")
 templates = criar_templates("templates/admin")
 
 # Rate limiter para operações de configuração
-admin_config_limiter = RateLimiter(
-    max_tentativas=10,  # 10 operações
-    janela_minutos=1,   # por minuto
+admin_config_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_admin_config_max",
+    chave_minutos="rate_limit_admin_config_minutos",
+    padrao_max=10,
+    padrao_minutos=1,
     nome="admin_config",
 )
 
@@ -57,58 +59,31 @@ async def get_listar_configuracoes(request: Request, usuario_logado: Optional[di
         return RedirectResponse("/home", status_code=status.HTTP_303_SEE_OTHER)
 
 
-@router.get("/configuracoes/editar/{chave}")
+# Rotas de edição individual desativadas (substituídas por salvamento em lote)
+# Mantidas comentadas para referência histórica
+#
+# @router.get("/configuracoes/editar/{chave}")
+# @router.post("/configuracoes/editar/{chave}")
+#
+# A edição agora é feita diretamente na tela de listagem com abas,
+# salvando múltiplas configurações de uma vez via /configuracoes/salvar-lote
+
+
+@router.post("/configuracoes/salvar-lote")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def get_editar_configuracao(
+async def post_salvar_lote_configuracoes(
     request: Request,
-    chave: str,
     usuario_logado: Optional[dict] = None
 ):
-    """Exibe formulário de edição de configuração"""
-    try:
-        config_obj = configuracao_repo.obter_por_chave(chave)
+    """
+    Salva múltiplas configurações de uma vez (salvamento em lote).
 
-        if not config_obj:
-            informar_erro(request, f"Configuração '{chave}' não encontrada")
-            return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+    Recebe todos os campos do formulário, valida usando SalvarConfiguracaoLoteDTO,
+    e atualiza todas as configurações válidas em uma única transação.
 
-        # Extrair categoria da descrição
-        import re
-        categoria = "Outras"
-        descricao_limpa = config_obj.descricao or ""
-        if config_obj.descricao:
-            match = re.match(r'^\[([^\]]+)\]\s*(.+)$', config_obj.descricao)
-            if match:
-                categoria = match.group(1)
-                descricao_limpa = match.group(2)
-
-        return templates.TemplateResponse(
-            "admin/configuracoes/editar.html",
-            {
-                "request": request,
-                "config": config_obj,
-                "categoria": categoria,
-                "descricao_limpa": descricao_limpa,
-                "dados": {"chave": config_obj.chave, "valor": config_obj.valor},
-                "erros": {}
-            }
-        )
-
-    except Exception as e:
-        logger.error(f"Erro ao buscar configuração '{chave}': {e}")
-        informar_erro(request, "Erro ao carregar configuração")
-        return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
-
-
-@router.post("/configuracoes/editar/{chave}")
-@requer_autenticacao([Perfil.ADMIN.value])
-async def post_editar_configuracao(
-    request: Request,
-    chave: str,
-    valor: str = Form(...),
-    usuario_logado: Optional[dict] = None
-):
-    """Salva alterações em uma configuração"""
+    Returns:
+        Redirect para listagem com mensagem de sucesso ou erro
+    """
     assert usuario_logado is not None
 
     # Rate limiting
@@ -117,73 +92,79 @@ async def post_editar_configuracao(
         informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
         return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Dados do formulário para reexibir em caso de erro
-    dados_formulario = {"chave": chave, "valor": valor}
-
     try:
-        # Validação com DTO
-        dto = EditarConfiguracaoDTO(chave=chave, valor=valor)
+        # Obter dados do formulário
+        form_data = await request.form()
 
-        # Buscar configuração existente
-        config_existente = configuracao_repo.obter_por_chave(chave)
+        # Converter FormData para dict, ignorando campo 'categoria'
+        configs = {}
+        for key, value in form_data.items():
+            if key != "categoria" and value:  # Ignorar categoria e valores vazios
+                configs[key] = value
 
-        if not config_existente:
-            informar_erro(request, f"Configuração '{chave}' não encontrada")
+        if not configs:
+            informar_aviso(request, "Nenhuma configuração para salvar.")
             return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
 
-        # Salvar valor anterior para log
-        valor_anterior = config_existente.valor
+        # Validar com DTO
+        dto = SalvarConfiguracaoLoteDTO(configs=configs)
 
-        # Atualizar configuração
-        sucesso = configuracao_repo.atualizar(chave, valor)
+        # Atualizar configurações no banco
+        quantidade_atualizada, chaves_nao_encontradas = configuracao_repo.atualizar_multiplas(dto.configs)
 
-        if sucesso:
-            # Limpar cache de configurações
-            config.limpar()
+        # Limpar cache de configurações
+        config.limpar()
 
-            logger.info(
-                f"Configuração '{chave}' alterada por admin {usuario_logado['id']} - "
-                f"Anterior: '{valor_anterior}' → Novo: '{valor}'"
-            )
-
-            informar_sucesso(request, f"Configuração '{chave}' atualizada com sucesso!")
-            return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
-        else:
-            informar_erro(request, "Erro ao atualizar configuração")
-            return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
-
-    except ValidationError as e:
-        # Buscar config novamente para reexibir formulário
-        config_obj = configuracao_repo.obter_por_chave(chave)
-        if not config_obj:
-            informar_erro(request, "Configuração não encontrada")
-            return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
-
-        # Extrair categoria da descrição
-        import re
-        categoria = "Outras"
-        descricao_limpa = config_obj.descricao or ""
-        if config_obj.descricao:
-            match = re.match(r'^\[([^\]]+)\]\s*(.+)$', config_obj.descricao)
-            if match:
-                categoria = match.group(1)
-                descricao_limpa = match.group(2)
-
-        # Adicionar contexto extra aos dados do formulário (para reexibir form)
-        dados_formulario["config"] = config_obj  # type: ignore[assignment]
-        dados_formulario["categoria"] = categoria
-        dados_formulario["descricao_limpa"] = descricao_limpa
-
-        raise FormValidationError(
-            validation_error=e,
-            template_path="admin/configuracoes/editar.html",
-            dados_formulario=dados_formulario,
-            campo_padrao="valor"
+        # Log de auditoria
+        logger.info(
+            f"Atualização em lote de configurações por admin {usuario_logado['id']} - "
+            f"{quantidade_atualizada} atualizadas, {len(chaves_nao_encontradas)} não encontradas"
         )
 
+        # Mensagem de feedback
+        if quantidade_atualizada > 0:
+            if chaves_nao_encontradas:
+                informar_aviso(
+                    request,
+                    f"{quantidade_atualizada} configurações atualizadas com sucesso! "
+                    f"Algumas chaves não foram encontradas: {', '.join(chaves_nao_encontradas)}"
+                )
+            else:
+                informar_sucesso(
+                    request,
+                    f"{quantidade_atualizada} configurações atualizadas com sucesso! "
+                    "Alterações aplicadas imediatamente."
+                )
+        else:
+            informar_erro(request, "Nenhuma configuração foi atualizada.")
+
+        return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+
+    except ValidationError as e:
+        # Processar erros de validação
+        erros = processar_erros_validacao(e)
+
+        # Montar mensagem de erro amigável
+        if erros:
+            mensagens_erro = []
+            for campo, mensagem in erros.items():
+                # Remover o prefixo "configs." dos campos se existir
+                campo_limpo = campo.replace("configs.", "")
+                mensagens_erro.append(f"{campo_limpo}: {mensagem}")
+
+            msg_erro = "Erros de validação: " + "; ".join(mensagens_erro)
+        else:
+            msg_erro = "Erro ao validar configurações. Verifique os valores informados."
+
+        logger.warning(f"Erro de validação no salvamento em lote: {msg_erro}")
+        informar_erro(request, msg_erro)
+
+        # Redirecionar de volta para a listagem
+        return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+
     except Exception as e:
-        logger.error(f"Erro ao atualizar configuração '{chave}': {e}")
-        informar_erro(request, f"Erro ao atualizar configuração: {str(e)}")
+        logger.error(f"Erro ao salvar configurações em lote: {e}")
+        informar_erro(request, f"Erro ao salvar configurações: {str(e)}")
         return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
 
 

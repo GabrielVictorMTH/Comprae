@@ -14,15 +14,17 @@ from util.perfis import Perfil
 from util.security import criar_hash_senha
 from util.exceptions import FormValidationError
 from util.validation_helpers import verificar_email_disponivel
-from util.rate_limiter import RateLimiter, obter_identificador_cliente
+from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
 
 router = APIRouter(prefix="/admin/usuarios")
 templates = criar_templates("templates/admin/usuarios")
 
 # Rate limiter para operações admin (mais restritivo)
-admin_usuarios_limiter = RateLimiter(
-    max_tentativas=10,  # 10 operações
-    janela_minutos=1,   # por minuto
+admin_usuarios_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_admin_usuarios_max",
+    chave_minutos="rate_limit_admin_usuarios_minutos",
+    padrao_max=10,
+    padrao_minutos=1,
     nome="admin_usuarios",
 )
 

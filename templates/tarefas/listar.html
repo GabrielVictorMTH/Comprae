@@ -1,4 +1,5 @@
 {% extends 'base_privada.html' %}
+{% from 'macros/empty_states.html' import empty_state %}
 
 {% block titulo %}Lista de Tarefas{% endblock %}
 
@@ -70,14 +71,13 @@
             </small>
         </div>
         {% else %}
-        <div class="alert alert-info" role="alert">
-            <h4 class="alert-heading"><i class="bi bi-info-circle"></i> Nenhuma tarefa cadastrada</h4>
-            <p>Você ainda não possui tarefas cadastradas. Clique no botão "Nova Tarefa" para começar!</p>
-            <hr>
-            <a href="/tarefas/cadastrar" class="btn btn-success">
-                <i class="bi bi-plus-circle"></i> Cadastrar Primeira Tarefa
-            </a>
-        </div>
+        {{ empty_state(
+            'Nenhuma tarefa cadastrada',
+            'Você ainda não possui tarefas cadastradas. Clique no botão abaixo para começar!',
+            action_url='/tarefas/cadastrar',
+            action_text='Cadastrar Primeira Tarefa',
+            icon='clipboard-x'
+        ) }}
         {% endif %}
     </div>
 </div>
@@ -86,22 +86,8 @@
 {% block scripts %}
 <script>
     function excluirTarefa(tarefaId, tarefaTitulo) {
-        const detalhes = `
-        <div class="card bg-light">
-            <div class="card-body">
-                <h6 class="card-title mb-2">
-                    <i class="bi bi-list-task"></i> Tarefa:
-                </h6>
-                <p class="mb-0"><strong>${tarefaTitulo}</strong></p>
-            </div>
-        </div>
-    `;
-
-        abrirModalConfirmacao({
-            url: `/tarefas/${tarefaId}/excluir`,
-            mensagem: 'Tem certeza que deseja excluir esta tarefa?',
-            detalhes: detalhes
-        });
+        // Usando helper genérico do delete-helpers.js
+        excluirTarefa(tarefaId, tarefaTitulo, '', '/tarefas');
     }
 </script>
 {% endblock %}

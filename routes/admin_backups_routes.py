@@ -14,27 +14,27 @@ from util.flash_messages import informar_sucesso, informar_erro, informar_aviso
 from util.logger_config import logger
 from util.perfis import Perfil
 from util import backup_util
-from util.rate_limiter import RateLimiter, obter_identificador_cliente
-from util.config import (
-    RATE_LIMIT_BACKUP_DOWNLOAD_MAX,
-    RATE_LIMIT_BACKUP_DOWNLOAD_MINUTOS,
-)
+from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
 
 
 router = APIRouter(prefix="/admin/backups")
 templates = criar_templates("templates/admin/backups")
 
 # Rate limiter para operações de backup (MUITO restritivo - operações perigosas)
-admin_backups_limiter = RateLimiter(
-    max_tentativas=5,   # Apenas 5 operações
-    janela_minutos=5,   # a cada 5 minutos
+admin_backups_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_admin_backups_max",
+    chave_minutos="rate_limit_admin_backups_minutos",
+    padrao_max=5,
+    padrao_minutos=5,
     nome="admin_backups",
 )
 
 # Rate limiter específico para download de backups
-backup_download_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_BACKUP_DOWNLOAD_MAX,
-    janela_minutos=RATE_LIMIT_BACKUP_DOWNLOAD_MINUTOS,
+backup_download_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_backup_download_max",
+    chave_minutos="rate_limit_backup_download_minutos",
+    padrao_max=5,
+    padrao_minutos=10,
     nome="backup_download",
 )
 
@@ -217,7 +217,7 @@ async def get_download(
     if not backup_download_limiter.verificar(ip):
         informar_erro(
             request,
-            f"Muitas tentativas de download. Aguarde {RATE_LIMIT_BACKUP_DOWNLOAD_MINUTOS} minuto(s).",
+            "Muitas tentativas de download. Aguarde alguns minutos.",
         )
         logger.warning(f"Rate limit excedido para download de backup - IP: {ip}")
         return RedirectResponse(

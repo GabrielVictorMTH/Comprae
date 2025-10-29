@@ -1,4 +1,6 @@
 {% extends 'base_privada.html' %}
+{% from 'macros/badges.html' import badge_status_chamado, badge_prioridade, badge_mensagens_nao_lidas %}
+{% from 'macros/empty_states.html' import empty_state %}
 
 {% block titulo %}Meus Chamados{% endblock %}
 
@@ -24,34 +26,10 @@
                                         <i class="bi bi-ticket-detailed"></i>
                                         #{{ chamado.id }} - {{ chamado.titulo }}
                                     </h5>
-                                    <!-- Badge de Status -->
-                                    {% if chamado.status.value == 'Aberto' %}
-                                    <span class="badge bg-primary">{{ chamado.status.value }}</span>
-                                    {% elif chamado.status.value == 'Em Análise' %}
-                                    <span class="badge bg-info">{{ chamado.status.value }}</span>
-                                    {% elif chamado.status.value == 'Resolvido' %}
-                                    <span class="badge bg-success">{{ chamado.status.value }}</span>
-                                    {% elif chamado.status.value == 'Fechado' %}
-                                    <span class="badge bg-secondary">{{ chamado.status.value }}</span>
-                                    {% endif %}
-                                    <!-- Badge de Prioridade -->
-                                    {% if chamado.prioridade.value == 'Urgente' %}
-                                    <span class="badge bg-danger">{{ chamado.prioridade.value }}</span>
-                                    {% elif chamado.prioridade.value == 'Alta' %}
-                                    <span class="badge bg-warning">{{ chamado.prioridade.value }}</span>
-                                    {% elif chamado.prioridade.value == 'Média' %}
-                                    <span class="badge bg-info">{{ chamado.prioridade.value }}</span>
-                                    {% elif chamado.prioridade.value == 'Baixa' %}
-                                    <span class="badge bg-secondary">{{ chamado.prioridade.value }}</span>
-                                    {% endif %}
-                                    <!-- Badge de Mensagens Não Lidas -->
-                                    {% if chamado.mensagens_nao_lidas > 0 %}
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="bi bi-envelope-fill"></i>
-                                        {{ chamado.mensagens_nao_lidas }} não lida{% if chamado.mensagens_nao_lidas > 1
-                                        %}s{% endif %}
-                                    </span>
-                                    {% endif %}
+                                    <!-- Badges usando macros -->
+                                    {{ badge_status_chamado(chamado.status) }}
+                                    {{ badge_prioridade(chamado.prioridade) }}
+                                    {{ badge_mensagens_nao_lidas(chamado.mensagens_nao_lidas) }}
                                 </div>
                                 <small class="text-muted">
                                     <i class="bi bi-calendar3"></i> Aberto em: {{ chamado.data_abertura|format_data_hora
@@ -91,14 +69,13 @@
             </small>
         </div>
         {% else %}
-        <div class="alert alert-info" role="alert">
-            <h4 class="alert-heading"><i class="bi bi-info-circle"></i> Nenhum chamado encontrado</h4>
-            <p>Você ainda não abriu nenhum chamado. Clique em "Abrir Chamado" para começar!</p>
-            <hr>
-            <a href="/chamados/cadastrar" class="btn btn-success">
-                <i class="bi bi-plus-circle"></i> Abrir Primeiro Chamado
-            </a>
-        </div>
+        {{ empty_state(
+            'Nenhum chamado encontrado',
+            'Você ainda não abriu nenhum chamado. Clique no botão abaixo para começar!',
+            action_url='/chamados/cadastrar',
+            action_text='Abrir Primeiro Chamado',
+            icon='headset'
+        ) }}
         {% endif %}
     </div>
 </div>
@@ -109,21 +86,15 @@
 {% block scripts %}
 <script>
     function excluirChamado(chamadoId, chamadoTitulo) {
-        const detalhes = `
-        <div class="card bg-light">
-            <div class="card-body">
-                <h6 class="card-title mb-2">
-                    <i class="bi bi-ticket-detailed"></i> Chamado:
-                </h6>
-                <p class="mb-0"><strong>${chamadoTitulo}</strong></p>
-            </div>
-        </div>
-    `;
-
-        abrirModalConfirmacao({
-            url: `/chamados/${chamadoId}/excluir`,
-            mensagem: 'Tem certeza que deseja excluir este chamado?',
-            detalhes: detalhes
+        // Usando helper genérico do delete-helpers.js
+        confirmarExclusao({
+            id: chamadoId,
+            nome: `#${chamadoId}`,
+            urlBase: '/chamados',
+            entidade: 'chamado',
+            camposDetalhes: {
+                'Título': escapeHtml(chamadoTitulo)
+            }
         });
     }
 </script>

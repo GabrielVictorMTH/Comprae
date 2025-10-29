@@ -24,27 +24,25 @@ from util.template_util import criar_templates
 from util.flash_messages import informar_sucesso, informar_erro
 from util.logger_config import logger
 from util.exceptions import FormValidationError
-from util.config import (
-    RATE_LIMIT_CHAMADO_CRIAR_MAX,
-    RATE_LIMIT_CHAMADO_CRIAR_MINUTOS,
-    RATE_LIMIT_CHAMADO_RESPONDER_MAX,
-    RATE_LIMIT_CHAMADO_RESPONDER_MINUTOS,
-)
 
 router = APIRouter(prefix="/chamados")
 templates = criar_templates("templates/chamados")
 
 # Rate limiters
-from util.rate_limiter import RateLimiter, obter_identificador_cliente
+from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
 
-chamado_criar_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_CHAMADO_CRIAR_MAX,
-    janela_minutos=RATE_LIMIT_CHAMADO_CRIAR_MINUTOS,
+chamado_criar_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_chamado_criar_max",
+    chave_minutos="rate_limit_chamado_criar_minutos",
+    padrao_max=5,
+    padrao_minutos=30,
     nome="chamado_criar",
 )
-chamado_responder_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_CHAMADO_RESPONDER_MAX,
-    janela_minutos=RATE_LIMIT_CHAMADO_RESPONDER_MINUTOS,
+chamado_responder_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_chamado_responder_max",
+    chave_minutos="rate_limit_chamado_responder_minutos",
+    padrao_max=10,
+    padrao_minutos=10,
     nome="chamado_responder",
 )
 
@@ -90,7 +88,7 @@ async def post_cadastrar(
     if not chamado_criar_limiter.verificar(ip):
         informar_erro(
             request,
-            f"Muitas tentativas de criação de chamados. Aguarde {RATE_LIMIT_CHAMADO_CRIAR_MINUTOS} minuto(s).",
+            "Muitas tentativas de criação de chamados. Aguarde alguns minutos.",
         )
         logger.warning(f"Rate limit excedido para criação de chamados - IP: {ip}")
         return templates.TemplateResponse(
@@ -98,7 +96,7 @@ async def post_cadastrar(
             {
                 "request": request,
                 "erros": {
-                    "geral": f"Muitas tentativas de criação de chamados. Aguarde {RATE_LIMIT_CHAMADO_CRIAR_MINUTOS} minuto(s)."
+                    "geral": "Muitas tentativas de criação de chamados. Aguarde alguns minutos."
                 },
             },
         )
@@ -200,7 +198,7 @@ async def post_responder(
     if not chamado_responder_limiter.verificar(ip):
         informar_erro(
             request,
-            f"Muitas tentativas de resposta em chamados. Aguarde {RATE_LIMIT_CHAMADO_RESPONDER_MINUTOS} minuto(s).",
+            "Muitas tentativas de resposta em chamados. Aguarde alguns minutos.",
         )
         logger.warning(f"Rate limit excedido para resposta em chamados - IP: {ip}")
         return RedirectResponse(f"/chamados/{id}/visualizar", status_code=status.HTTP_303_SEE_OTHER)

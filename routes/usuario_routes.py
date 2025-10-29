@@ -14,34 +14,31 @@ from util.foto_util import salvar_foto_cropada_usuario
 from util.logger_config import logger
 from util.exceptions import FormValidationError
 from util.validation_helpers import verificar_email_disponivel
-from util.config import (
-    RATE_LIMIT_UPLOAD_FOTO_MAX,
-    RATE_LIMIT_UPLOAD_FOTO_MINUTOS,
-    RATE_LIMIT_ALTERAR_SENHA_MAX,
-    RATE_LIMIT_ALTERAR_SENHA_MINUTOS,
-    RATE_LIMIT_FORM_GET_MAX,
-    RATE_LIMIT_FORM_GET_MINUTOS,
-)
-
 router = APIRouter()
 templates_usuario = criar_templates("templates")
 
-# Rate limiters
-from util.rate_limiter import RateLimiter, obter_identificador_cliente
+# Rate limiters dinâmicos
+from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
 
-upload_foto_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_UPLOAD_FOTO_MAX,
-    janela_minutos=RATE_LIMIT_UPLOAD_FOTO_MINUTOS,
+upload_foto_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_upload_foto_max",
+    chave_minutos="rate_limit_upload_foto_minutos",
+    padrao_max=5,
+    padrao_minutos=10,
     nome="upload_foto",
 )
-alterar_senha_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_ALTERAR_SENHA_MAX,
-    janela_minutos=RATE_LIMIT_ALTERAR_SENHA_MINUTOS,
+alterar_senha_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_alterar_senha_max",
+    chave_minutos="rate_limit_alterar_senha_minutos",
+    padrao_max=5,
+    padrao_minutos=15,
     nome="alterar_senha",
 )
-form_get_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_FORM_GET_MAX,
-    janela_minutos=RATE_LIMIT_FORM_GET_MINUTOS,
+form_get_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_form_get_max",
+    chave_minutos="rate_limit_form_get_minutos",
+    padrao_max=60,
+    padrao_minutos=1,
     nome="form_get",
 )
 
@@ -95,7 +92,7 @@ async def get_editar_perfil(request: Request, usuario_logado: Optional[dict] = N
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not form_get_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_FORM_GET_MINUTOS} minuto(s).")
+        informar_erro(request, f"Muitas requisições. Aguarde {form_get_limiter.janela_minutos} minuto(s).")
         logger.warning(f"Rate limit excedido para formulário GET - IP: {ip}")
         return RedirectResponse("/usuario", status_code=status.HTTP_303_SEE_OTHER)
     """Formulário para editar dados do perfil"""
@@ -199,7 +196,7 @@ async def get_alterar_senha(request: Request, usuario_logado: Optional[dict] = N
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not form_get_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_FORM_GET_MINUTOS} minuto(s).")
+        informar_erro(request, f"Muitas requisições. Aguarde {form_get_limiter.janela_minutos} minuto(s).")
         logger.warning(f"Rate limit excedido para formulário GET - IP: {ip}")
         return RedirectResponse("/usuario", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -224,7 +221,7 @@ async def post_alterar_senha(
     if not alterar_senha_limiter.verificar(ip):
         informar_erro(
             request,
-            f"Muitas tentativas de alteração de senha. Aguarde {RATE_LIMIT_ALTERAR_SENHA_MINUTOS} minuto(s).",
+            f"Muitas tentativas de alteração de senha. Aguarde {alterar_senha_limiter.janela_minutos} minuto(s).",
         )
         logger.warning(f"Rate limit excedido para alteração de senha - IP: {ip}")
         return templates_usuario.TemplateResponse(
@@ -232,7 +229,7 @@ async def post_alterar_senha(
             {
                 "request": request,
                 "erros": {
-                    "geral": f"Muitas tentativas de alteração de senha. Aguarde {RATE_LIMIT_ALTERAR_SENHA_MINUTOS} minuto(s)."
+                    "geral": f"Muitas tentativas de alteração de senha. Aguarde {alterar_senha_limiter.janela_minutos} minuto(s)."
                 },
             },
         )
@@ -326,7 +323,7 @@ async def post_atualizar_foto(
     if not upload_foto_limiter.verificar(ip):
         informar_erro(
             request,
-            f"Muitas tentativas de upload de foto. Aguarde {RATE_LIMIT_UPLOAD_FOTO_MINUTOS} minuto(s).",
+            f"Muitas tentativas de upload de foto. Aguarde {upload_foto_limiter.janela_minutos} minuto(s).",
         )
         logger.warning(f"Rate limit excedido para upload de foto - IP: {ip}")
         return RedirectResponse(

@@ -3,21 +3,19 @@ from fastapi.responses import RedirectResponse
 
 from util.template_util import criar_templates
 from util.auth_decorator import obter_usuario_logado
-from util.rate_limiter import RateLimiter, obter_identificador_cliente
+from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
 from util.flash_messages import informar_erro
 from util.logger_config import logger
-from util.config import (
-    RATE_LIMIT_PUBLIC_MAX,
-    RATE_LIMIT_PUBLIC_MINUTOS,
-)
 
 router = APIRouter()
 templates_public = criar_templates("templates")
 
 # Rate limiter para páginas públicas (proteção contra DDoS)
-public_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_PUBLIC_MAX,
-    janela_minutos=RATE_LIMIT_PUBLIC_MINUTOS,
+public_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_public_max",
+    chave_minutos="rate_limit_public_minutos",
+    padrao_max=100,
+    padrao_minutos=1,
     nome="public_pages",
 )
 
@@ -30,7 +28,7 @@ async def home(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not public_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_PUBLIC_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página pública - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
@@ -53,7 +51,7 @@ async def index(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not public_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_PUBLIC_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página pública - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
@@ -75,7 +73,7 @@ async def sobre(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not public_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_PUBLIC_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página pública - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",

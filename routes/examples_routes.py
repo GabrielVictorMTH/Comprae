@@ -1,21 +1,19 @@
 from fastapi import APIRouter, Request, status
 
 from util.template_util import criar_templates
-from util.rate_limiter import RateLimiter, obter_identificador_cliente
+from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
 from util.flash_messages import informar_erro
 from util.logger_config import logger
-from util.config import (
-    RATE_LIMIT_EXAMPLES_MAX,
-    RATE_LIMIT_EXAMPLES_MINUTOS,
-)
 
 router = APIRouter(prefix="/exemplos")
 templates_public = criar_templates("templates")
 
 # Rate limiter para páginas de exemplos (proteção contra DDoS)
-examples_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_EXAMPLES_MAX,
-    janela_minutos=RATE_LIMIT_EXAMPLES_MINUTOS,
+examples_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_examples_max",
+    chave_minutos="rate_limit_examples_minutos",
+    padrao_max=100,
+    padrao_minutos=1,
     nome="examples_pages",
 )
 
@@ -28,7 +26,7 @@ async def index(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not examples_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_EXAMPLES_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
@@ -50,7 +48,7 @@ async def form_fields_demo(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not examples_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_EXAMPLES_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
@@ -72,7 +70,7 @@ async def cards_grid_demo(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not examples_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_EXAMPLES_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
@@ -94,7 +92,7 @@ async def bootswatch_demo(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not examples_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_EXAMPLES_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
@@ -116,7 +114,7 @@ async def product_detail_demo(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not examples_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_EXAMPLES_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
@@ -138,7 +136,7 @@ async def service_detail_demo(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not examples_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_EXAMPLES_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
@@ -160,7 +158,7 @@ async def profile_detail_demo(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not examples_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_EXAMPLES_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
@@ -182,7 +180,7 @@ async def property_detail_demo(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not examples_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_EXAMPLES_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
@@ -204,7 +202,7 @@ async def table_list_demo(request: Request):
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not examples_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_EXAMPLES_MINUTOS} minuto(s).")
+        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
         logger.warning(f"Rate limit excedido para página de exemplos - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",

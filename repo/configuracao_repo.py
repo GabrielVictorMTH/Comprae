@@ -127,6 +127,64 @@ def atualizar(chave: str, valor: str) -> bool:
         return cursor.rowcount > 0
 
 
+def atualizar_multiplas(configs: dict[str, str]) -> tuple[int, list[str]]:
+    """
+    Atualiza múltiplas configurações de uma vez (operação atômica).
+
+    Todas as atualizações são executadas em uma única transação.
+    Se alguma falhar, todas são revertidas (rollback automático).
+
+    Args:
+        configs: Dicionário {chave: valor} com as configurações a atualizar
+
+    Returns:
+        Tupla (quantidade_atualizada, chaves_nao_encontradas)
+        - quantidade_atualizada: Número de configurações atualizadas com sucesso
+        - chaves_nao_encontradas: Lista de chaves que não existem no banco
+
+    Examples:
+        >>> atualizar_multiplas({
+        ...     "app_name": "Meu Sistema",
+        ...     "rate_limit_login_max": "10",
+        ...     "chave_inexistente": "valor"
+        ... })
+        (2, ["chave_inexistente"])
+
+    Note:
+        A operação é atômica: ou todas as configurações válidas são atualizadas,
+        ou nenhuma é (em caso de erro de banco de dados).
+    """
+    if not configs:
+        return (0, [])
+
+    quantidade_atualizada = 0
+    chaves_nao_encontradas = []
+
+    with get_connection() as conn:
+        cursor = conn.cursor()
+
+        for chave, valor in configs.items():
+            # Verificar se configuração existe
+            cursor.execute(OBTER_POR_CHAVE, (chave,))
+            if not cursor.fetchone():
+                chaves_nao_encontradas.append(chave)
+                logger.warning(f"Configuração '{chave}' não existe, ignorando atualização")
+                continue
+
+            # Atualizar configuração
+            cursor.execute(ATUALIZAR, (valor, chave))
+            if cursor.rowcount > 0:
+                quantidade_atualizada += 1
+                logger.debug(f"Configuração '{chave}' atualizada para: {valor}")
+
+    logger.info(
+        f"Atualização em lote concluída: {quantidade_atualizada} atualizadas, "
+        f"{len(chaves_nao_encontradas)} não encontradas"
+    )
+
+    return (quantidade_atualizada, chaves_nao_encontradas)
+
+
 def inserir_ou_atualizar(chave: str, valor: str, descricao: str = "") -> bool:
     """
     Insere ou atualiza uma configuração (operação upsert)

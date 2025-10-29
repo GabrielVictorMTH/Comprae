@@ -16,40 +16,38 @@ from util.foto_util import obter_caminho_foto_usuario
 from util.datetime_util import agora
 from util.logger_config import logger
 from util.perfis import Perfil
-from util.config import (
-    RATE_LIMIT_CHAT_MESSAGE_MAX,
-    RATE_LIMIT_CHAT_MESSAGE_MINUTOS,
-    RATE_LIMIT_CHAT_SALA_MAX,
-    RATE_LIMIT_CHAT_SALA_MINUTOS,
-    RATE_LIMIT_BUSCA_USUARIOS_MAX,
-    RATE_LIMIT_BUSCA_USUARIOS_MINUTOS,
-    RATE_LIMIT_CHAT_LISTAGEM_MAX,
-    RATE_LIMIT_CHAT_LISTAGEM_MINUTOS,
-)
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
 
 # Rate limiters
-from util.rate_limiter import RateLimiter, obter_identificador_cliente
+from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
 
-chat_mensagem_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_CHAT_MESSAGE_MAX,
-    janela_minutos=RATE_LIMIT_CHAT_MESSAGE_MINUTOS,
+chat_mensagem_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_chat_message_max",
+    chave_minutos="rate_limit_chat_message_minutos",
+    padrao_max=30,
+    padrao_minutos=1,
     nome="chat_mensagem",
 )
-chat_sala_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_CHAT_SALA_MAX,
-    janela_minutos=RATE_LIMIT_CHAT_SALA_MINUTOS,
+chat_sala_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_chat_sala_max",
+    chave_minutos="rate_limit_chat_sala_minutos",
+    padrao_max=10,
+    padrao_minutos=10,
     nome="chat_sala",
 )
-busca_usuarios_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_BUSCA_USUARIOS_MAX,
-    janela_minutos=RATE_LIMIT_BUSCA_USUARIOS_MINUTOS,
+busca_usuarios_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_busca_usuarios_max",
+    chave_minutos="rate_limit_busca_usuarios_minutos",
+    padrao_max=30,
+    padrao_minutos=1,
     nome="busca_usuarios",
 )
-chat_listagem_limiter = RateLimiter(
-    max_tentativas=RATE_LIMIT_CHAT_LISTAGEM_MAX,
-    janela_minutos=RATE_LIMIT_CHAT_LISTAGEM_MINUTOS,
+chat_listagem_limiter = DynamicRateLimiter(
+    chave_max="rate_limit_chat_listagem_max",
+    chave_minutos="rate_limit_chat_listagem_minutos",
+    padrao_max=60,
+    padrao_minutos=1,
     nome="chat_listagem",
 )
 
@@ -110,7 +108,7 @@ async def criar_ou_obter_sala(
         logger.warning(f"Rate limit excedido para criação de sala de chat - IP: {ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Muitas tentativas de criação de salas. Aguarde {RATE_LIMIT_CHAT_SALA_MINUTOS} minuto(s)."
+            detail="Muitas tentativas de criação de salas. Aguarde alguns minutos."
         )
 
     try:
@@ -173,7 +171,7 @@ async def listar_conversas(
         logger.warning(f"Rate limit excedido para listagem de conversas - IP: {ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Muitas requisições de listagem. Aguarde {RATE_LIMIT_CHAT_LISTAGEM_MINUTOS} minuto(s)."
+            detail="Muitas requisições de listagem. Aguarde alguns minutos."
         )
 
     usuario_id = usuario_logado["id"]
@@ -256,7 +254,7 @@ async def listar_mensagens(
         logger.warning(f"Rate limit excedido para listagem de mensagens - IP: {ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Muitas requisições de listagem. Aguarde {RATE_LIMIT_CHAT_LISTAGEM_MINUTOS} minuto(s)."
+            detail="Muitas requisições de listagem. Aguarde alguns minutos."
         )
 
     usuario_id = usuario_logado["id"]
@@ -307,7 +305,7 @@ async def enviar_mensagem(
         logger.warning(f"Rate limit excedido para envio de mensagem no chat - IP: {ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Muitas mensagens enviadas. Aguarde {RATE_LIMIT_CHAT_MESSAGE_MINUTOS} minuto(s)."
+            detail="Muitas mensagens enviadas. Aguarde alguns minutos."
         )
 
     try:
@@ -428,7 +426,7 @@ async def buscar_usuarios(
         logger.warning(f"Rate limit excedido para busca de usuários - IP: {ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"Muitas buscas. Aguarde {RATE_LIMIT_BUSCA_USUARIOS_MINUTOS} minuto(s)."
+            detail="Muitas buscas. Aguarde alguns minutos."
         )
 
     if len(q) < 2:

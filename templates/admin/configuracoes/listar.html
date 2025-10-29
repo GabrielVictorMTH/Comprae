@@ -1,4 +1,5 @@
 {% extends "base_privada.html" %}
+{% from 'components/rate_limit_field.html' import rate_limit_field %}
 
 {% block titulo %}Configurações do Sistema{% endblock %}
 
@@ -6,22 +7,13 @@
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-md-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="mb-0">
-                        <i class="bi bi-gear-fill"></i> Configurações do Sistema
-                    </h1>
-                    <p class="text-muted mt-2">
-                        Gerencie as configurações editáveis da aplicação.
-                        Total: <strong>{{ total_configs }}</strong> configurações
-                    </p>
-                </div>
-                <div>
-                    <a href="/home" class="btn btn-secondary">
-                        <i class="bi bi-arrow-left"></i> Voltar
-                    </a>
-                </div>
-            </div>
+            <h1 class="mb-0">
+                <i class="bi bi-gear-fill"></i> Configurações do Sistema
+            </h1>
+            <p class="text-muted mt-2">
+                Gerencie as configurações editáveis da aplicação.
+                Total: <strong>{{ total_configs }}</strong> configurações
+            </p>
         </div>
     </div>
 
@@ -31,104 +23,636 @@
         Nenhuma configuração encontrada. Execute a migração de configurações para popular o banco de dados.
     </div>
     {% else %}
-    <!-- Configurações Agrupadas por Categoria -->
-    {% for categoria, configs in configs_por_categoria.items() %}
-    <div class="card mb-4 shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
-                {% if categoria == "Aplicação" %}
-                <i class="bi bi-app-indicator"></i>
-                {% elif categoria == "Segurança - Autenticação" %}
-                <i class="bi bi-shield-lock-fill"></i>
-                {% elif categoria == "Operações de Usuário" %}
-                <i class="bi bi-person-gear"></i>
-                {% elif categoria == "Chat" %}
-                <i class="bi bi-chat-dots-fill"></i>
-                {% elif categoria == "Suporte" %}
-                <i class="bi bi-headset"></i>
-                {% elif categoria == "Tarefas" %}
-                <i class="bi bi-list-task"></i>
-                {% elif categoria == "Admin" %}
-                <i class="bi bi-tools"></i>
-                {% elif categoria == "Páginas Públicas" %}
-                <i class="bi bi-globe"></i>
-                {% elif categoria == "Interface" %}
-                <i class="bi bi-palette-fill"></i>
-                {% elif categoria == "Fotos" %}
-                <i class="bi bi-images"></i>
-                {% else %}
-                <i class="bi bi-folder"></i>
+
+    <!-- Navegação com Abas -->
+    <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="rate-limit-tab" data-bs-toggle="tab" data-bs-target="#rate-limit" type="button" role="tab" aria-controls="rate-limit" aria-selected="true">
+                <i class="bi bi-speedometer2"></i> Frequência de Requisições
+                <span class="badge bg-secondary ms-1" id="rate-limit-count">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="interface-tab" data-bs-toggle="tab" data-bs-target="#interface" type="button" role="tab" aria-controls="interface" aria-selected="false">
+                <i class="bi bi-palette-fill"></i> Interface
+                <span class="badge bg-secondary ms-1" id="interface-count">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="aplicacao-tab" data-bs-toggle="tab" data-bs-target="#aplicacao" type="button" role="tab" aria-controls="aplicacao" aria-selected="false">
+                <i class="bi bi-app-indicator"></i> Aplicação
+                <span class="badge bg-secondary ms-1" id="aplicacao-count">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="fotos-tab" data-bs-toggle="tab" data-bs-target="#fotos" type="button" role="tab" aria-controls="fotos" aria-selected="false">
+                <i class="bi bi-images"></i> Fotos
+                <span class="badge bg-secondary ms-1" id="fotos-count">0</span>
+            </button>
+        </li>
+    </ul>
+
+    <!-- Conteúdo das Abas -->
+    <div class="tab-content" id="configTabsContent">
+
+        <!-- ABA 1: FREQUÊNCIA DE REQUISIÇÕES (Rate Limits) -->
+        <div class="tab-pane fade show active" id="rate-limit" role="tabpanel" aria-labelledby="rate-limit-tab">
+            <form id="form-rate-limit" method="POST" action="/admin/configuracoes/salvar-lote">
+                <input type="hidden" name="categoria" value="rate_limit">
+
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <strong>Rate Limiting</strong> protege sua aplicação contra abuso, ataques de força bruta e sobrecarga.
+                    Configure o número máximo de requisições permitidas e o período de tempo (janela).
+                    <strong>Importante:</strong> Alterações são aplicadas imediatamente!
+                </div>
+
+                <!-- Autenticação -->
+                <h4 class="mb-3"><i class="bi bi-shield-lock-fill"></i> Autenticação</h4>
+                {% for config in configs_por_categoria.get('Segurança - Autenticação', []) %}
+                    {% if config.chave.startswith('rate_limit_login') %}
+                        {% set pair_key = 'rate_limit_login' %}
+                        {% if config.chave.endswith('_max') %}
+                            {% set max_config = config %}
+                            {% set minutos_config = configs_por_categoria.get('Segurança - Autenticação', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                            {{ rate_limit_field(
+                                prefixo=pair_key,
+                                label='Login',
+                                max_atual=max_config.valor,
+                                minutos_atuais=minutos_config.valor if minutos_config else 5,
+                                max_recomendado=5,
+                                minutos_recomendados=5,
+                                descricao='Tentativas de login por IP (proteção contra força bruta)',
+                                erros=erros
+                            ) }}
+                        {% endif %}
+                    {% elif config.chave.startswith('rate_limit_cadastro') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_cadastro' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Segurança - Autenticação', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Cadastro',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 10,
+                            max_recomendado=3,
+                            minutos_recomendados=10,
+                            descricao='Cadastros de novos usuários por IP',
+                            erros=erros
+                        ) }}
+                    {% elif config.chave.startswith('rate_limit_esqueci_senha') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_esqueci_senha' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Segurança - Autenticação', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Recuperação de Senha',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 1,
+                            max_recomendado=1,
+                            minutos_recomendados=1,
+                            descricao='Solicitações de recuperação de senha por IP',
+                            erros=erros
+                        ) }}
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Operações de Usuário -->
+                <h4 class="mb-3 mt-4"><i class="bi bi-person-gear"></i> Operações de Usuário</h4>
+                {% for config in configs_por_categoria.get('Operações de Usuário', []) %}
+                    {% if config.chave.startswith('rate_limit_upload_foto') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_upload_foto' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Operações de Usuário', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Upload de Foto',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 10,
+                            max_recomendado=5,
+                            minutos_recomendados=10,
+                            descricao='Uploads de foto de perfil por usuário',
+                            erros=erros
+                        ) }}
+                    {% elif config.chave.startswith('rate_limit_alterar_senha') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_alterar_senha' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Operações de Usuário', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Alteração de Senha',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 15,
+                            max_recomendado=5,
+                            minutos_recomendados=15,
+                            descricao='Alterações de senha por usuário',
+                            erros=erros
+                        ) }}
+                    {% elif config.chave.startswith('rate_limit_form_get') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_form_get' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Operações de Usuário', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Acesso a Formulários (GET)',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 1,
+                            max_recomendado=60,
+                            minutos_recomendados=1,
+                            descricao='Requisições GET para formulários por usuário',
+                            erros=erros
+                        ) }}
+                    {% endif %}
+                {% endfor %}
+
+                <!-- Chat -->
+                {% if configs_por_categoria.get('Chat', []) %}
+                <h4 class="mb-3 mt-4"><i class="bi bi-chat-dots-fill"></i> Chat</h4>
+                {% for config in configs_por_categoria.get('Chat', []) %}
+                    {% if config.chave.startswith('rate_limit_chat_message') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_chat_message' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Chat', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Envio de Mensagens',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 1,
+                            max_recomendado=30,
+                            minutos_recomendados=1,
+                            descricao='Mensagens enviadas no chat por usuário',
+                            erros=erros
+                        ) }}
+                    {% elif config.chave.startswith('rate_limit_chat_sala') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_chat_sala' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Chat', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Criação de Salas',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 10,
+                            max_recomendado=10,
+                            minutos_recomendados=10,
+                            descricao='Criação de salas de chat por usuário',
+                            erros=erros
+                        ) }}
+                    {% elif config.chave.startswith('rate_limit_busca_usuarios') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_busca_usuarios' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Chat', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Busca de Usuários',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 1,
+                            max_recomendado=30,
+                            minutos_recomendados=1,
+                            descricao='Buscas de usuários no chat',
+                            erros=erros
+                        ) }}
+                    {% elif config.chave.startswith('rate_limit_chat_listagem') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_chat_listagem' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Chat', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Listagem de Mensagens',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 1,
+                            max_recomendado=60,
+                            minutos_recomendados=1,
+                            descricao='Requisições de listagem de mensagens',
+                            erros=erros
+                        ) }}
+                    {% endif %}
+                {% endfor %}
                 {% endif %}
-                {{ categoria }}
-                <span class="badge bg-light text-dark ms-2">{{ configs|length }}</span>
-            </h5>
+
+                <!-- Suporte/Chamados -->
+                {% if configs_por_categoria.get('Suporte', []) %}
+                <h4 class="mb-3 mt-4"><i class="bi bi-headset"></i> Suporte / Chamados</h4>
+                {% for config in configs_por_categoria.get('Suporte', []) %}
+                    {% if config.chave.startswith('rate_limit_chamado_criar') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_chamado_criar' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Suporte', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Criação de Chamados',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 30,
+                            max_recomendado=5,
+                            minutos_recomendados=30,
+                            descricao='Chamados criados por usuário',
+                            erros=erros
+                        ) }}
+                    {% elif config.chave.startswith('rate_limit_chamado_responder') and not config.chave.startswith('rate_limit_admin_chamado') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_chamado_responder' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Suporte', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Respostas em Chamados (Usuário)',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 10,
+                            max_recomendado=10,
+                            minutos_recomendados=10,
+                            descricao='Respostas enviadas por usuários',
+                            erros=erros
+                        ) }}
+                    {% elif config.chave.startswith('rate_limit_admin_chamado_responder') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_admin_chamado_responder' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Suporte', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Respostas em Chamados (Admin)',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 5,
+                            max_recomendado=20,
+                            minutos_recomendados=5,
+                            descricao='Respostas enviadas por administradores',
+                            erros=erros
+                        ) }}
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+
+                <!-- Tarefas -->
+                {% if configs_por_categoria.get('Tarefas', []) %}
+                <h4 class="mb-3 mt-4"><i class="bi bi-list-task"></i> Tarefas</h4>
+                {% for config in configs_por_categoria.get('Tarefas', []) %}
+                    {% if config.chave.startswith('rate_limit_tarefa_criar') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_tarefa_criar' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Tarefas', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Criação de Tarefas',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 10,
+                            max_recomendado=20,
+                            minutos_recomendados=10,
+                            descricao='Tarefas criadas por usuário',
+                            erros=erros
+                        ) }}
+                    {% elif config.chave.startswith('rate_limit_tarefa_operacao') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_tarefa_operacao' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Tarefas', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Operações em Tarefas',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 5,
+                            max_recomendado=30,
+                            minutos_recomendados=5,
+                            descricao='Operações (editar, excluir, etc) em tarefas',
+                            erros=erros
+                        ) }}
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+
+                <!-- Admin -->
+                {% if configs_por_categoria.get('Admin', []) %}
+                <h4 class="mb-3 mt-4"><i class="bi bi-tools"></i> Administração</h4>
+                {% for config in configs_por_categoria.get('Admin', []) %}
+                    {% if config.chave.startswith('rate_limit_backup_download') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_backup_download' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Admin', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Download de Backups',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 10,
+                            max_recomendado=5,
+                            minutos_recomendados=10,
+                            descricao='Downloads de backups do banco de dados',
+                            erros=erros
+                        ) }}
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+
+                <!-- Páginas Públicas -->
+                {% if configs_por_categoria.get('Páginas Públicas', []) %}
+                <h4 class="mb-3 mt-4"><i class="bi bi-globe"></i> Páginas Públicas</h4>
+                {% for config in configs_por_categoria.get('Páginas Públicas', []) %}
+                    {% if config.chave.startswith('rate_limit_public') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_public' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Páginas Públicas', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Páginas Públicas',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 1,
+                            max_recomendado=100,
+                            minutos_recomendados=1,
+                            descricao='Acesso às páginas públicas (/, /sobre, etc)',
+                            erros=erros
+                        ) }}
+                    {% elif config.chave.startswith('rate_limit_examples') and config.chave.endswith('_max') %}
+                        {% set pair_key = 'rate_limit_examples' %}
+                        {% set max_config = config %}
+                        {% set minutos_config = configs_por_categoria.get('Páginas Públicas', []) | selectattr('chave', 'equalto', pair_key ~ '_minutos') | first %}
+                        {{ rate_limit_field(
+                            prefixo=pair_key,
+                            label='Páginas de Exemplos',
+                            max_atual=max_config.valor,
+                            minutos_atuais=minutos_config.valor if minutos_config else 1,
+                            max_recomendado=100,
+                            minutos_recomendados=1,
+                            descricao='Acesso às páginas de exemplos (/exemplos/*)',
+                            erros=erros
+                        ) }}
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-save"></i> Salvar Configurações de Frequência
+                    </button>
+                </div>
+            </form>
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 30%">Chave</th>
-                            <th style="width: 20%">Valor Atual</th>
-                            <th style="width: 40%">Descrição</th>
-                            <th style="width: 10%" class="text-center">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for config in configs %}
-                        <tr>
-                            <td>
-                                <code class="text-primary">{{ config.chave }}</code>
-                            </td>
-                            <td>
-                                {% if config.valor|length > 50 %}
-                                <span class="badge bg-secondary"
-                                      data-bs-toggle="tooltip"
-                                      data-bs-placement="top"
-                                      title="{{ config.valor }}">
-                                    {{ config.valor[:47] }}...
-                                </span>
+
+        <!-- ABA 2: INTERFACE -->
+        <div class="tab-pane fade" id="interface" role="tabpanel" aria-labelledby="interface-tab">
+            <form id="form-interface" method="POST" action="/admin/configuracoes/salvar-lote">
+                <input type="hidden" name="categoria" value="interface">
+
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle-fill"></i>
+                    Configurações que afetam a aparência e comportamento da interface do usuário.
+                </div>
+
+                {% for config in configs_por_categoria.get('Interface', []) %}
+                    {% if config.chave != 'tema' %}
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-3 text-muted">
+                                {% if config.chave == 'toast_auto_hide_delay_ms' %}
+                                Tempo de Exibição de Notificações (Toast)
                                 {% else %}
-                                <span class="badge bg-info text-dark">{{ config.valor }}</span>
+                                {{ config.chave.replace('_', ' ').title() }}
                                 {% endif %}
-                            </td>
-                            <td>
-                                {% if config.descricao %}
-                                    {% if config.descricao.startswith('[') %}
-                                        {% set parts = config.descricao.split(']', 1) %}
-                                        {% if parts|length > 1 %}
-                                            <small class="text-muted">{{ parts[1].strip() }}</small>
-                                        {% else %}
-                                            <small class="text-muted">{{ config.descricao }}</small>
+                            </h6>
+
+                            {% if config.chave == 'toast_auto_hide_delay_ms' %}
+                            <p class="small text-muted mb-3">
+                                Tempo em milissegundos que as notificações toast ficam visíveis na tela antes de desaparecerem automaticamente.
+                            </p>
+                            {% endif %}
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="{{ config.chave }}" class="form-label">
+                                        Valor (milissegundos)
+                                        {% if config.chave == 'toast_auto_hide_delay_ms' %}
+                                        <span class="badge bg-secondary ms-1" data-bs-toggle="tooltip" title="Recomendado: 5000ms (5 segundos)">
+                                            <i class="bi bi-info-circle"></i>
+                                        </span>
                                         {% endif %}
-                                    {% else %}
-                                        <small class="text-muted">{{ config.descricao }}</small>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        class="form-control {% if erros.get(config.chave) %}is-invalid{% endif %}"
+                                        id="{{ config.chave }}"
+                                        name="{{ config.chave }}"
+                                        value="{{ config.valor }}"
+                                        min="1000"
+                                        max="30000"
+                                        step="500"
+                                        required>
+                                    <div class="form-text">
+                                        Entre 1000ms (1 segundo) e 30000ms (30 segundos)
+                                    </div>
+                                    {% if erros.get(config.chave) %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ erros[config.chave] }}
+                                    </div>
                                     {% endif %}
-                                {% else %}
-                                    <small class="text-muted fst-italic">Sem descrição</small>
-                                {% endif %}
-                            </td>
-                            <td class="text-center">
-                                <a href="/admin/configuracoes/editar/{{ config.chave }}"
-                                   class="btn btn-sm btn-outline-primary"
-                                   data-bs-toggle="tooltip"
-                                   data-bs-placement="top"
-                                   title="Editar configuração">
-                                    <i class="bi bi-pencil-fill"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                                <div class="col-md-6 d-flex align-items-center">
+                                    <div class="alert alert-secondary mb-0 w-100">
+                                        <i class="bi bi-clock-history"></i>
+                                        <strong>Valor atual:</strong> <span id="toast_preview">{{ (config.valor | int / 1000) | round(1) }} segundos</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script>
+                    // Atualizar preview quando campo mudar
+                    (function() {
+                        const input = document.getElementById('{{ config.chave }}');
+                        const preview = document.getElementById('toast_preview');
+                        if (input && preview) {
+                            input.addEventListener('input', function() {
+                                const segundos = (parseInt(input.value) / 1000).toFixed(1);
+                                preview.textContent = `${segundos} segundos`;
+                            });
+                        }
+                    })();
+                    </script>
+                    {% endif %}
+                {% endfor %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-save"></i> Salvar Configurações de Interface
+                    </button>
+                </div>
+            </form>
         </div>
+
+        <!-- ABA 3: APLICAÇÃO -->
+        <div class="tab-pane fade" id="aplicacao" role="tabpanel" aria-labelledby="aplicacao-tab">
+            <form id="form-aplicacao" method="POST" action="/admin/configuracoes/salvar-lote">
+                <input type="hidden" name="categoria" value="aplicacao">
+
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle-fill"></i>
+                    Configurações gerais da aplicação, como nome e informações de e-mail.
+                </div>
+
+                {% for config in configs_por_categoria.get('Aplicação', []) %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-3 text-muted">
+                            {% if config.chave == 'app_name' %}
+                            Nome da Aplicação
+                            {% elif config.chave == 'resend_from_email' %}
+                            E-mail de Envio (Resend)
+                            {% elif config.chave == 'resend_from_name' %}
+                            Nome do Remetente (Resend)
+                            {% else %}
+                            {{ config.chave.replace('_', ' ').title() }}
+                            {% endif %}
+                        </h6>
+
+                        <p class="small text-muted mb-3">
+                            {% if config.chave == 'app_name' %}
+                            Nome exibido no título das páginas, cabeçalho e e-mails.
+                            {% elif config.chave == 'resend_from_email' %}
+                            Endereço de e-mail usado como remetente dos e-mails enviados pela aplicação via Resend.
+                            {% elif config.chave == 'resend_from_name' %}
+                            Nome exibido como remetente nos e-mails enviados.
+                            {% else %}
+                            {{ config.descricao.split(']', 1)[1].strip() if config.descricao and config.descricao.startswith('[') else config.descricao }}
+                            {% endif %}
+                        </p>
+
+                        <label for="{{ config.chave }}" class="form-label">Valor</label>
+                        {% if config.chave == 'resend_from_email' %}
+                        <input
+                            type="email"
+                            class="form-control {% if erros.get(config.chave) %}is-invalid{% endif %}"
+                            id="{{ config.chave }}"
+                            name="{{ config.chave }}"
+                            value="{{ config.valor }}"
+                            required>
+                        {% else %}
+                        <input
+                            type="text"
+                            class="form-control {% if erros.get(config.chave) %}is-invalid{% endif %}"
+                            id="{{ config.chave }}"
+                            name="{{ config.chave }}"
+                            value="{{ config.valor }}"
+                            maxlength="200"
+                            required>
+                        {% endif %}
+                        {% if erros.get(config.chave) %}
+                        <div class="invalid-feedback d-block">
+                            {{ erros[config.chave] }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-save"></i> Salvar Configurações de Aplicação
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ABA 4: FOTOS -->
+        <div class="tab-pane fade" id="fotos" role="tabpanel" aria-labelledby="fotos-tab">
+            <form id="form-fotos" method="POST" action="/admin/configuracoes/salvar-lote">
+                <input type="hidden" name="categoria" value="fotos">
+
+                <div class="alert alert-info mb-4">
+                    <i class="bi bi-info-circle-fill"></i>
+                    Configurações relacionadas ao upload e processamento de fotos de perfil.
+                </div>
+
+                {% for config in configs_por_categoria.get('Fotos', []) %}
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h6 class="card-subtitle mb-3 text-muted">
+                            {% if config.chave == 'foto_perfil_tamanho_max' %}
+                            Tamanho Máximo da Foto de Perfil
+                            {% elif config.chave == 'foto_max_upload_bytes' %}
+                            Tamanho Máximo de Upload
+                            {% else %}
+                            {{ config.chave.replace('_', ' ').title() }}
+                            {% endif %}
+                        </h6>
+
+                        <p class="small text-muted mb-3">
+                            {% if config.chave == 'foto_perfil_tamanho_max' %}
+                            Dimensão máxima (largura/altura) em pixels para fotos de perfil após redimensionamento.
+                            {% elif config.chave == 'foto_max_upload_bytes' %}
+                            Tamanho máximo em bytes permitido para upload de foto (antes do processamento).
+                            {% else %}
+                            {{ config.descricao.split(']', 1)[1].strip() if config.descricao and config.descricao.startswith('[') else config.descricao }}
+                            {% endif %}
+                        </p>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="{{ config.chave }}" class="form-label">
+                                    Valor
+                                    {% if config.chave == 'foto_perfil_tamanho_max' %}
+                                    <span class="badge bg-secondary ms-1" data-bs-toggle="tooltip" title="Recomendado: 256 pixels">
+                                        <i class="bi bi-info-circle"></i>
+                                    </span>
+                                    {% elif config.chave == 'foto_max_upload_bytes' %}
+                                    <span class="badge bg-secondary ms-1" data-bs-toggle="tooltip" title="Recomendado: 5242880 bytes (5MB)">
+                                        <i class="bi bi-info-circle"></i>
+                                    </span>
+                                    {% endif %}
+                                </label>
+                                <input
+                                    type="number"
+                                    class="form-control {% if erros.get(config.chave) %}is-invalid{% endif %}"
+                                    id="{{ config.chave }}"
+                                    name="{{ config.chave }}"
+                                    value="{{ config.valor }}"
+                                    {% if config.chave == 'foto_perfil_tamanho_max' %}
+                                    min="64"
+                                    max="2048"
+                                    {% elif config.chave == 'foto_max_upload_bytes' %}
+                                    min="102400"
+                                    max="52428800"
+                                    {% endif %}
+                                    required>
+                                <div class="form-text">
+                                    {% if config.chave == 'foto_perfil_tamanho_max' %}
+                                    Entre 64 e 2048 pixels
+                                    {% elif config.chave == 'foto_max_upload_bytes' %}
+                                    Entre 100KB e 50MB
+                                    {% endif %}
+                                </div>
+                                {% if erros.get(config.chave) %}
+                                <div class="invalid-feedback d-block">
+                                    {{ erros[config.chave] }}
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6 d-flex align-items-center">
+                                <div class="alert alert-secondary mb-0 w-100">
+                                    {% if config.chave == 'foto_perfil_tamanho_max' %}
+                                    <i class="bi bi-aspect-ratio"></i>
+                                    <strong>Valor atual:</strong> {{ config.valor }}x{{ config.valor }} pixels
+                                    {% elif config.chave == 'foto_max_upload_bytes' %}
+                                    <i class="bi bi-file-earmark-arrow-up"></i>
+                                    <strong>Valor atual:</strong> {{ "%.2f"|format(config.valor|int / 1048576) }} MB
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <div class="alert alert-warning mt-3">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <strong>Atenção:</strong> Alterações nessas configurações afetam apenas uploads futuros. Fotos já enviadas não são alteradas.
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-save"></i> Salvar Configurações de Fotos
+                    </button>
+                </div>
+            </form>
+        </div>
+
     </div>
-    {% endfor %}
     {% endif %}
 
     <!-- Informações Adicionais -->
-    <div class="card border-warning mb-4">
+    <div class="card border-warning mt-4 mb-4">
         <div class="card-header bg-warning text-dark">
             <i class="bi bi-info-circle-fill"></i> Informações Importantes
         </div>
@@ -138,10 +662,10 @@
                     <strong>Origem dos Valores:</strong> As configurações exibidas aqui têm prioridade sobre os valores do arquivo <code>.env</code>.
                 </li>
                 <li>
-                    <strong>Aplicação Imediata:</strong> Alterações nas configurações são aplicadas imediatamente após salvar (não requer reiniciar o servidor).
+                    <strong>Aplicação Imediata:</strong> Alterações nas configurações são aplicadas <strong>imediatamente</strong> após salvar (não requer reiniciar o servidor).
                 </li>
                 <li>
-                    <strong>Rate Limiting:</strong> Configurações de rate limit são especialmente importantes para segurança. Ajuste com cuidado.
+                    <strong>Rate Limiting:</strong> Todas as configurações de frequência de requisições são dinâmicas e entram em vigor na próxima requisição.
                 </li>
                 <li>
                     <strong>Auditoria:</strong> Todas as alterações são registradas nos logs do sistema para fins de auditoria.
@@ -154,13 +678,54 @@
     </div>
 </div>
 
-<!-- Script para inicializar tooltips do Bootstrap -->
+<!-- Script para inicializar tooltips e contar configs por aba -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Inicializar todos os tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+
+    // Contar campos em cada aba e atualizar badges
+    const rateLimitFields = document.querySelectorAll('#rate-limit .card').length;
+    const interfaceFields = document.querySelectorAll('#interface .card').length;
+    const aplicacaoFields = document.querySelectorAll('#aplicacao .card').length;
+    const fotosFields = document.querySelectorAll('#fotos .card').length;
+
+    document.getElementById('rate-limit-count').textContent = rateLimitFields;
+    document.getElementById('interface-count').textContent = interfaceFields;
+    document.getElementById('aplicacao-count').textContent = aplicacaoFields;
+    document.getElementById('fotos-count').textContent = fotosFields;
+
+    // Alerta de mudanças não salvas ao trocar de aba
+    let formModified = false;
+    const forms = document.querySelectorAll('form');
+
+    forms.forEach(form => {
+        const inputs = form.querySelectorAll('input[type="number"], input[type="text"], input[type="email"]');
+        inputs.forEach(input => {
+            input.addEventListener('change', function() {
+                formModified = true;
+            });
+        });
+
+        form.addEventListener('submit', function() {
+            formModified = false;
+        });
+    });
+
+    // Avisar antes de trocar de aba se houver mudanças
+    const tabButtons = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            if (formModified) {
+                if (!confirm('Você tem alterações não salvas. Deseja realmente trocar de aba? As alterações serão perdidas.')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        });
     });
 });
 </script>

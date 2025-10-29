@@ -148,3 +148,104 @@ class ValidarRateLimitDTO(BaseModel):
             if "invalid literal" in str(e):
                 raise ValueError(f'{info.field_name} deve ser um número inteiro')
             raise
+
+
+class SalvarConfiguracaoLoteDTO(BaseModel):
+    """
+    DTO para salvamento em lote de configurações.
+
+    Recebe um dicionário de {chave: valor} e valida cada par
+    de acordo com regras específicas baseadas na chave.
+
+    Example:
+        {
+            "rate_limit_login_max": "5",
+            "rate_limit_login_minutos": "5",
+            "app_name": "Meu Sistema",
+            "toast_auto_hide_delay_ms": "5000"
+        }
+    """
+    configs: dict[str, str] = Field(..., min_length=1, description="Dicionário de configurações")
+
+    @field_validator('configs')
+    @classmethod
+    def validar_configs(cls, v):
+        """Valida cada configuração individualmente"""
+        if not v:
+            raise ValueError('Deve fornecer pelo menos uma configuração')
+
+        erros = {}
+
+        for chave, valor in v.items():
+            # Validar formato da chave
+            if not chave or not isinstance(chave, str):
+                erros[chave] = "Chave inválida"
+                continue
+
+            # Validar valor não vazio
+            if not valor or not isinstance(valor, str) or valor.strip() == "":
+                erros[chave] = "Valor não pode ser vazio"
+                continue
+
+            # Validações específicas por tipo de configuração
+            try:
+                # Rate limits (pares max/minutos)
+                if chave.endswith('_max'):
+                    num = int(valor)
+                    if num < 1:
+                        erros[chave] = "Deve ser pelo menos 1"
+                    elif num > 1000:
+                        erros[chave] = "Máximo permitido é 1000"
+
+                elif chave.endswith('_minutos'):
+                    num = int(valor)
+                    if num < 1:
+                        erros[chave] = "Deve ser pelo menos 1 minuto"
+                    elif num > 1440:
+                        erros[chave] = "Máximo permitido é 1440 minutos (24 horas)"
+
+                # Toast delay
+                elif chave == 'toast_auto_hide_delay_ms':
+                    num = int(valor)
+                    if num < 1000:
+                        erros[chave] = "Mínimo é 1000ms (1 segundo)"
+                    elif num > 30000:
+                        erros[chave] = "Máximo é 30000ms (30 segundos)"
+
+                # Foto perfil tamanho
+                elif chave == 'foto_perfil_tamanho_max':
+                    num = int(valor)
+                    if num < 64:
+                        erros[chave] = "Mínimo é 64 pixels"
+                    elif num > 2048:
+                        erros[chave] = "Máximo é 2048 pixels"
+
+                # Foto upload bytes
+                elif chave == 'foto_max_upload_bytes':
+                    num = int(valor)
+                    if num < 102400:  # 100KB
+                        erros[chave] = "Mínimo é 100KB (102400 bytes)"
+                    elif num > 52428800:  # 50MB
+                        erros[chave] = "Máximo é 50MB (52428800 bytes)"
+
+                # Email
+                elif chave == 'resend_from_email':
+                    import re
+                    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+                    if not re.match(pattern, valor):
+                        erros[chave] = "Email inválido"
+
+                # Strings gerais (app_name, resend_from_name, etc)
+                elif chave in ['app_name', 'resend_from_name']:
+                    if len(valor) > 200:
+                        erros[chave] = "Máximo de 200 caracteres"
+
+            except ValueError:
+                erros[chave] = "Valor deve ser um número válido"
+
+        # Se houver erros, levantar exceção com detalhes
+        if erros:
+            erro_msg = "; ".join([f"{k}: {v}" for k, v in erros.items()])
+            raise ValueError(f"Erros de validação encontrados: {erro_msg}")
+
+        return v

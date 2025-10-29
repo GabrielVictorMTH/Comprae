@@ -1,4 +1,6 @@
 {% extends "base_privada.html" %}
+{% from 'macros/badges.html' import badge_perfil %}
+{% from 'macros/action_buttons.html' import btn_group_crud %}
 
 {% block titulo %}Gerenciar Usuários{% endblock %}
 
@@ -34,30 +36,21 @@
                                 <td>{{ usuario.nome }}</td>
                                 <td>{{ usuario.email }}</td>
                                 <td>
-                                    {% if usuario.perfil == 'Administrador' %}
-                                    <span class="badge bg-danger">{{ usuario.perfil }}</span>
-                                    {% elif usuario.perfil == 'Vendedor' %}
-                                    <span class="badge bg-warning text-dark">{{ usuario.perfil }}</span>
-                                    {% else %}
-                                    <span class="badge bg-info">{{ usuario.perfil }}</span>
-                                    {% endif %}
+                                    {{ badge_perfil(usuario.perfil) }}
                                 </td>
                                 <td>{{ usuario.data_cadastro|data_br if usuario.data_cadastro else '-' }}</td>
                                 <td class="text-center">
-                                    <div class="btn-group btn-group-sm" role="group">
-                                        <a href="/admin/usuarios/editar/{{ usuario.id }}"
-                                            class="btn btn-outline-primary"
-                                            title="Editar"
-                                            aria-label="Editar usuário {{ usuario.nome }}">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-outline-danger"
-                                            title="Excluir"
-                                            aria-label="Excluir usuário {{ usuario.nome }}"
-                                            onclick="excluirUsuario({{ usuario.id }}, '{{ usuario.nome|replace("'", "\\'") }}', '{{ usuario.email }}', '{{ usuario.perfil }}')">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
+                                    {{ btn_group_crud(
+                                        usuario.id,
+                                        'usuário ' ~ usuario.nome,
+                                        '/admin/usuarios',
+                                        "excluirUsuario(%d, '%s', '%s', '%s')" | format(
+                                            usuario.id,
+                                            usuario.nome|replace("'", "\\'"),
+                                            usuario.email,
+                                            usuario.perfil
+                                        )
+                                    ) }}
                                 </td>
                             </tr>
                             {% endfor %}
@@ -95,45 +88,7 @@
 
 {% block scripts %}
 <script>
-    /**
-     * Função para excluir um usuário
-     */
-    function excluirUsuario(usuarioId, usuarioNome, usuarioEmail, usuarioPerfil) {
-        let perfilBadge;
-        if (usuarioPerfil === 'Administrador') {
-            perfilBadge = '<span class="badge bg-danger">Administrador</span>';
-        } else if (usuarioPerfil === 'Vendedor') {
-            perfilBadge = '<span class="badge bg-warning text-dark">Vendedor</span>';
-        } else {
-            perfilBadge = '<span class="badge bg-info">Cliente</span>';
-        }
-
-        const detalhes = `
-        <div class="card bg-light">
-            <div class="card-body">
-                <table class="table table-sm table-borderless mb-0">
-                    <tr>
-                        <th scope="row" width="30%">Nome:</th>
-                        <td>${usuarioNome}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Email:</th>
-                        <td>${usuarioEmail}</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Perfil:</th>
-                        <td>${perfilBadge}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    `;
-
-        abrirModalConfirmacao({
-            url: `/admin/usuarios/excluir/${usuarioId}`,
-            mensagem: 'Tem certeza que deseja excluir este usuário?',
-            detalhes: detalhes
-        });
-    }
+    // Usando helper genérico do delete-helpers.js
+    // A função excluirUsuario já está definida globalmente no delete-helpers.js
 </script>
 {% endblock %}
