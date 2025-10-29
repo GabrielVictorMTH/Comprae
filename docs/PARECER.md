@@ -10,6 +10,24 @@
 
 ## 🔄 HISTÓRICO DE ATUALIZAÇÕES
 
+### 2025-10-28 (PM-003) - Routes Administrativas para Endereços
+**Melhorias Implementadas:**
+1. ✅ **Criadas routes administrativas** para Endereços (`/admin/enderecos/*`)
+2. ✅ **Adicionadas funções auxiliares** em `endereco_repo.py`:
+   - `obter_por_uf()` - Filtragem por estado
+   - `obter_estatisticas()` - Métricas gerais
+   - `contar_por_uf()` - Distribuição geográfica
+   - `contar_por_cidade()` - Top 10 cidades
+   - `obter_duplicados()` - Detecção de fraudes
+3. ✅ **Criados 4 templates HTML** (listar, detalhes, estatisticas, duplicados)
+4. ✅ **Registrado router** no `main.py`
+
+**Impacto:**
+- Conformidade aumentou de **92% para ~95%**
+- Problema médio PM-003 (falta routes admin endereços) resolvido
+- Adicionada funcionalidade de detecção de fraudes
+- Adicionadas estatísticas geográficas
+
 ### Commit fe9031c - 2025-10-28
 **Melhorias Implementadas:**
 1. ✅ **Removida função duplicada** `post_excluir` em `admin_produtos_routes.py`
@@ -33,10 +51,10 @@ Esta análise avaliou a conformidade de todas as implementações específicas d
 
 ### Resultado Geral (Atualizado)
 
-- **Conformidade Global:** 92% ⬆️ (anteriormente 85%)
+- **Conformidade Global:** 95% ⬆️ (anteriormente 92%)
 - **Entidades Analisadas:** 4 principais (Categoria, Anúncio, Pedido, Endereço, Mensagem)
-- **Problemas Críticos Encontrados:** 0 ✅ (anteriormente 1)
-- **Problemas Médios Pendentes:** 1 (endereços admin - baixa prioridade)
+- **Problemas Críticos Encontrados:** 0 ✅
+- **Problemas Médios Pendentes:** 0 ✅ (todos resolvidos)
 - **Desvios Justificados:** 3 (complexidade do domínio)
 - **Boas Práticas Identificadas:** 12
 
@@ -162,14 +180,13 @@ POST /excluir/{id}        -> Exclui categoria
 
 ### 2.1 ENDEREÇO
 
-**Conformidade:** ✅ 95% - ALTA
+**Conformidade:** ✅ 100% - EXCELENTE ⬆️
 
 #### SQL (`sql/endereco_sql.py`)
 - ✅ Segue o padrão de nomenclatura
 - ✅ Queries parametrizadas
 - ✅ Possui índice (idx_endereco_usuario) - justificado
 - ✅ Foreign key com CASCADE apropriado
-- ⚠️ Nomenclatura: usa `id_endereco` em vez de `id` (inconsistência menor)
 
 **Diferenças Justificadas:**
 - Índice em id_usuario: necessário para queries frequentes de endereços por usuário
@@ -185,10 +202,16 @@ POST /excluir/{id}        -> Exclui categoria
 - ✅ Context manager utilizado
 - ✅ Retornos de tipo apropriados
 - ✅ Conversão inline (entidade simples)
-- ✅ Função adicional: `obter_por_usuario()` - justificada
+- ✅ Funções adicionais justificadas:
+  - `obter_por_usuario()` - necessário para listar endereços do usuário logado
+  - `obter_por_uf()` - filtragem administrativa por estado
+  - `obter_estatisticas()` - métricas para dashboard admin
+  - `contar_por_uf()` - distribuição geográfica
+  - `contar_por_cidade()` - ranking de cidades
+  - `obter_duplicados()` - detecção de fraudes
 
 **Diferenças Justificadas:**
-- `obter_por_usuario()`: necessário para listar endereços do usuário logado
+- Todas as funções adicionais são necessárias para funcionalidade administrativa e detecção de fraudes
 
 #### DTO (`dtos/endereco_dto.py`)
 - ✅ Segue padrão Pydantic BaseModel
@@ -196,12 +219,25 @@ POST /excluir/{id}        -> Exclui categoria
 - ✅ Validadores reutilizáveis
 - ✅ Validações específicas: CEP e UF
 
-#### Routes
-- ⚠️ **NÃO POSSUI ROUTES ADMINISTRATIVAS**
-- ℹ️ Endereços são gerenciados apenas pelo usuário (routes/usuario_routes.py)
-- ℹ️ Decisão arquitetural válida (não requer moderação admin)
+#### Routes (`routes/admin_enderecos_routes.py`)
+- ✅ **ROUTES ADMINISTRATIVAS IMPLEMENTADAS** ⬆️
+- ✅ Estrutura base similar ao padrão
+- ✅ Rate limiting implementado (20 req/min)
+- ✅ Autenticação ADMIN obrigatória
+- ✅ Flash messages e logging
+- ✅ Endpoints administrativos:
+  - `GET /admin/enderecos/listar` - Lista com filtro por UF
+  - `GET /admin/enderecos/detalhes/{id}` - Detalhes completos
+  - `GET /admin/enderecos/estatisticas` - Dashboard de estatísticas
+  - `GET /admin/enderecos/duplicados` - Detecção de fraudes
+- ✅ 4 templates HTML criados
 
-**Recomendação:** Conformidade excelente. Padrão seguido corretamente.
+**Funcionalidades Extras:**
+- Detecção de fraudes: identifica endereços duplicados (mesmo CEP + número, usuários diferentes)
+- Estatísticas geográficas: distribuição por UF, top 10 cidades
+- Vinculação com pedidos: mostra todos os pedidos que usaram o endereço
+
+**Recomendação:** Conformidade perfeita. Todas as melhorias implementadas.
 
 ---
 
@@ -431,14 +467,14 @@ Esta abordagem é necessária pois o SQLite pode retornar rows com colunas difer
 | **Model** | ✅ 100% | ✅ 100% | ✅ 100% | ✅ 100% ⬆️ | ✅ 100% ⬆️ |
 | **Repository** | ✅ 100% | ✅ 100% ⬆️ | ✅ 100% ⬆️ | ⚠️ 85% ⬆️ | ⚠️ 85% ⬆️ |
 | **DTO** | ✅ 100% | ✅ 100% | ✅ 100% | ⚠️ 85% | ⚠️ 80% |
-| **Routes** | ✅ 100% | N/A | N/A | ✅ 90% ⬆️ | ✅ 95% ⬆️ |
+| **Routes** | ✅ 100% | ✅ 100% ⬆️ | N/A | ✅ 90% ⬆️ | ✅ 95% ⬆️ |
 | **GERAL** | ✅ 100% | ✅ 100% ⬆️ | ✅ 100% ⬆️ | ⚠️ 88% ⬆️ | ✅ 90% ⬆️ |
 
 ### Legendas:
 - ✅ **90-100%**: Conformidade alta, padrão seguido
 - ⚠️ **70-89%**: Conformidade média, desvios justificados
 - ❌ **<70%**: Conformidade baixa, requer atenção
-- ⬆️ **Melhorado** após commit fe9031c
+- ⬆️ **Melhorado** após implementações de 2025-10-28
 
 ---
 
@@ -510,18 +546,29 @@ Não havia routes administrativas para gestão de pedidos.
 
 ---
 
-#### 🟡 PM-003: Falta de Routes Administrativas para Endereços
+#### ✅ ~~🟡 PM-003: Falta de Routes Administrativas para Endereços~~ **RESOLVIDO**
 
-**Descrição:**
-Não há interface administrativa para gestão de endereços.
+**Status:** ✅ **CORRIGIDO** em 2025-10-28
 
-**Recomendação:**
-Embora endereços sejam gerenciados pelos usuários, considerar criar visualização administrativa para:
-- Auditoria de endereços cadastrados
-- Detecção de fraudes (múltiplas contas, mesmo endereço)
-- Estatísticas geográficas
+**Descrição Original:**
+Não havia interface administrativa para gestão de endereços.
 
-**Impacto:** Baixo (funcionalidade)
+**Solução Implementada:**
+- ✅ Criado `routes/admin_enderecos_routes.py` com:
+  - `GET /admin/enderecos/listar` - Lista com filtro por UF
+  - `GET /admin/enderecos/detalhes/{id}` - Detalhes completos do endereço
+  - `GET /admin/enderecos/estatisticas` - Dashboard com estatísticas geográficas
+  - `GET /admin/enderecos/duplicados` - Detecção de fraudes
+- ✅ Criados 4 templates HTML
+- ✅ Adicionadas 5 funções auxiliares em `endereco_repo.py`
+- ✅ Registrado router no `main.py`
+- ✅ Rate limiting implementado
+- ✅ Autenticação ADMIN obrigatória
+
+**Funcionalidades Extras:**
+- Detecção de fraudes: identifica endereços duplicados (mesmo CEP + número, usuários diferentes)
+- Estatísticas: distribuição por UF, top 10 cidades, média de endereços/usuário
+- Auditoria: visualização completa de endereços e pedidos vinculados
 
 ---
 
@@ -680,35 +727,35 @@ Use este checklist ao criar novas entidades no sistema:
 
 ## 7. RECOMENDAÇÕES PRIORITÁRIAS
 
-### 7.1 Ação Imediata (Esta Sprint)
+### 7.1 ✅ Ações Concluídas
 
-1. **🔴 CRÍTICO:** Remover função duplicada `post_excluir` em `admin_produtos_routes.py:270-297`
+1. ✅ **CRÍTICO:** ~~Remover função duplicada `post_excluir`~~ - **RESOLVIDO** (commit fe9031c)
 
-### 7.2 Curto Prazo (Próxima Sprint)
+2. ✅ **IMPORTANTE:** ~~Padronizar nomenclatura de chaves primárias~~ - **RESOLVIDO** (commit fe9031c)
+   - Decisão: usar `id` (padrão Django/Rails)
+   - Aplicado em todas as entidades
 
-2. **🟡 IMPORTANTE:** Padronizar nomenclatura de chaves primárias
-   - Decidir: `id` vs `id_{tabela}`
-   - Documentar decisão
-   - Aplicar em novas entidades
+3. ✅ **IMPORTANTE:** ~~Criar routes administrativas para Pedidos~~ - **RESOLVIDO** (commit fe9031c)
+   - `/admin/pedidos/listar` com filtros por status
+   - `/admin/pedidos/detalhes/{id}` com informações completas
+   - `/admin/pedidos/estatisticas` com dashboard
 
-3. **🟡 IMPORTANTE:** Criar routes administrativas para Pedidos
-   - `/admin/pedidos/listar`
-   - `/admin/pedidos/detalhes/{id}`
-   - Filtros por status
+4. ✅ **MELHORIA:** ~~Refatorar verificações `row.keys()`~~ - **ANALISADO** (OBS-003)
+   - Análise concluída: abordagem atual é correta para SQLite
+   - `sqlite3.Row` não possui método `.get()`
 
-### 7.3 Médio Prazo (Backlog)
+5. ✅ **IMPORTANTE:** ~~Criar routes administrativas para Endereços~~ - **RESOLVIDO** (2025-10-28)
+   - `/admin/enderecos/listar` com filtro por UF
+   - `/admin/enderecos/detalhes/{id}` com pedidos vinculados
+   - `/admin/enderecos/estatisticas` com métricas geográficas
+   - `/admin/enderecos/duplicados` com detecção de fraudes
 
-4. **🟢 MELHORIA:** Refatorar verificações `if "campo" in row.keys()` para usar `row.get("campo")`
-   - Mais pythônico
-   - Menos verboso
-   - Mesmo comportamento
-
-5. **🟢 MELHORIA:** Considerar criar routes administrativas para Endereços (auditoria/estatísticas)
+### 7.2 Médio Prazo (Backlog)
 
 6. **🟢 DOCUMENTAÇÃO:** Documentar decisões de design
-   - Por que algumas entidades não têm routes admin?
-   - Quando usar múltiplos DTOs?
-   - Quando criar helper functions?
+   - Por que Mensagens não têm routes admin? (privacidade)
+   - Quando usar múltiplos DTOs? (workflows complexos)
+   - Quando criar helper functions? (conversões complexas)
 
 ---
 
@@ -732,9 +779,9 @@ Use este checklist ao criar novas entidades no sistema:
 
 O projeto **Comprae** demonstra excelente organização e qualidade de código. O padrão estabelecido pelo CRUD de Categorias é sólido e bem documentado por meio do código. Os desvios encontrados em entidades mais complexas (Anúncio, Pedido) são **justificados pela complexidade do domínio** e não representam problemas arquiteturais.
 
-**Conformidade Global:** 85% ✅
+**Conformidade Global:** 95% ✅ ⬆️
 
-A conformidade não é 100% porque entidades de domínio complexo naturalmente requerem funcionalidades adicionais. O importante é que essas adições seguem os mesmos princípios de design do padrão:
+A conformidade não é 100% porque entidades de domínio complexo (Anúncio, Pedido) naturalmente requerem funcionalidades adicionais (múltiplos DTOs, funções de workflow, etc.). O importante é que essas adições seguem os mesmos princípios de design do padrão:
 - Separação de responsabilidades
 - Type hints
 - Validação adequada
@@ -742,12 +789,26 @@ A conformidade não é 100% porque entidades de domínio complexo naturalmente r
 - Logging
 - Feedback ao usuário
 
+### Status Atual
+
+✅ **Todos os problemas críticos e médios foram resolvidos:**
+- ✅ PC-001: Função duplicada removida
+- ✅ PM-001: Chaves primárias padronizadas
+- ✅ PM-002: Routes admin para Pedidos criadas
+- ✅ PM-003: Routes admin para Endereços criadas (com detecção de fraudes)
+
+**Funcionalidades Extras Implementadas:**
+- Sistema de detecção de fraudes em endereços
+- Dashboards de estatísticas geográficas
+- Interfaces administrativas completas para auditoria
+
 ### Próximos Passos
 
-1. Corrigir o problema crítico (função duplicada)
-2. Padronizar nomenclatura de IDs
-3. Avaliar necessidade de routes administrativas faltantes
-4. Usar este documento como guia para novas entidades
+1. ✅ ~~Corrigir problemas críticos~~ - CONCLUÍDO
+2. ✅ ~~Padronizar nomenclatura de IDs~~ - CONCLUÍDO
+3. ✅ ~~Criar routes administrativas faltantes~~ - CONCLUÍDO
+4. 📖 Documentar decisões de design (opcional)
+5. 🎯 Usar este documento como guia para novas entidades
 
 ---
 
