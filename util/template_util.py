@@ -12,8 +12,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi import Request
 
 from util.flash_messages import obter_mensagens
-from util.config import APP_NAME, VERSION
+from util.config import APP_NAME, VERSION, TOAST_AUTO_HIDE_DELAY_MS
 from util.csrf_protection import get_csrf_token, CSRF_FORM_FIELD
+from util.config_cache import config
 
 
 def formatar_data_br(
@@ -86,6 +87,81 @@ def formatar_data_hora_br(data_str: Union[str, datetime, None]) -> str:
     return formatar_data_br(data_str, com_hora=True)
 
 
+def format_data(data: Union[datetime, None]) -> str:
+    """
+    Formata datetime para DD/MM/YYYY (sem hora).
+
+    Args:
+        data: Objeto datetime ou None
+
+    Returns:
+        String formatada (DD/MM/YYYY) ou vazia se None
+    """
+    if not data:
+        return ""
+    if isinstance(data, datetime):
+        return data.strftime("%d/%m/%Y")
+    return ""
+
+
+def format_data_hora(data: Union[datetime, None]) -> str:
+    """
+    Formata datetime para DD/MM/YYYY HH:MM (sem segundos).
+
+    Args:
+        data: Objeto datetime ou None
+
+    Returns:
+        String formatada (DD/MM/YYYY HH:MM) ou vazia se None
+    """
+    if not data:
+        return ""
+    if isinstance(data, datetime):
+        return data.strftime("%d/%m/%Y %H:%M")
+    return ""
+
+
+def format_data_as_hora(data: Union[datetime, None]) -> str:
+    """
+    Formata datetime para DD/MM/YYYY às HH:MM.
+
+    Args:
+        data: Objeto datetime ou None
+
+    Returns:
+        String formatada (DD/MM/YYYY às HH:MM) ou vazia se None
+    """
+    if not data:
+        return ""
+    if isinstance(data, datetime):
+        return data.strftime("%d/%m/%Y às %H:%M")
+    return ""
+
+
+def format_hora(data: Union[datetime, None]) -> str:
+    """
+    Formata datetime para HH:MM (apenas hora).
+
+    Args:
+        data: Objeto datetime ou None
+
+    Returns:
+        String formatada (HH:MM) ou vazia se None
+    """
+    if not data:
+        return ""
+    if isinstance(data, datetime):
+        return data.strftime("%H:%M")
+    return ""
+
+
+# Aliases para compatibilidade com código legado
+formatar_data_br_simples = format_data
+formatar_data_br_com_hora = format_data_hora
+formatar_data_br_as = format_data_as_hora
+formatar_hora_br = format_hora
+
+
 def foto_usuario(id: int) -> str:
     """
     Retorna o caminho da foto do usuário para uso em templates.
@@ -154,6 +230,12 @@ def criar_templates(pasta: str) -> Jinja2Templates:
     env.globals['APP_NAME'] = APP_NAME
     env.globals['VERSION'] = VERSION
 
+    # Adicionar configuração dinâmica de toast delay (lê do banco → .env)
+    env.globals['TOAST_AUTO_HIDE_DELAY_MS'] = config.obter_int(
+        'toast_auto_hide_delay_ms',
+        TOAST_AUTO_HIDE_DELAY_MS
+    )
+
     # CSRF Protection: Adicionar função global para gerar input CSRF
     # IMPORTANTE: Esta função precisa receber 'request' do contexto
     # Uso no template: {{ csrf_input(request) }}
@@ -163,6 +245,18 @@ def criar_templates(pasta: str) -> Jinja2Templates:
     env.filters['data_br'] = formatar_data_br
     env.filters['data_hora_br'] = formatar_data_hora_br
     env.filters['foto_usuario'] = foto_usuario
+
+    # Novos filtros com nomes intuitivos
+    env.filters['format_data'] = format_data
+    env.filters['format_data_hora'] = format_data_hora
+    env.filters['format_data_as_hora'] = format_data_as_hora
+    env.filters['format_hora'] = format_hora
+
+    # Aliases para compatibilidade (deprecados, usar novos nomes)
+    env.filters['data_br_simples'] = format_data
+    env.filters['data_br_com_hora'] = format_data_hora
+    env.filters['data_br_as'] = format_data_as_hora
+    env.filters['hora_br'] = format_hora
 
     templates = Jinja2Templates(env=env)
     return templates

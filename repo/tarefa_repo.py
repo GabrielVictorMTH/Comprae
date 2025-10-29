@@ -4,15 +4,33 @@ from model.tarefa_model import Tarefa
 from sql.tarefa_sql import *
 from util.db_util import get_connection
 
-def _converter_data(data_str: Optional[str]) -> Optional[datetime]:
-    """Converte string de data do banco em objeto datetime"""
-    if not data_str:
-        return None
-    try:
-        # SQLite retorna datas no formato 'YYYY-MM-DD HH:MM:SS'
-        return datetime.strptime(data_str, '%Y-%m-%d %H:%M:%S')
-    except ValueError:
-        return None
+
+def _row_to_tarefa(row) -> Tarefa:
+    """
+    Converte uma linha do banco de dados em objeto Tarefa.
+
+    Args:
+        row: Linha do cursor SQLite (sqlite3.Row)
+
+    Returns:
+        Objeto Tarefa populado
+    """
+    # Campos do JOIN (opcionais)
+    usuario_nome = row["usuario_nome"] if "usuario_nome" in row.keys() else None
+    usuario_email = row["usuario_email"] if "usuario_email" in row.keys() else None
+
+    return Tarefa(
+        id=row["id"],
+        titulo=row["titulo"],
+        descricao=row["descricao"],
+        concluida=bool(row["concluida"]),
+        usuario_id=row["usuario_id"],
+        data_criacao=row["data_criacao"],
+        data_conclusao=row["data_conclusao"],
+        usuario_nome=usuario_nome,
+        usuario_email=usuario_email
+    )
+
 
 def criar_tabela() -> bool:
     with get_connection() as conn:
@@ -35,18 +53,7 @@ def obter_todos_por_usuario(usuario_id: int) -> list[Tarefa]:
         cursor = conn.cursor()
         cursor.execute(OBTER_TODOS_POR_USUARIO, (usuario_id,))
         rows = cursor.fetchall()
-        return [
-            Tarefa(
-                id=row["id"],
-                titulo=row["titulo"],
-                descricao=row["descricao"],
-                concluida=bool(row["concluida"]),
-                usuario_id=row["usuario_id"],
-                data_criacao=_converter_data(row["data_criacao"]),
-                data_conclusao=_converter_data(row["data_conclusao"])
-            )
-            for row in rows
-        ]
+        return [_row_to_tarefa(row) for row in rows]
 
 def obter_por_id(id: int) -> Optional[Tarefa]:
     with get_connection() as conn:
@@ -54,15 +61,7 @@ def obter_por_id(id: int) -> Optional[Tarefa]:
         cursor.execute(OBTER_POR_ID, (id,))
         row = cursor.fetchone()
         if row:
-            return Tarefa(
-                id=row["id"],
-                titulo=row["titulo"],
-                descricao=row["descricao"],
-                concluida=bool(row["concluida"]),
-                usuario_id=row["usuario_id"],
-                data_criacao=_converter_data(row["data_criacao"]),
-                data_conclusao=_converter_data(row["data_conclusao"])
-            )
+            return _row_to_tarefa(row)
         return None
 
 def atualizar(tarefa: Tarefa) -> bool:
@@ -87,3 +86,22 @@ def excluir(id: int) -> bool:
         cursor = conn.cursor()
         cursor.execute(EXCLUIR, (id,))
         return cursor.rowcount > 0
+
+def contar_pendentes_por_usuario(usuario_id: int) -> int:
+    """
+    Conta quantas tarefas não concluídas um usuário possui.
+
+    Args:
+        usuario_id: ID do usuário
+
+    Returns:
+        Número de tarefas com concluida = 0
+    """
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT COUNT(*) as total FROM tarefa WHERE usuario_id = ? AND concluida = 0",
+            (usuario_id,)
+        )
+        row = cursor.fetchone()
+        return row["total"] if row else 0

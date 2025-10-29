@@ -33,51 +33,51 @@ def inserir(pedido: Pedido) -> Optional[int]:
         return cursor.lastrowid
 
 
-def atualizar_status(id_pedido: int, status: str) -> bool:
+def atualizar_status(id: int, status: str) -> bool:
     """Atualiza o status de um pedido"""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(ATUALIZAR_STATUS, (status, id_pedido))
+        cursor.execute(ATUALIZAR_STATUS, (status, id))
         return cursor.rowcount > 0
 
 
-def marcar_como_pago(id_pedido: int) -> bool:
+def marcar_como_pago(id: int) -> bool:
     """Marca pedido como pago e registra data/hora"""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(ATUALIZAR_PARA_PAGO, (id_pedido,))
+        cursor.execute(ATUALIZAR_PARA_PAGO, (id,))
         return cursor.rowcount > 0
 
 
-def marcar_como_enviado(id_pedido: int, codigo_rastreio: str) -> bool:
+def marcar_como_enviado(id: int, codigo_rastreio: str) -> bool:
     """Marca pedido como enviado com código de rastreio"""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(ATUALIZAR_PARA_ENVIADO, (codigo_rastreio, id_pedido))
+        cursor.execute(ATUALIZAR_PARA_ENVIADO, (codigo_rastreio, id))
         return cursor.rowcount > 0
 
 
-def cancelar(id_pedido: int) -> bool:
+def cancelar(id: int) -> bool:
     """Cancela um pedido"""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(CANCELAR_PEDIDO, (id_pedido,))
+        cursor.execute(CANCELAR_PEDIDO, (id,))
         return cursor.rowcount > 0
 
 
-def avaliar(id_pedido: int, nota: int, comentario: str) -> bool:
+def avaliar(id: int, nota: int, comentario: str) -> bool:
     """Registra avaliação de um pedido"""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(AVALIAR_PEDIDO, (nota, comentario, id_pedido))
+        cursor.execute(AVALIAR_PEDIDO, (nota, comentario, id))
         return cursor.rowcount > 0
 
 
-def obter_por_id(id_pedido: int) -> Optional[Pedido]:
+def obter_por_id(id: int) -> Optional[Pedido]:
     """Obtém um pedido por ID"""
     with get_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(OBTER_POR_ID, (id_pedido,))
+        cursor.execute(OBTER_POR_ID, (id,))
         row = cursor.fetchone()
         if row:
             return _row_to_pedido(row)
@@ -133,13 +133,13 @@ def _converter_data(data_str: Optional[str]) -> Optional[datetime]:
 def _row_to_pedido(row) -> Pedido:
     """Converte row do banco para objeto Pedido"""
     return Pedido(
-        id_pedido=row["id_pedido"],
+        id=row["id"],
         id_endereco=row["id_endereco"],
         id_comprador=row["id_comprador"],
         id_anuncio=row["id_anuncio"],
         preco=row["preco"],
         status=row["status"],
-        data_hora_pedido=_converter_data(row["data_hora_pedido"]),
+        data_hora_pedido=_converter_data(row["data_hora_pedido"] if "data_hora_pedido" in row.keys() else None),
         data_hora_pagamento=_converter_data(row["data_hora_pagamento"] if "data_hora_pagamento" in row.keys() else None),
         data_hora_envio=_converter_data(row["data_hora_envio"] if "data_hora_envio" in row.keys() else None),
         codigo_rastreio=row["codigo_rastreio"] if "codigo_rastreio" in row.keys() else None,

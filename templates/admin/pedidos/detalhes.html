@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block titulo %}Detalhes do Pedido #{{ pedido.id }} - Admin{% endblock %}
+
+{% block conteudo %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col">
+            <h2>Detalhes do Pedido #{{ pedido.id }}</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin/pedidos/listar">Pedidos</a></li>
+                    <li class="breadcrumb-item active">Pedido #{{ pedido.id }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informações do Pedido -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Informações do Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Status:</dt>
+                        <dd class="col-sm-8">
+                            {% if pedido.status == 'Pendente' %}
+                                <span class="badge bg-warning text-dark">{{ pedido.status }}</span>
+                            {% elif pedido.status == 'Pago' %}
+                                <span class="badge bg-success">{{ pedido.status }}</span>
+                            {% elif pedido.status == 'Enviado' %}
+                                <span class="badge bg-info">{{ pedido.status }}</span>
+                            {% elif pedido.status == 'Cancelado' %}
+                                <span class="badge bg-danger">{{ pedido.status }}</span>
+                            {% endif %}
+                        </dd>
+
+                        <dt class="col-sm-4">Valor:</dt>
+                        <dd class="col-sm-8">R$ {{ "%.2f"|format(pedido.preco) }}</dd>
+
+                        <dt class="col-sm-4">Data do Pedido:</dt>
+                        <dd class="col-sm-8">
+                            {% if pedido.data_hora_pedido %}
+                                {{ pedido.data_hora_pedido.strftime('%d/%m/%Y às %H:%M') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </dd>
+
+                        {% if pedido.data_hora_pagamento %}
+                        <dt class="col-sm-4">Data Pagamento:</dt>
+                        <dd class="col-sm-8">{{ pedido.data_hora_pagamento.strftime('%d/%m/%Y às %H:%M') }}</dd>
+                        {% endif %}
+
+                        {% if pedido.data_hora_envio %}
+                        <dt class="col-sm-4">Data Envio:</dt>
+                        <dd class="col-sm-8">{{ pedido.data_hora_envio.strftime('%d/%m/%Y às %H:%M') }}</dd>
+                        {% endif %}
+
+                        {% if pedido.codigo_rastreio %}
+                        <dt class="col-sm-4">Código Rastreio:</dt>
+                        <dd class="col-sm-8"><code>{{ pedido.codigo_rastreio }}</code></dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações do Produto -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Produto</h5>
+                </div>
+                <div class="card-body">
+                    {% if pedido.anuncio %}
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Nome:</dt>
+                        <dd class="col-sm-8">{{ pedido.anuncio.nome }}</dd>
+
+                        <dt class="col-sm-4">Vendedor:</dt>
+                        <dd class="col-sm-8">
+                            {% if pedido.anuncio.vendedor %}
+                                {{ pedido.anuncio.vendedor.nome }}<br>
+                                <small class="text-muted">{{ pedido.anuncio.vendedor.email }}</small>
+                            {% else %}
+                                <em>Vendedor removido</em>
+                            {% endif %}
+                        </dd>
+
+                        <dt class="col-sm-4">Peso:</dt>
+                        <dd class="col-sm-8">{{ "%.2f"|format(pedido.anuncio.peso) }} kg</dd>
+                    </dl>
+                    {% else %}
+                    <p class="text-muted mb-0"><em>Produto removido do sistema</em></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações do Comprador -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Comprador</h5>
+                </div>
+                <div class="card-body">
+                    {% if pedido.comprador %}
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4">Nome:</dt>
+                        <dd class="col-sm-8">{{ pedido.comprador.nome }}</dd>
+
+                        <dt class="col-sm-4">Email:</dt>
+                        <dd class="col-sm-8">{{ pedido.comprador.email }}</dd>
+
+                        <dt class="col-sm-4">Perfil:</dt>
+                        <dd class="col-sm-8">
+                            <span class="badge bg-secondary">{{ pedido.comprador.perfil }}</span>
+                        </dd>
+                    </dl>
+                    {% else %}
+                    <p class="text-muted mb-0"><em>Usuário removido do sistema</em></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Endereço de Entrega -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Endereço de Entrega</h5>
+                </div>
+                <div class="card-body">
+                    {% if pedido.endereco %}
+                    <address class="mb-0">
+                        <strong>{{ pedido.endereco.titulo }}</strong><br>
+                        {{ pedido.endereco.logradouro }}, {{ pedido.endereco.numero }}<br>
+                        {% if pedido.endereco.complemento %}
+                            {{ pedido.endereco.complemento }}<br>
+                        {% endif %}
+                        {{ pedido.endereco.bairro }}<br>
+                        {{ pedido.endereco.cidade }} - {{ pedido.endereco.uf }}<br>
+                        CEP: {{ pedido.endereco.cep }}
+                    </address>
+                    {% else %}
+                    <p class="text-muted mb-0"><em>Endereço removido</em></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Avaliação -->
+        {% if pedido.nota_avaliacao %}
+        <div class="col-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Avaliação</h5>
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-2">Nota:</dt>
+                        <dd class="col-sm-10">
+                            {% for i in range(pedido.nota_avaliacao) %}
+                                <i class="bi bi-star-fill text-warning"></i>
+                            {% endfor %}
+                            {% for i in range(5 - pedido.nota_avaliacao) %}
+                                <i class="bi bi-star text-muted"></i>
+                            {% endfor %}
+                            ({{ pedido.nota_avaliacao }}/5)
+                        </dd>
+
+                        {% if pedido.comentario_avaliacao %}
+                        <dt class="col-sm-2">Comentário:</dt>
+                        <dd class="col-sm-10">{{ pedido.comentario_avaliacao }}</dd>
+                        {% endif %}
+
+                        {% if pedido.data_hora_avaliacao %}
+                        <dt class="col-sm-2">Data:</dt>
+                        <dd class="col-sm-10">{{ pedido.data_hora_avaliacao.strftime('%d/%m/%Y às %H:%M') }}</dd>
+                        {% endif %}
+                    </dl>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Ações Admin -->
+    <div class="row mt-4">
+        <div class="col">
+            <a href="/admin/pedidos/listar" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+            {% if pedido.status != 'Cancelado' %}
+            <form method="POST" action="/admin/pedidos/cancelar/{{ pedido.id }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja cancelar este pedido? Esta ação não pode ser desfeita.');">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-x-circle"></i> Cancelar Pedido (Admin Override)
+                </button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

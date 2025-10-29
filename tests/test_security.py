@@ -197,7 +197,7 @@ class TestEscalacaoPrivilegios:
         # Ou verificar que não há tal endpoint acessível
         # Este teste valida que perfil só edita próprio usuário
 
-        response = client.get("/perfil/editar")
+        response = client.get("/usuario/perfil/editar")
         assert response.status_code == 200
 
         # Modificar para tentar editar outro usuário (simulação)
@@ -385,7 +385,7 @@ class TestSessionSecurity:
 
         # Fazer logout
         response_logout = cliente_autenticado.get("/logout", follow_redirects=False)
-        assert_redirects_to(response_logout, "/login")
+        assert_redirects_to(response_logout, "/")
 
         # Tentar acessar área protegida com mesma sessão
         response_protegido = cliente_autenticado.get("/usuario", follow_redirects=False)
@@ -444,7 +444,7 @@ class TestPasswordSecurity:
         })
 
         # Acessar várias páginas
-        pages = ["/usuario", "/perfil/visualizar", "/perfil/editar"]
+        pages = ["/usuario", "/usuario/perfil/visualizar", "/usuario/perfil/editar"]
 
         for page in pages:
             response = client.get(page)

@@ -132,7 +132,9 @@ def validar_texto_minimo_palavras(
         valor = v.strip()
 
         if len(valor.split()) < min_palavras:
-            raise ValueError(f"{nome_campo} deve ter no mínimo {min_palavras} palavras.")
+            raise ValueError(
+                f"{nome_campo} deve ter no mínimo {min_palavras} palavras."
+            )
 
         if len(valor) > tamanho_maximo:
             raise ValueError(
@@ -660,7 +662,7 @@ def validar_tamanho_arquivo(
     return validator
 
 
-# ===== VALIDAÇÕES DE DATA E URL =====
+# ===== VALIDAÇÕES DE TIPOS ESPECÍFICOS =====
 
 
 def validar_data(
@@ -744,143 +746,28 @@ def validar_url(requer_protocolo: bool = True) -> Callable[[Any, Any], Any]:
     return validator
 
 
-# ===== VALIDAÇÕES DE DOMÍNIO ESPECÍFICO =====
-
-
-def validar_perfil_usuario(perfil_enum: Any) -> Callable[[Any, Any], Any]:
+def validar_tipo(nome_campo: str, tipo_enum: Any) -> Callable[[Any, Any], Any]:
     """
-    Valida perfil de usuário usando um Enum.
+    Valida tipo usando um Enum.
 
     Args:
-        perfil_enum: Classe Enum com método existe() e valores()
+        tipo_enum: Classe Enum com método existe() e valores()
 
     Returns:
         Função validadora para uso com field_validator
 
     Example:
-        from util.perfis import Perfil
-        _validar_perfil = field_validator('perfil')(validar_perfil_usuario(Perfil))
+        from model.chamado_model import StatusChamado
+        _validar_status = field_validator('status')(validar_tipo(StatusChamado))
     """
 
     def validator(cls: Any, v: Any) -> Any:  # noqa: N805
-        if not perfil_enum.existe(v):
-            perfis_validos = ", ".join([f"'{p}'" for p in perfil_enum.valores()])
+        valores_validos = [t.value for t in tipo_enum]
+        if v not in valores_validos:
+            tipos_validos = ", ".join([f"'{t.value}'" for t in tipo_enum])
             raise ValueError(
-                f'Perfil inválido: "{v}". ' f"Valores válidos: {perfis_validos}."
+                f"{nome_campo} deve ter um valor válido. Valores válidos: {tipos_validos}."
             )
         return v
-
-    return validator
-
-
-def validar_uf() -> Callable[[Any, Any], Any]:
-    """
-    Valida UF (Unidade Federativa) do Brasil.
-
-    Returns:
-        Função validadora para uso com field_validator
-
-    Example:
-        _validar_uf = field_validator('uf')(validar_uf())
-    """
-    UFS_VALIDAS = {
-        "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA",
-        "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN",
-        "RS", "RO", "RR", "SC", "SP", "SE", "TO"
-    }
-
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
-        if not v:
-            raise ValueError("UF é obrigatória.")
-
-        uf = v.strip().upper()
-
-        if uf not in UFS_VALIDAS:
-            raise ValueError(
-                f'UF inválida: "{v}". Deve ser uma sigla de estado brasileiro válida.'
-            )
-
-        return uf
-
-    return validator
-
-
-def validar_valor_monetario(
-    minimo: float = 0.0,
-    maximo: Optional[float] = None,
-    permitir_zero: bool = True
-) -> Callable[[Any, Any], Any]:
-    """
-    Valida valor monetário (float).
-
-    Args:
-        minimo: Valor mínimo permitido (padrão: 0.0)
-        maximo: Valor máximo permitido (opcional)
-        permitir_zero: Se deve permitir valor zero (padrão: True)
-
-    Returns:
-        Função validadora para uso com field_validator
-
-    Example:
-        _validar_preco = field_validator('preco')(validar_valor_monetario(minimo=0.01, maximo=999999.99))
-    """
-
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
-        if v is None:
-            raise ValueError("Valor é obrigatório.")
-
-        try:
-            valor = float(v)
-        except (TypeError, ValueError):
-            raise ValueError(f'Valor inválido: "{v}". Deve ser um número.')
-
-        if not permitir_zero and valor == 0:
-            raise ValueError("Valor não pode ser zero.")
-
-        if valor < minimo:
-            raise ValueError(f"Valor deve ser no mínimo R$ {minimo:.2f}.")
-
-        if maximo is not None and valor > maximo:
-            raise ValueError(f"Valor deve ser no máximo R$ {maximo:.2f}.")
-
-        return valor
-
-    return validator
-
-
-def validar_numero_positivo(
-    permitir_zero: bool = False,
-    nome_campo: str = "Número"
-) -> Callable[[Any, Any], Any]:
-    """
-    Valida número positivo (int ou float).
-
-    Args:
-        permitir_zero: Se deve permitir valor zero (padrão: False)
-        nome_campo: Nome do campo para mensagens de erro (padrão: "Número")
-
-    Returns:
-        Função validadora para uso com field_validator
-
-    Example:
-        _validar_quantidade = field_validator('quantidade')(validar_numero_positivo(permitir_zero=True))
-    """
-
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
-        if v is None:
-            raise ValueError(f"{nome_campo} é obrigatório.")
-
-        try:
-            valor = float(v)
-        except (TypeError, ValueError):
-            raise ValueError(f'{nome_campo} inválido: "{v}". Deve ser um número.')
-
-        if not permitir_zero and valor <= 0:
-            raise ValueError(f"{nome_campo} deve ser maior que zero.")
-
-        if permitir_zero and valor < 0:
-            raise ValueError(f"{nome_campo} não pode ser negativo.")
-
-        return valor
 
     return validator

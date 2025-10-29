@@ -9,7 +9,7 @@ from model.usuario_model import Usuario
 
 @dataclass
 class Pedido:
-    id_pedido: int
+    id: int
     id_endereco: int
     id_comprador: int
     id_anuncio: int

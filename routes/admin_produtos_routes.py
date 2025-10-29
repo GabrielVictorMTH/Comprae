@@ -207,7 +207,7 @@ async def post_editar(
             ativo=ativo_bool
         )
 
-        # Atualizar anúncio
+        # Atualizar anúncio (mantém data_cadastro e ativo originais)
         anuncio_atualizado = Anuncio(
             id=id,
             id_vendedor=anuncio_atual.id_vendedor,  # Mantém vendedor original

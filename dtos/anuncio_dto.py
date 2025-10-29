@@ -6,8 +6,6 @@ from pydantic import BaseModel, field_validator
 from dtos.validators import (
     validar_string_obrigatoria,
     validar_id_positivo,
-    validar_valor_monetario,
-    validar_numero_positivo,
 )
 
 
@@ -28,9 +26,30 @@ class CriarAnuncioDTO(BaseModel):
     _validar_descricao = field_validator("descricao")(
         validar_string_obrigatoria("Descrição", tamanho_minimo=10, tamanho_maximo=1000)
     )
-    _validar_peso = field_validator("peso")(validar_numero_positivo("Peso"))
-    _validar_preco = field_validator("preco")(validar_valor_monetario())
-    _validar_estoque = field_validator("estoque")(validar_numero_positivo("Estoque"))
+
+    @field_validator("peso")
+    @classmethod
+    def validar_peso(cls, v: float) -> float:
+        """Valida se o peso é positivo"""
+        if v <= 0:
+            raise ValueError("Peso deve ser maior que zero")
+        return v
+
+    @field_validator("preco")
+    @classmethod
+    def validar_preco(cls, v: float) -> float:
+        """Valida se o preço é positivo"""
+        if v <= 0:
+            raise ValueError("Preço deve ser maior que zero")
+        return v
+
+    @field_validator("estoque")
+    @classmethod
+    def validar_estoque(cls, v: int) -> int:
+        """Valida se o estoque não é negativo"""
+        if v < 0:
+            raise ValueError("Estoque não pode ser negativo")
+        return v
 
 
 class AlterarAnuncioDTO(BaseModel):
@@ -53,9 +72,30 @@ class AlterarAnuncioDTO(BaseModel):
     _validar_descricao = field_validator("descricao")(
         validar_string_obrigatoria("Descrição", tamanho_minimo=10, tamanho_maximo=1000)
     )
-    _validar_peso = field_validator("peso")(validar_numero_positivo("Peso"))
-    _validar_preco = field_validator("preco")(validar_valor_monetario())
-    _validar_estoque = field_validator("estoque")(validar_numero_positivo("Estoque"))
+
+    @field_validator("peso")
+    @classmethod
+    def validar_peso(cls, v: float) -> float:
+        """Valida se o peso é positivo"""
+        if v <= 0:
+            raise ValueError("Peso deve ser maior que zero")
+        return v
+
+    @field_validator("preco")
+    @classmethod
+    def validar_preco(cls, v: float) -> float:
+        """Valida se o preço é positivo"""
+        if v <= 0:
+            raise ValueError("Preço deve ser maior que zero")
+        return v
+
+    @field_validator("estoque")
+    @classmethod
+    def validar_estoque(cls, v: int) -> int:
+        """Valida se o estoque não é negativo"""
+        if v < 0:
+            raise ValueError("Estoque não pode ser negativo")
+        return v
 
 
 class FiltroAnuncioDTO(BaseModel):
@@ -73,7 +113,6 @@ class FiltroAnuncioDTO(BaseModel):
 
 class ModerarProdutoDTO(BaseModel):
     """DTO para reprovar/moderar produto"""
-
     id: int
     motivo_reprovacao: str
 

@@ -14,9 +14,6 @@
     <!-- CSS Customizado -->
     <link rel="stylesheet" href="/static/css/custom.css">
 
-    <!-- Bootstrap 5.3.8 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-
     {% block head %}{% endblock %}
 </head>
 
@@ -44,12 +41,6 @@
                         <a class="nav-link {{ 'active' if request.path == '/sobre' else '' }}"
                             href="/sobre">Sobre</a>
                     </li>
-                    {% if request.session.get('usuario_logado') %}
-                    <li class="nav-item">
-                        <a class="nav-link {{ 'active' if '/tarefas/' in request.path else '' }}"
-                            href="/tarefas/listar">Tarefas</a>
-                    </li>
-                    {% endif %}
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/exemplos' in request.path else '' }}"
                             href="/exemplos">Exemplos</a>
@@ -79,6 +70,11 @@
     <!-- Container para Toasts (bottom-right) -->
     <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-4 toast-offset"></div>
 
+    <!-- Chat Widget (apenas para usuários logados) -->
+    {% if request.session.get('usuario_logado') %}
+    {% include 'components/chat_widget.html' %}
+    {% endif %}
+
     <!-- Conteúdo Principal -->
     <main class="container d-flex flex-column flex-fill my-4">
         {% block content %}{% endblock %}
@@ -102,6 +98,12 @@
         {{ obter_mensagens(request) | tojson }}
     </script>
 
+    <!-- Configurações globais da aplicação -->
+    <script>
+        // Delay configurável para auto-hide dos toasts
+        window.TOAST_AUTO_HIDE_DELAY_MS = {{ TOAST_AUTO_HIDE_DELAY_MS }};
+    </script>
+
     <!-- Bootstrap 5.3.8 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -119,6 +121,12 @@
 
     <!-- Script de Máscaras de Input -->
     <script src="/static/js/input-mask.js"></script>
+
+    <!-- Scripts do Chat (apenas para usuários logados) -->
+    {% if request.session.get('usuario_logado') %}
+    <script src="/static/js/chat-manager.js"></script>
+    <script src="/static/js/chat-ui.js"></script>
+    {% endif %}
 
     {% block scripts %}{% endblock %}
 </body>
