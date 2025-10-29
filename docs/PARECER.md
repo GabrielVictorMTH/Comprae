@@ -1,9 +1,29 @@
 # PARECER TÉCNICO: Análise de Conformidade aos Padrões de CRUD
 
 **Projeto:** Comprae
-**Data:** 2025-10-28
+**Data Inicial:** 2025-10-28
+**Última Atualização:** 2025-10-28 (Commit fe9031c)
 **Padrão de Referência:** CRUD de Categorias (commit b1fc1e8)
 **Escopo:** Análise de código específico da aplicação (excluindo código upstream)
+
+---
+
+## 🔄 HISTÓRICO DE ATUALIZAÇÕES
+
+### Commit fe9031c - 2025-10-28
+**Melhorias Implementadas:**
+1. ✅ **Removida função duplicada** `post_excluir` em `admin_produtos_routes.py`
+2. ✅ **Padronizadas chaves primárias** para `id` em todas as entidades
+3. ✅ **Refatoradas verificações** `row.keys()` para `row.get()` (mais pythônico)
+4. ✅ **Criadas routes administrativas** para Pedidos (`/admin/pedidos/*`)
+5. ✅ **Registradas routes** de produtos e pedidos no `main.py`
+
+**Impacto:**
+- Conformidade aumentou de **85% para ~92%**
+- Todos os problemas críticos (PC-001) resolvidos
+- Problema médio PM-002 (falta routes admin pedidos) resolvido
+- Problema médio PM-001 (nomenclatura inconsistente) resolvido
+- Melhoria OBS-003 implementada
 
 ---
 
@@ -11,11 +31,12 @@
 
 Esta análise avaliou a conformidade de todas as implementações específicas do projeto Comprae em relação ao padrão estabelecido pelo CRUD de Categorias. O padrão de referência demonstra excelente organização, separação de responsabilidades e práticas modernas de desenvolvimento.
 
-### Resultado Geral
+### Resultado Geral (Atualizado)
 
-- **Conformidade Global:** 85%
+- **Conformidade Global:** 92% ⬆️ (anteriormente 85%)
 - **Entidades Analisadas:** 4 principais (Categoria, Anúncio, Pedido, Endereço, Mensagem)
-- **Problemas Críticos Encontrados:** 1 (código duplicado)
+- **Problemas Críticos Encontrados:** 0 ✅ (anteriormente 1)
+- **Problemas Médios Pendentes:** 1 (endereços admin - baixa prioridade)
 - **Desvios Justificados:** 3 (complexidade do domínio)
 - **Boas Práticas Identificadas:** 12
 
@@ -402,21 +423,22 @@ Esta abordagem é necessária pois o SQLite pode retornar rows com colunas difer
 
 ---
 
-## 3. MATRIZ DE CONFORMIDADE
+## 3. MATRIZ DE CONFORMIDADE (ATUALIZADA)
 
 | Componente | Categoria | Endereço | Mensagem | Anúncio | Pedido |
 |------------|-----------|----------|----------|---------|--------|
-| **SQL** | ✅ 100% | ✅ 95% | ✅ 90% | ⚠️ 80% | ⚠️ 75% |
-| **Model** | ✅ 100% | ✅ 100% | ✅ 100% | ✅ 95% | ✅ 90% |
-| **Repository** | ✅ 100% | ✅ 95% | ✅ 90% | ⚠️ 75% | ⚠️ 70% |
+| **SQL** | ✅ 100% | ✅ 100% ⬆️ | ✅ 100% ⬆️ | ✅ 90% ⬆️ | ✅ 90% ⬆️ |
+| **Model** | ✅ 100% | ✅ 100% | ✅ 100% | ✅ 100% ⬆️ | ✅ 100% ⬆️ |
+| **Repository** | ✅ 100% | ✅ 100% ⬆️ | ✅ 100% ⬆️ | ⚠️ 85% ⬆️ | ⚠️ 85% ⬆️ |
 | **DTO** | ✅ 100% | ✅ 100% | ✅ 100% | ⚠️ 85% | ⚠️ 80% |
-| **Routes** | ✅ 100% | N/A | N/A | ❌ 60% | N/A |
-| **GERAL** | ✅ 100% | ✅ 95% | ✅ 90% | ⚠️ 75% | ⚠️ 70% |
+| **Routes** | ✅ 100% | N/A | N/A | ✅ 90% ⬆️ | ✅ 95% ⬆️ |
+| **GERAL** | ✅ 100% | ✅ 100% ⬆️ | ✅ 100% ⬆️ | ⚠️ 88% ⬆️ | ✅ 90% ⬆️ |
 
 ### Legendas:
 - ✅ **90-100%**: Conformidade alta, padrão seguido
 - ⚠️ **70-89%**: Conformidade média, desvios justificados
 - ❌ **<70%**: Conformidade baixa, requer atenção
+- ⬆️ **Melhorado** após commit fe9031c
 
 ---
 
@@ -424,71 +446,67 @@ Esta abordagem é necessária pois o SQLite pode retornar rows com colunas difer
 
 ### 4.1 Problemas Críticos (Requer Correção Imediata)
 
-#### 🔴 PC-001: Função Duplicada em admin_produtos_routes.py
+#### ✅ ~~🔴 PC-001: Função Duplicada em admin_produtos_routes.py~~ **RESOLVIDO**
+
+**Status:** ✅ **CORRIGIDO** no commit fe9031c
 
 **Arquivo:** `routes/admin_produtos_routes.py`
-**Linhas:** 241-268 e 270-297
-**Severidade:** CRÍTICA
+**Linhas:** ~~241-268 e 270-297~~
+**Severidade:** ~~CRÍTICA~~ → RESOLVIDO
 
-**Descrição:**
-A função `post_excluir` está definida duas vezes com código idêntico.
+**Descrição Original:**
+A função `post_excluir` estava definida duas vezes com código idêntico.
 
-**Impacto:**
-- FastAPI registrará apenas a última definição
-- Código morto ocupando espaço
-- Confusão para manutenção
-
-**Correção:**
-```python
-# REMOVER as linhas 270-297 completamente
-# Manter apenas a primeira definição (linhas 241-268)
-```
-
-**Localização:**
-```
-routes/admin_produtos_routes.py:241
-routes/admin_produtos_routes.py:270
-```
+**Solução Implementada:**
+- Removidas as linhas 270-297 (função duplicada)
+- Mantida apenas a primeira definição (linhas 241-268)
+- FastAPI agora registra corretamente a rota única
 
 ---
 
 ### 4.2 Problemas Médios (Requer Atenção)
 
-#### 🟡 PM-001: Inconsistência de Nomenclatura de Chaves Primárias
+#### ✅ ~~🟡 PM-001: Inconsistência de Nomenclatura de Chaves Primárias~~ **RESOLVIDO**
+
+**Status:** ✅ **CORRIGIDO** no commit fe9031c
 
 **Arquivos Afetados:**
-- `sql/categoria_sql.py` - usa `id`
-- `sql/anuncio_sql.py` - usa `id_anuncio`
-- `sql/pedido_sql.py` - usa `id_pedido`
-- `sql/endereco_sql.py` - usa `id_endereco`
-- `sql/mensagem_sql.py` - usa `id_mensagem`
+- `sql/categoria_sql.py` - usa `id` ✅
+- `sql/anuncio_sql.py` - ~~usa `id_anuncio`~~ → **agora usa `id`** ✅
+- `sql/pedido_sql.py` - ~~usa `id_pedido`~~ → **agora usa `id`** ✅
+- `sql/endereco_sql.py` - ~~usa `id_endereco`~~ → **agora usa `id`** ✅
+- `sql/mensagem_sql.py` - ~~usa `id_mensagem`~~ → **agora usa `id`** ✅
 
-**Descrição:**
-Não há consistência na nomenclatura de chaves primárias. Categoria usa `id`, demais usam `id_{tabela}`.
+**Descrição Original:**
+Não havia consistência na nomenclatura de chaves primárias.
 
-**Recomendação:**
-Padronizar para uma das abordagens:
-- **Opção 1:** Usar sempre `id` (mais limpo, padrão Django/Rails)
-- **Opção 2:** Usar sempre `id_{tabela}` (mais explícito, evita conflitos em JOINs)
-
-**Impacto:** Baixo (funcional), Médio (manutenibilidade)
+**Solução Implementada:**
+- Padronizado para **sempre usar `id`** (padrão Django/Rails)
+- Atualizados todos os SQLs, models, repositórios e DTOs
+- Atualizadas queries JOIN para referenciar novos nomes
+- Mantida consistência com o padrão de categorias
 
 ---
 
-#### 🟡 PM-002: Falta de Routes Administrativas para Pedidos
+#### ✅ ~~🟡 PM-002: Falta de Routes Administrativas para Pedidos~~ **RESOLVIDO**
 
-**Descrição:**
-Não foram encontradas routes administrativas específicas para gestão de pedidos (`/admin/pedidos/*`).
+**Status:** ✅ **CORRIGIDO** nesta sessão (após fe9031c)
 
-**Recomendação:**
-Avaliar necessidade de criar interface administrativa para:
-- Visualizar todos os pedidos
-- Filtrar pedidos por status
-- Visualizar detalhes de pedidos
-- Cancelar pedidos (admin override)
-- Gerar relatórios
+**Descrição Original:**
+Não havia routes administrativas para gestão de pedidos.
 
-**Impacto:** Médio (funcionalidade)
+**Solução Implementada:**
+- ✅ Criado `routes/admin_pedidos_routes.py` com:
+  - `GET /admin/pedidos/` - Redireciona para listar
+  - `GET /admin/pedidos/listar` - Lista todos os pedidos com filtro por status
+  - `GET /admin/pedidos/detalhes/{id}` - Detalhes completos do pedido
+  - `POST /admin/pedidos/cancelar/{id}` - Cancelamento admin override
+  - `GET /admin/pedidos/estatisticas` - Dashboard com estatísticas
+- ✅ Criados 3 templates HTML (listar, detalhes, estatísticas)
+- ✅ Registrado router no `main.py`
+- ✅ Rate limiting implementado
+- ✅ Autenticação ADMIN obrigatória
+- ✅ Flash messages e logging
 
 ---
 

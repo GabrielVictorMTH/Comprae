@@ -39,7 +39,7 @@ class TestInserir:
     def test_inserir_endereco_valido(self, usuario_teste):
         """Testa inserção de endereço válido"""
         endereco = Endereco(
-            id_endereco=0,
+            id=0,
             id_usuario=usuario_teste,
             titulo="Casa",
             logradouro="Rua das Flores",
@@ -59,7 +59,7 @@ class TestInserir:
     def test_inserir_endereco_sem_complemento(self, usuario_teste):
         """Testa inserção sem complemento (campo opcional)"""
         endereco = Endereco(
-            id_endereco=0,
+            id=0,
             id_usuario=usuario_teste,
             titulo="Trabalho",
             logradouro="Av Principal",
@@ -82,7 +82,7 @@ class TestInserir:
     def test_inserir_endereco_usuario_inexistente(self):
         """Testa inserção com FK inválida (deve falhar)"""
         endereco = Endereco(
-            id_endereco=0,
+            id=0,
             id_usuario=99999,  # Usuário inexistente
             titulo="Teste",
             logradouro="Rua Teste",
@@ -100,7 +100,7 @@ class TestInserir:
     def test_inserir_endereco_todos_campos(self, usuario_teste):
         """Testa inserção com todos os campos preenchidos"""
         endereco = Endereco(
-            id_endereco=0,
+            id=0,
             id_usuario=usuario_teste,
             titulo="Casa de Praia",
             logradouro="Avenida Beira Mar",
@@ -123,7 +123,7 @@ class TestAlterar:
         """Testa alteração de endereço existente"""
         # Criar endereço
         endereco = Endereco(
-            id_endereco=0,
+            id=0,
             id_usuario=usuario_teste,
             titulo="Original",
             logradouro="Rua Original",
@@ -138,7 +138,7 @@ class TestAlterar:
 
         # Alterar
         endereco_alterado = Endereco(
-            id_endereco=end_id,
+            id=end_id,
             id_usuario=usuario_teste,
             titulo="Alterado",
             logradouro="Rua Alterada",
@@ -163,7 +163,7 @@ class TestAlterar:
     def test_alterar_endereco_inexistente(self, usuario_teste):
         """Testa alteração de endereço que não existe"""
         endereco = Endereco(
-            id_endereco=99999,
+            id=99999,
             id_usuario=usuario_teste,
             titulo="Inexistente",
             logradouro="Rua Teste",
@@ -185,7 +185,7 @@ class TestExcluir:
     def test_excluir_endereco_existente(self, usuario_teste):
         """Testa exclusão de endereço existente"""
         endereco = Endereco(
-            id_endereco=0,
+            id=0,
             id_usuario=usuario_teste,
             titulo="ParaExcluir",
             logradouro="Rua Excluir",
@@ -217,7 +217,7 @@ class TestObterPorId:
     def test_obter_endereco_existente(self, usuario_teste):
         """Testa busca de endereço por ID existente"""
         endereco = Endereco(
-            id_endereco=0,
+            id=0,
             id_usuario=usuario_teste,
             titulo="BuscaId",
             logradouro="Rua Busca",
@@ -233,7 +233,7 @@ class TestObterPorId:
         end_recuperado = endereco_repo.obter_por_id(end_id)
 
         assert end_recuperado is not None
-        assert end_recuperado.id_endereco == end_id
+        assert end_recuperado.id == end_id
         assert end_recuperado.titulo == "BuscaId"
         assert end_recuperado.id_usuario == usuario_teste
 
@@ -252,7 +252,7 @@ class TestObterPorUsuario:
         titulos = ["Casa", "Trabalho", "Praia"]
         for titulo in titulos:
             endereco = Endereco(
-                id_endereco=0,
+                id=0,
                 id_usuario=usuario_teste,
                 titulo=titulo,
                 logradouro=f"Rua {titulo}",
@@ -294,7 +294,7 @@ class TestObterPorUsuario:
         titulos = ["Zebra", "Alpha", "Beta"]
         for titulo in titulos:
             endereco = Endereco(
-                id_endereco=0,
+                id=0,
                 id_usuario=usuario_teste,
                 titulo=titulo,
                 logradouro="Rua",
@@ -323,7 +323,7 @@ class TestObterTodos:
         # Criar alguns endereços
         for i in range(3):
             endereco = Endereco(
-                id_endereco=0,
+                id=0,
                 id_usuario=usuario_teste,
                 titulo=f"End{i}",
                 logradouro="Rua",
@@ -359,7 +359,7 @@ class TestCascadeDelete:
 
         # Criar endereço
         endereco = Endereco(
-            id_endereco=0,
+            id=0,
             id_usuario=usuario_id,
             titulo="Cascade Test",
             logradouro="Rua",
@@ -386,7 +386,7 @@ class TestModelValidation:
     def test_endereco_model_atributos(self):
         """Testa se o model tem os atributos corretos"""
         endereco = Endereco(
-            id_endereco=1,
+            id=1,
             id_usuario=1,
             titulo="Casa",
             logradouro="Rua A",
@@ -399,7 +399,7 @@ class TestModelValidation:
             usuario=None
         )
 
-        assert hasattr(endereco, 'id_endereco')
+        assert hasattr(endereco, 'id')
         assert hasattr(endereco, 'id_usuario')
         assert hasattr(endereco, 'titulo')
         assert hasattr(endereco, 'logradouro')
@@ -419,7 +419,7 @@ class TestIntegracaoCompleta:
         """Testa fluxo completo: criar, ler, atualizar, excluir"""
         # CREATE
         endereco = Endereco(
-            id_endereco=0,
+            id=0,
             id_usuario=usuario_teste,
             titulo="FluxoCRUD",
             logradouro="Rua Fluxo",
@@ -440,7 +440,7 @@ class TestIntegracaoCompleta:
 
         # UPDATE
         end_atualizado = Endereco(
-            id_endereco=end_id,
+            id=end_id,
             id_usuario=usuario_teste,
             titulo="FluxoCRUD_Atualizado",
             logradouro="Rua Nova",

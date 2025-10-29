@@ -144,7 +144,7 @@ class TestExcluir:
 
         # Criar anúncio vinculado
         anuncio = Anuncio(
-            id_anuncio=0,
+            id=0,
             id_vendedor=usuario_id,
             id_categoria=cat_id,
             nome="Produto Teste",

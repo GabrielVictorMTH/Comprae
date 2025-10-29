@@ -45,7 +45,7 @@ class TestCriarTabela:
 class TestInserir:
     def test_inserir_mensagem_valida(self, remetente_teste, destinatario_teste):
         mensagem = Mensagem(
-            id_mensagem=0,
+            id=0,
             id_remetente=remetente_teste,
             id_destinatario=destinatario_teste,
             mensagem="Olá, como vai?",
@@ -56,12 +56,12 @@ class TestInserir:
         )
         resultado = mensagem_repo.inserir(mensagem)
         assert resultado is not None
-        assert resultado.id_mensagem > 0
+        assert resultado.id > 0
         assert resultado.mensagem == "Olá, como vai?"
 
     def test_inserir_mensagem_fk_remetente_invalida(self, destinatario_teste):
         mensagem = Mensagem(
-            id_mensagem=0,
+            id=0,
             id_remetente=99999,
             id_destinatario=destinatario_teste,
             mensagem="Teste",
@@ -75,7 +75,7 @@ class TestInserir:
 
     def test_inserir_mensagem_fk_destinatario_invalida(self, remetente_teste):
         mensagem = Mensagem(
-            id_mensagem=0,
+            id=0,
             id_remetente=remetente_teste,
             id_destinatario=99999,
             mensagem="Teste",
@@ -91,7 +91,7 @@ class TestInserir:
         """Testa inserção de mensagem com texto longo"""
         texto_longo = "Lorem ipsum " * 100
         mensagem = Mensagem(
-            id_mensagem=0,
+            id=0,
             id_remetente=remetente_teste,
             id_destinatario=destinatario_teste,
             mensagem=texto_longo,
@@ -107,7 +107,7 @@ class TestInserir:
     def test_inserir_mensagem_visualizada_default_false(self, remetente_teste, destinatario_teste):
         """Testa que visualizada é False por padrão"""
         mensagem = Mensagem(
-            id_mensagem=0,
+            id=0,
             id_remetente=remetente_teste,
             id_destinatario=destinatario_teste,
             mensagem="Teste",
@@ -125,9 +125,9 @@ class TestMarcarComoLida:
         mensagem = Mensagem(0, remetente_teste, destinatario_teste, "Teste", datetime.now(), False, None, None)
         resultado = mensagem_repo.inserir(mensagem)
 
-        assert mensagem_repo.marcar_como_lida(resultado.id_mensagem) is True
+        assert mensagem_repo.marcar_como_lida(resultado.id) is True
 
-        recuperada = mensagem_repo.obter_por_id(resultado.id_mensagem)
+        recuperada = mensagem_repo.obter_por_id(resultado.id)
         assert recuperada.visualizada is True
 
     def test_marcar_como_lida_inexistente(self):
@@ -139,9 +139,9 @@ class TestObterPorId:
         mensagem = Mensagem(0, remetente_teste, destinatario_teste, "Busca ID", datetime.now(), False, None, None)
         resultado = mensagem_repo.inserir(mensagem)
 
-        recuperada = mensagem_repo.obter_por_id(resultado.id_mensagem)
+        recuperada = mensagem_repo.obter_por_id(resultado.id)
         assert recuperada is not None
-        assert recuperada.id_mensagem == resultado.id_mensagem
+        assert recuperada.id == resultado.id
         assert recuperada.mensagem == "Busca ID"
 
     def test_obter_mensagem_inexistente(self):
@@ -180,7 +180,7 @@ class TestObterConversa:
         conversa = mensagem_repo.obter_conversa(remetente_teste, destinatario_teste)
 
         # Encontrar as mensagens inseridas
-        msgs_teste = [m for m in conversa if m.id_mensagem in [r1.id_mensagem, r2.id_mensagem]]
+        msgs_teste = [m for m in conversa if m.id in [r1.id, r2.id]]
         if len(msgs_teste) >= 2:
             # Verificar que estão em ordem cronológica
             assert msgs_teste[0].data_hora <= msgs_teste[1].data_hora
@@ -224,7 +224,7 @@ class TestObterMensagensRecebidas:
         recebidas = mensagem_repo.obter_mensagens_recebidas(destinatario_teste)
 
         # Encontrar as mensagens inseridas
-        msgs_teste = [m for m in recebidas if m.id_mensagem in [r1.id_mensagem, r2.id_mensagem]]
+        msgs_teste = [m for m in recebidas if m.id in [r1.id, r2.id]]
         if len(msgs_teste) >= 2:
             # Verificar ordem DESC (mais recente primeiro)
             assert msgs_teste[0].data_hora >= msgs_teste[1].data_hora
@@ -242,14 +242,14 @@ class TestObterMensagensNaoLidas:
         # Criar mensagem lida
         m3 = Mensagem(0, remetente_teste, destinatario_teste, "Lida", datetime.now(), False, None, None)
         r3 = mensagem_repo.inserir(m3)
-        mensagem_repo.marcar_como_lida(r3.id_mensagem)
+        mensagem_repo.marcar_como_lida(r3.id)
 
         nao_lidas = mensagem_repo.obter_mensagens_nao_lidas(destinatario_teste)
-        ids_nao_lidas = [m.id_mensagem for m in nao_lidas]
+        ids_nao_lidas = [m.id for m in nao_lidas]
 
-        assert r1.id_mensagem in ids_nao_lidas
-        assert r2.id_mensagem in ids_nao_lidas
-        assert r3.id_mensagem not in ids_nao_lidas
+        assert r1.id in ids_nao_lidas
+        assert r2.id in ids_nao_lidas
+        assert r3.id not in ids_nao_lidas
 
     def test_obter_mensagens_nao_lidas_vazio(self):
         """Testa usuário sem mensagens não lidas"""
@@ -270,7 +270,7 @@ class TestContarNaoLidas:
         for i in range(3):
             m = Mensagem(0, remetente_teste, destinatario_teste, f"L {i}", datetime.now(), False, None, None)
             r = mensagem_repo.inserir(m)
-            mensagem_repo.marcar_como_lida(r.id_mensagem)
+            mensagem_repo.marcar_como_lida(r.id)
 
         total = mensagem_repo.contar_nao_lidas(destinatario_teste)
         assert total >= 5
@@ -294,7 +294,7 @@ class TestCascadeDelete:
         usuario_repo.excluir(remetente)
 
         # Verificar que mensagem foi excluída
-        recuperada = mensagem_repo.obter_por_id(resultado.id_mensagem)
+        recuperada = mensagem_repo.obter_por_id(resultado.id)
         assert recuperada is None
 
     def test_excluir_destinatario_exclui_mensagens(self, remetente_teste):
@@ -308,7 +308,7 @@ class TestCascadeDelete:
         usuario_repo.excluir(destinatario)
 
         # Verificar que mensagem foi excluída
-        recuperada = mensagem_repo.obter_por_id(resultado.id_mensagem)
+        recuperada = mensagem_repo.obter_por_id(resultado.id)
         assert recuperada is None
 
 
@@ -316,7 +316,7 @@ class TestModelValidation:
     def test_mensagem_model_atributos(self):
         """Testa se o model tem os atributos corretos"""
         mensagem = Mensagem(
-            id_mensagem=1,
+            id=1,
             id_remetente=1,
             id_destinatario=2,
             mensagem="Teste",
@@ -326,7 +326,7 @@ class TestModelValidation:
             destinatario=None
         )
 
-        assert hasattr(mensagem, 'id_mensagem')
+        assert hasattr(mensagem, 'id')
         assert hasattr(mensagem, 'id_remetente')
         assert hasattr(mensagem, 'id_destinatario')
         assert hasattr(mensagem, 'mensagem')
@@ -351,10 +351,10 @@ class TestIntegracaoCompleta:
         # U2 verifica mensagens não lidas
         nao_lidas_u2 = mensagem_repo.obter_mensagens_nao_lidas(u2)
         assert len(nao_lidas_u2) >= 1
-        assert r1.id_mensagem in [m.id_mensagem for m in nao_lidas_u2]
+        assert r1.id in [m.id for m in nao_lidas_u2]
 
         # U2 lê a mensagem
-        assert mensagem_repo.marcar_como_lida(r1.id_mensagem) is True
+        assert mensagem_repo.marcar_como_lida(r1.id) is True
 
         # U2 responde
         m2 = Mensagem(0, u2, u1, "Oi U1, tudo bem?", datetime.now(), False, None, None)
@@ -362,13 +362,13 @@ class TestIntegracaoCompleta:
 
         # Obter conversa completa
         conversa = mensagem_repo.obter_conversa(u1, u2)
-        ids_conversa = [m.id_mensagem for m in conversa]
-        assert r1.id_mensagem in ids_conversa
-        assert r2.id_mensagem in ids_conversa
+        ids_conversa = [m.id for m in conversa]
+        assert r1.id in ids_conversa
+        assert r2.id in ids_conversa
 
         # U1 verifica mensagens não lidas
         nao_lidas_u1 = mensagem_repo.obter_mensagens_nao_lidas(u1)
-        assert r2.id_mensagem in [m.id_mensagem for m in nao_lidas_u1]
+        assert r2.id in [m.id for m in nao_lidas_u1]
 
         # Contar não lidas de U1
         total_nao_lidas = mensagem_repo.contar_nao_lidas(u1)

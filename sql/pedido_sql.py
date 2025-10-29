@@ -88,7 +88,7 @@ ORDER BY data_hora_pedido DESC
 
 OBTER_POR_VENDEDOR = """
 SELECT p.* FROM pedido p
-INNER JOIN anuncio a ON p.id_anuncio = a.id_anuncio
+INNER JOIN anuncio a ON p.id_anuncio = a.id
 WHERE a.id_vendedor = ?
 ORDER BY p.data_hora_pedido DESC
 """

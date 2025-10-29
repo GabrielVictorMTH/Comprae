@@ -32,6 +32,8 @@ from routes.tarefas_routes import router as tarefas_router
 from routes.chamados_routes import router as chamados_router
 from routes.admin_usuarios_routes import router as admin_usuarios_router
 from routes.admin_categorias_routes import router as admin_categorias_router
+from routes.admin_produtos_routes import router as admin_produtos_router
+from routes.admin_pedidos_routes import router as admin_pedidos_router
 from routes.admin_configuracoes_routes import router as admin_config_router
 from routes.admin_backups_routes import router as admin_backups_router
 from routes.admin_chamados_routes import router as admin_chamados_router
@@ -138,6 +140,12 @@ logger.info("Router admin de usuários incluído")
 
 app.include_router(admin_categorias_router, tags=["Admin - Categorias"])
 logger.info("Router admin de categorias incluído")
+
+app.include_router(admin_produtos_router, tags=["Admin - Produtos"])
+logger.info("Router admin de produtos incluído")
+
+app.include_router(admin_pedidos_router, tags=["Admin - Pedidos"])
+logger.info("Router admin de pedidos incluído")
 
 app.include_router(admin_config_router, tags=["Admin - Configurações"])
 logger.info("Router admin de configurações incluído")
