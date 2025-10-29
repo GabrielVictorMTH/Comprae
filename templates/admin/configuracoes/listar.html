@@ -1,0 +1,167 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Configurações do Sistema{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="mb-0">
+                        <i class="bi bi-gear-fill"></i> Configurações do Sistema
+                    </h1>
+                    <p class="text-muted mt-2">
+                        Gerencie as configurações editáveis da aplicação.
+                        Total: <strong>{{ total_configs }}</strong> configurações
+                    </p>
+                </div>
+                <div>
+                    <a href="/home" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if total_configs == 0 %}
+    <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Nenhuma configuração encontrada. Execute a migração de configurações para popular o banco de dados.
+    </div>
+    {% else %}
+    <!-- Configurações Agrupadas por Categoria -->
+    {% for categoria, configs in configs_por_categoria.items() %}
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                {% if categoria == "Aplicação" %}
+                <i class="bi bi-app-indicator"></i>
+                {% elif categoria == "Segurança - Autenticação" %}
+                <i class="bi bi-shield-lock-fill"></i>
+                {% elif categoria == "Operações de Usuário" %}
+                <i class="bi bi-person-gear"></i>
+                {% elif categoria == "Chat" %}
+                <i class="bi bi-chat-dots-fill"></i>
+                {% elif categoria == "Suporte" %}
+                <i class="bi bi-headset"></i>
+                {% elif categoria == "Tarefas" %}
+                <i class="bi bi-list-task"></i>
+                {% elif categoria == "Admin" %}
+                <i class="bi bi-tools"></i>
+                {% elif categoria == "Páginas Públicas" %}
+                <i class="bi bi-globe"></i>
+                {% elif categoria == "Interface" %}
+                <i class="bi bi-palette-fill"></i>
+                {% elif categoria == "Fotos" %}
+                <i class="bi bi-images"></i>
+                {% else %}
+                <i class="bi bi-folder"></i>
+                {% endif %}
+                {{ categoria }}
+                <span class="badge bg-light text-dark ms-2">{{ configs|length }}</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 30%">Chave</th>
+                            <th style="width: 20%">Valor Atual</th>
+                            <th style="width: 40%">Descrição</th>
+                            <th style="width: 10%" class="text-center">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for config in configs %}
+                        <tr>
+                            <td>
+                                <code class="text-primary">{{ config.chave }}</code>
+                            </td>
+                            <td>
+                                {% if config.valor|length > 50 %}
+                                <span class="badge bg-secondary"
+                                      data-bs-toggle="tooltip"
+                                      data-bs-placement="top"
+                                      title="{{ config.valor }}">
+                                    {{ config.valor[:47] }}...
+                                </span>
+                                {% else %}
+                                <span class="badge bg-info text-dark">{{ config.valor }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if config.descricao %}
+                                    {% if config.descricao.startswith('[') %}
+                                        {% set parts = config.descricao.split(']', 1) %}
+                                        {% if parts|length > 1 %}
+                                            <small class="text-muted">{{ parts[1].strip() }}</small>
+                                        {% else %}
+                                            <small class="text-muted">{{ config.descricao }}</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <small class="text-muted">{{ config.descricao }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    <small class="text-muted fst-italic">Sem descrição</small>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <a href="/admin/configuracoes/editar/{{ config.chave }}"
+                                   class="btn btn-sm btn-outline-primary"
+                                   data-bs-toggle="tooltip"
+                                   data-bs-placement="top"
+                                   title="Editar configuração">
+                                    <i class="bi bi-pencil-fill"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Informações Adicionais -->
+    <div class="card border-warning mb-4">
+        <div class="card-header bg-warning text-dark">
+            <i class="bi bi-info-circle-fill"></i> Informações Importantes
+        </div>
+        <div class="card-body">
+            <ul class="mb-0">
+                <li>
+                    <strong>Origem dos Valores:</strong> As configurações exibidas aqui têm prioridade sobre os valores do arquivo <code>.env</code>.
+                </li>
+                <li>
+                    <strong>Aplicação Imediata:</strong> Alterações nas configurações são aplicadas imediatamente após salvar (não requer reiniciar o servidor).
+                </li>
+                <li>
+                    <strong>Rate Limiting:</strong> Configurações de rate limit são especialmente importantes para segurança. Ajuste com cuidado.
+                </li>
+                <li>
+                    <strong>Auditoria:</strong> Todas as alterações são registradas nos logs do sistema para fins de auditoria.
+                </li>
+                <li>
+                    <strong>Backup:</strong> Recomenda-se fazer backup do banco de dados antes de alterações massivas.
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Script para inicializar tooltips do Bootstrap -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar todos os tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+});
+</script>
+{% endblock %}

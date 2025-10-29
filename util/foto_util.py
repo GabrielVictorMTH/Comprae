@@ -15,6 +15,7 @@ from PIL import Image
 
 from util.logger_config import logger
 from util.config import FOTO_PERFIL_TAMANHO_MAX
+from util.config_cache import config
 
 
 # Configurações
@@ -121,7 +122,8 @@ def salvar_foto_cropada_usuario(id: int, conteudo_base64: str) -> bool:
             imagem = imagem.convert("RGB")  # type: ignore
 
         # Redimensionar se necessário (mantendo aspect ratio)
-        tamanho_max = FOTO_PERFIL_TAMANHO_MAX
+        # Lê tamanho máximo do cache (database → .env)
+        tamanho_max = config.obter_int("foto_perfil_tamanho_max", FOTO_PERFIL_TAMANHO_MAX)
         if imagem.width > tamanho_max or imagem.height > tamanho_max:
             # thumbnail redimensiona mantendo aspect ratio
             imagem.thumbnail((tamanho_max, tamanho_max), Image.Resampling.LANCZOS)

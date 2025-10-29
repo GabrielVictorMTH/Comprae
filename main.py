@@ -125,6 +125,13 @@ try:
 except Exception as e:
     logger.error(f"Erro ao inicializar dados seed: {e}", exc_info=True)
 
+# Migrar configurações do .env para o banco de dados
+try:
+    from util.migrar_config import migrar_configs_para_banco
+    migrar_configs_para_banco()
+except Exception as e:
+    logger.error(f"Erro ao migrar configurações para banco: {e}", exc_info=True)
+
 # Incluir routers
 # IMPORTANTE: public_router deve ser incluído por último para que a rota "/" funcione corretamente
 app.include_router(auth_router, tags=["Autenticação"])

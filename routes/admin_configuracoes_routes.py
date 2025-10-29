@@ -3,16 +3,20 @@ import shutil
 from pathlib import Path
 from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse
+from pydantic import ValidationError
 
 from repo import configuracao_repo
 from util.config_cache import config
 from util.auth_decorator import requer_autenticacao
 from util.template_util import criar_templates
-from util.flash_messages import informar_sucesso, informar_erro
+from util.flash_messages import informar_sucesso, informar_erro, informar_aviso
 from util.logger_config import logger
 from util.perfis import Perfil
 from util.datetime_util import agora
 from util.rate_limiter import RateLimiter, obter_identificador_cliente
+from util.exceptions import FormValidationError
+from util.validation_util import processar_erros_validacao
+from dtos.configuracao_dto import EditarConfiguracaoDTO
 
 router = APIRouter(prefix="/admin")
 templates = criar_templates("templates/admin")
@@ -23,6 +27,167 @@ admin_config_limiter = RateLimiter(
     janela_minutos=1,   # por minuto
     nome="admin_config",
 )
+
+
+# === CRUD de Configurações ===
+
+@router.get("/configuracoes")
+@requer_autenticacao([Perfil.ADMIN.value])
+async def get_listar_configuracoes(request: Request, usuario_logado: Optional[dict] = None):
+    """Lista todas as configurações agrupadas por categoria"""
+    try:
+        # Obter configurações agrupadas por categoria
+        configs_por_categoria = configuracao_repo.obter_por_categoria()
+
+        # Calcular total de configurações
+        total_configs = sum(len(configs) for configs in configs_por_categoria.values())
+
+        return templates.TemplateResponse(
+            "admin/configuracoes/listar.html",
+            {
+                "request": request,
+                "configs_por_categoria": configs_por_categoria,
+                "total_configs": total_configs
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Erro ao listar configurações: {e}")
+        informar_erro(request, "Erro ao carregar configurações")
+        return RedirectResponse("/home", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.get("/configuracoes/editar/{chave}")
+@requer_autenticacao([Perfil.ADMIN.value])
+async def get_editar_configuracao(
+    request: Request,
+    chave: str,
+    usuario_logado: Optional[dict] = None
+):
+    """Exibe formulário de edição de configuração"""
+    try:
+        config_obj = configuracao_repo.obter_por_chave(chave)
+
+        if not config_obj:
+            informar_erro(request, f"Configuração '{chave}' não encontrada")
+            return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+
+        # Extrair categoria da descrição
+        import re
+        categoria = "Outras"
+        descricao_limpa = config_obj.descricao or ""
+        if config_obj.descricao:
+            match = re.match(r'^\[([^\]]+)\]\s*(.+)$', config_obj.descricao)
+            if match:
+                categoria = match.group(1)
+                descricao_limpa = match.group(2)
+
+        return templates.TemplateResponse(
+            "admin/configuracoes/editar.html",
+            {
+                "request": request,
+                "config": config_obj,
+                "categoria": categoria,
+                "descricao_limpa": descricao_limpa,
+                "dados": {"chave": config_obj.chave, "valor": config_obj.valor},
+                "erros": {}
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"Erro ao buscar configuração '{chave}': {e}")
+        informar_erro(request, "Erro ao carregar configuração")
+        return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+
+
+@router.post("/configuracoes/editar/{chave}")
+@requer_autenticacao([Perfil.ADMIN.value])
+async def post_editar_configuracao(
+    request: Request,
+    chave: str,
+    valor: str = Form(...),
+    usuario_logado: Optional[dict] = None
+):
+    """Salva alterações em uma configuração"""
+    assert usuario_logado is not None
+
+    # Rate limiting
+    ip = obter_identificador_cliente(request)
+    if not admin_config_limiter.verificar(ip):
+        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
+        return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+
+    # Dados do formulário para reexibir em caso de erro
+    dados_formulario = {"chave": chave, "valor": valor}
+
+    try:
+        # Validação com DTO
+        dto = EditarConfiguracaoDTO(chave=chave, valor=valor)
+
+        # Buscar configuração existente
+        config_existente = configuracao_repo.obter_por_chave(chave)
+
+        if not config_existente:
+            informar_erro(request, f"Configuração '{chave}' não encontrada")
+            return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+
+        # Salvar valor anterior para log
+        valor_anterior = config_existente.valor
+
+        # Atualizar configuração
+        sucesso = configuracao_repo.atualizar(chave, valor)
+
+        if sucesso:
+            # Limpar cache de configurações
+            config.limpar()
+
+            logger.info(
+                f"Configuração '{chave}' alterada por admin {usuario_logado['id']} - "
+                f"Anterior: '{valor_anterior}' → Novo: '{valor}'"
+            )
+
+            informar_sucesso(request, f"Configuração '{chave}' atualizada com sucesso!")
+            return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+        else:
+            informar_erro(request, "Erro ao atualizar configuração")
+            return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+
+    except ValidationError as e:
+        # Buscar config novamente para reexibir formulário
+        config_obj = configuracao_repo.obter_por_chave(chave)
+        if not config_obj:
+            informar_erro(request, "Configuração não encontrada")
+            return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+
+        # Extrair categoria da descrição
+        import re
+        categoria = "Outras"
+        descricao_limpa = config_obj.descricao or ""
+        if config_obj.descricao:
+            match = re.match(r'^\[([^\]]+)\]\s*(.+)$', config_obj.descricao)
+            if match:
+                categoria = match.group(1)
+                descricao_limpa = match.group(2)
+
+        # Adicionar contexto extra aos dados do formulário (para reexibir form)
+        dados_formulario["config"] = config_obj  # type: ignore[assignment]
+        dados_formulario["categoria"] = categoria
+        dados_formulario["descricao_limpa"] = descricao_limpa
+
+        raise FormValidationError(
+            validation_error=e,
+            template_path="admin/configuracoes/editar.html",
+            dados_formulario=dados_formulario,
+            campo_padrao="valor"
+        )
+
+    except Exception as e:
+        logger.error(f"Erro ao atualizar configuração '{chave}': {e}")
+        informar_erro(request, f"Erro ao atualizar configuração: {str(e)}")
+        return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+
+
+# === Tema Visual ===
 
 @router.get("/tema")
 @requer_autenticacao([Perfil.ADMIN.value])

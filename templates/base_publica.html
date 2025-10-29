@@ -98,6 +98,12 @@
         {{ obter_mensagens(request) | tojson }}
     </script>
 
+    <!-- Configurações globais da aplicação -->
+    <script>
+        // Delay configurável para auto-hide dos toasts
+        window.TOAST_AUTO_HIDE_DELAY_MS = {{ TOAST_AUTO_HIDE_DELAY_MS }};
+    </script>
+
     <!-- Bootstrap 5.3.8 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 

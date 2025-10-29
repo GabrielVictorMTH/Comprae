@@ -12,8 +12,9 @@ from fastapi.templating import Jinja2Templates
 from fastapi import Request
 
 from util.flash_messages import obter_mensagens
-from util.config import APP_NAME, VERSION
+from util.config import APP_NAME, VERSION, TOAST_AUTO_HIDE_DELAY_MS
 from util.csrf_protection import get_csrf_token, CSRF_FORM_FIELD
+from util.config_cache import config
 
 
 def formatar_data_br(
@@ -228,6 +229,12 @@ def criar_templates(pasta: str) -> Jinja2Templates:
     # Adicionar variáveis globais de configuração
     env.globals['APP_NAME'] = APP_NAME
     env.globals['VERSION'] = VERSION
+
+    # Adicionar configuração dinâmica de toast delay (lê do banco → .env)
+    env.globals['TOAST_AUTO_HIDE_DELAY_MS'] = config.obter_int(
+        'toast_auto_hide_delay_ms',
+        TOAST_AUTO_HIDE_DELAY_MS
+    )
 
     # CSRF Protection: Adicionar função global para gerar input CSRF
     # IMPORTANTE: Esta função precisa receber 'request' do contexto

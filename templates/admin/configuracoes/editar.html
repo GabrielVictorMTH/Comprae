@@ -1,0 +1,165 @@
+{% extends "base_privada.html" %}
+{% from 'macros/form_fields.html' import field %}
+
+{% block titulo %}Editar Configuração{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <!-- Cabeçalho -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="mb-0">
+                        <i class="bi bi-pencil-square"></i> Editar Configuração
+                    </h1>
+                    <p class="text-muted mt-2">
+                        Categoria: <span class="badge bg-primary">{{ categoria }}</span>
+                    </p>
+                </div>
+                <div>
+                    <a href="/admin/configuracoes" class="btn btn-secondary">
+                        <i class="bi bi-arrow-left"></i> Voltar
+                    </a>
+                </div>
+            </div>
+
+            <!-- Card de Informação da Configuração -->
+            <div class="card border-info mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-info-circle-fill"></i> Informações da Configuração
+                </div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3">Chave:</dt>
+                        <dd class="col-sm-9">
+                            <code class="text-primary">{{ config.chave }}</code>
+                        </dd>
+
+                        <dt class="col-sm-3">Descrição:</dt>
+                        <dd class="col-sm-9">
+                            {{ descricao_limpa if descricao_limpa else "Sem descrição" }}
+                        </dd>
+
+                        <dt class="col-sm-3">Valor Atual:</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge bg-secondary">{{ config.valor }}</span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <!-- Formulário de Edição -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <i class="bi bi-gear-fill"></i> Alterar Valor
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/admin/configuracoes/editar/{{ config.chave }}">
+                        <!-- Campo de Valor -->
+                        {% if 'senha' in config.chave or 'secret' in config.chave or 'api_key' in config.chave %}
+                            {# Campos sensíveis como textarea #}
+                            {{ field(
+                                name='valor',
+                                label='Novo Valor',
+                                type='textarea',
+                                value=dados.get('valor', ''),
+                                required=true,
+                                rows=3,
+                                help_text='Campo sensível - digite com atenção'
+                            ) }}
+                        {% elif 'max' in config.chave or 'minutos' in config.chave or 'tamanho' in config.chave or 'bytes' in config.chave or 'delay' in config.chave %}
+                            {# Campos numéricos #}
+                            {{ field(
+                                name='valor',
+                                label='Novo Valor',
+                                type='number',
+                                value=dados.get('valor', ''),
+                                required=true,
+                                help_text='Valor numérico inteiro'
+                            ) }}
+                        {% elif 'email' in config.chave %}
+                            {# Campos de email #}
+                            {{ field(
+                                name='valor',
+                                label='Novo Valor',
+                                type='email',
+                                value=dados.get('valor', ''),
+                                required=true,
+                                help_text='Endereço de email válido'
+                            ) }}
+                        {% else %}
+                            {# Campos de texto padrão #}
+                            {{ field(
+                                name='valor',
+                                label='Novo Valor',
+                                type='text',
+                                value=dados.get('valor', ''),
+                                required=true,
+                                help_text='Digite o novo valor para esta configuração'
+                            ) }}
+                        {% endif %}
+
+                        <!-- Alertas de Segurança/Contexto -->
+                        {% if categoria == "Segurança - Autenticação" %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            <strong>Atenção:</strong> Configurações de autenticação afetam a segurança do sistema.
+                            Valores muito permissivos podem facilitar ataques de força bruta.
+                        </div>
+                        {% elif 'rate_limit' in config.chave %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <strong>Dica:</strong> Rate limiting protege contra abusos e ataques.
+                            Durante um ataque, reduza o máximo de tentativas para mitigar o impacto.
+                        </div>
+                        {% elif 'foto' in config.chave or 'upload' in config.chave %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle-fill"></i>
+                            <strong>Dica:</strong> Tamanhos menores economizam espaço e melhoram performance,
+                            mas podem limitar a experiência do usuário.
+                        </div>
+                        {% endif %}
+
+                        <!-- Botões de Ação -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="/admin/configuracoes" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle-fill"></i> Salvar Alteração
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Card de Avisos Adicionais -->
+            <div class="card border-warning mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <i class="bi bi-shield-exclamation"></i> Avisos Importantes
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>
+                            <strong>Aplicação Imediata:</strong> A alteração será aplicada imediatamente após salvar.
+                        </li>
+                        <li>
+                            <strong>Auditoria:</strong> Esta alteração será registrada nos logs do sistema.
+                        </li>
+                        <li>
+                            <strong>Fallback:</strong> Se houver erro, o sistema usará o valor do arquivo <code>.env</code>.
+                        </li>
+                        {% if 'rate_limit' in config.chave %}
+                        <li>
+                            <strong>Efeito no Rate Limit:</strong> A mudança afeta apenas novas requisições.
+                            Usuários já bloqueados continuarão bloqueados até o final da janela de tempo.
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

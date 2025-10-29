@@ -14,9 +14,36 @@ from util.foto_util import salvar_foto_cropada_usuario
 from util.logger_config import logger
 from util.exceptions import FormValidationError
 from util.validation_helpers import verificar_email_disponivel
+from util.config import (
+    RATE_LIMIT_UPLOAD_FOTO_MAX,
+    RATE_LIMIT_UPLOAD_FOTO_MINUTOS,
+    RATE_LIMIT_ALTERAR_SENHA_MAX,
+    RATE_LIMIT_ALTERAR_SENHA_MINUTOS,
+    RATE_LIMIT_FORM_GET_MAX,
+    RATE_LIMIT_FORM_GET_MINUTOS,
+)
 
 router = APIRouter()
 templates_usuario = criar_templates("templates")
+
+# Rate limiters
+from util.rate_limiter import RateLimiter, obter_identificador_cliente
+
+upload_foto_limiter = RateLimiter(
+    max_tentativas=RATE_LIMIT_UPLOAD_FOTO_MAX,
+    janela_minutos=RATE_LIMIT_UPLOAD_FOTO_MINUTOS,
+    nome="upload_foto",
+)
+alterar_senha_limiter = RateLimiter(
+    max_tentativas=RATE_LIMIT_ALTERAR_SENHA_MAX,
+    janela_minutos=RATE_LIMIT_ALTERAR_SENHA_MINUTOS,
+    nome="alterar_senha",
+)
+form_get_limiter = RateLimiter(
+    max_tentativas=RATE_LIMIT_FORM_GET_MAX,
+    janela_minutos=RATE_LIMIT_FORM_GET_MINUTOS,
+    nome="form_get",
+)
 
 
 @router.get("/usuario")
@@ -65,6 +92,12 @@ async def get_visualizar_perfil(request: Request, usuario_logado: Optional[dict]
 @router.get("/usuario/perfil/editar")
 @requer_autenticacao()
 async def get_editar_perfil(request: Request, usuario_logado: Optional[dict] = None):
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not form_get_limiter.verificar(ip):
+        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_FORM_GET_MINUTOS} minuto(s).")
+        logger.warning(f"Rate limit excedido para formulário GET - IP: {ip}")
+        return RedirectResponse("/usuario", status_code=status.HTTP_303_SEE_OTHER)
     """Formulário para editar dados do perfil"""
     assert usuario_logado is not None
     usuario = usuario_repo.obter_por_id(usuario_logado["id"])
@@ -163,6 +196,13 @@ async def post_editar_perfil(
 @requer_autenticacao()
 async def get_alterar_senha(request: Request, usuario_logado: Optional[dict] = None):
     """Formulário para alterar senha"""
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not form_get_limiter.verificar(ip):
+        informar_erro(request, f"Muitas requisições. Aguarde {RATE_LIMIT_FORM_GET_MINUTOS} minuto(s).")
+        logger.warning(f"Rate limit excedido para formulário GET - IP: {ip}")
+        return RedirectResponse("/usuario", status_code=status.HTTP_303_SEE_OTHER)
+
     assert usuario_logado is not None
     return templates_usuario.TemplateResponse("perfil/alterar-senha.html", {"request": request})
 
@@ -178,6 +218,25 @@ async def post_alterar_senha(
 ):
     """Processar alteração de senha"""
     assert usuario_logado is not None
+
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not alterar_senha_limiter.verificar(ip):
+        informar_erro(
+            request,
+            f"Muitas tentativas de alteração de senha. Aguarde {RATE_LIMIT_ALTERAR_SENHA_MINUTOS} minuto(s).",
+        )
+        logger.warning(f"Rate limit excedido para alteração de senha - IP: {ip}")
+        return templates_usuario.TemplateResponse(
+            "perfil/alterar-senha.html",
+            {
+                "request": request,
+                "erros": {
+                    "geral": f"Muitas tentativas de alteração de senha. Aguarde {RATE_LIMIT_ALTERAR_SENHA_MINUTOS} minuto(s)."
+                },
+            },
+        )
+
     try:
         # Validar com DTO
         dto = AlterarSenhaDTO(
@@ -261,6 +320,19 @@ async def post_atualizar_foto(
 ):
     """Upload de foto de perfil cropada"""
     assert usuario_logado is not None
+
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not upload_foto_limiter.verificar(ip):
+        informar_erro(
+            request,
+            f"Muitas tentativas de upload de foto. Aguarde {RATE_LIMIT_UPLOAD_FOTO_MINUTOS} minuto(s).",
+        )
+        logger.warning(f"Rate limit excedido para upload de foto - IP: {ip}")
+        return RedirectResponse(
+            "/usuario/perfil/visualizar", status_code=status.HTTP_303_SEE_OTHER
+        )
+
     try:
         usuario_id = usuario_logado["id"]
 

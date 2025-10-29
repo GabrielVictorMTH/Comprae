@@ -55,8 +55,8 @@
                             href="/admin/usuarios/listar">Usuários</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if '/admin/categorias/' in request.path else '' }}"
-                            href="/admin/categorias/listar">Categorias</a>
+                        <a class="nav-link {{ 'active' if '/admin/configuracoes' in request.path else '' }}"
+                            href="/admin/configuracoes">Configurações</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/tema' in request.path else '' }}"
@@ -118,6 +118,12 @@
     <!-- Dados de mensagens (hidden) -->
     <script id="mensagens-data" type="application/json">
         {{ obter_mensagens(request) | tojson }}
+    </script>
+
+    <!-- Configurações globais da aplicação -->
+    <script>
+        // Delay configurável para auto-hide dos toasts
+        window.TOAST_AUTO_HIDE_DELAY_MS = {{ TOAST_AUTO_HIDE_DELAY_MS }};
     </script>
 
     <!-- Bootstrap 5.3.8 JS Bundle -->

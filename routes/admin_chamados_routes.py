@@ -25,9 +25,22 @@ from util.template_util import criar_templates
 from util.flash_messages import informar_sucesso, informar_erro
 from util.logger_config import logger
 from util.exceptions import FormValidationError
+from util.config import (
+    RATE_LIMIT_ADMIN_CHAMADO_RESPONDER_MAX,
+    RATE_LIMIT_ADMIN_CHAMADO_RESPONDER_MINUTOS,
+)
 
 router = APIRouter(prefix="/admin/chamados")
 templates = criar_templates("templates/admin/chamados")
+
+# Rate limiters
+from util.rate_limiter import RateLimiter, obter_identificador_cliente
+
+admin_chamado_responder_limiter = RateLimiter(
+    max_tentativas=RATE_LIMIT_ADMIN_CHAMADO_RESPONDER_MAX,
+    janela_minutos=RATE_LIMIT_ADMIN_CHAMADO_RESPONDER_MINUTOS,
+    nome="admin_chamado_responder",
+)
 
 
 @router.get("/listar")
@@ -77,6 +90,16 @@ async def post_responder(
 ):
     """Salva resposta do administrador ao chamado e atualiza status."""
     assert usuario_logado is not None
+
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not admin_chamado_responder_limiter.verificar(ip):
+        informar_erro(
+            request,
+            f"Muitas tentativas de resposta. Aguarde {RATE_LIMIT_ADMIN_CHAMADO_RESPONDER_MINUTOS} minuto(s).",
+        )
+        logger.warning(f"Rate limit excedido para admin responder chamado - IP: {ip}")
+        return RedirectResponse(f"/admin/chamados/{id}/responder", status_code=status.HTTP_303_SEE_OTHER)
 
     chamado = chamado_repo.obter_por_id(id)
     if not chamado:

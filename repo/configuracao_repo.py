@@ -46,6 +46,70 @@ def obter_todos() -> list[Configuracao]:
         rows = cursor.fetchall()
         return [_row_to_configuracao(row) for row in rows]
 
+
+def obter_por_categoria() -> dict[str, list[Configuracao]]:
+    """
+    Obtém todas as configurações agrupadas por categoria.
+
+    A categoria é extraída da descrição no formato "[Categoria] Descrição".
+    Configurações sem categoria ficam em "Outras".
+
+    Returns:
+        Dicionário {categoria: [configuracoes]}
+
+    Example:
+        {
+            "Aplicação": [config1, config2],
+            "Segurança - Autenticação": [config3, config4],
+            "Chat": [config5]
+        }
+    """
+    import re
+
+    todas = obter_todos()
+    agrupadas: dict[str, list[Configuracao]] = {}
+
+    for config in todas:
+        # Extrai categoria da descrição usando regex
+        categoria = "Outras"
+        if config.descricao:
+            match = re.match(r'^\[([^\]]+)\]', config.descricao)
+            if match:
+                categoria = match.group(1)
+
+        if categoria not in agrupadas:
+            agrupadas[categoria] = []
+
+        agrupadas[categoria].append(config)
+
+    # Ordena categorias alfabeticamente, mas mantém "Outras" por último
+    categorias_ordenadas = sorted(agrupadas.keys())
+    if "Outras" in categorias_ordenadas:
+        categorias_ordenadas.remove("Outras")
+        categorias_ordenadas.append("Outras")
+
+    return {cat: agrupadas[cat] for cat in categorias_ordenadas}
+
+
+def obter_multiplas(chaves: list[str]) -> dict[str, Optional[Configuracao]]:
+    """
+    Obtém múltiplas configurações de uma vez.
+
+    Args:
+        chaves: Lista de chaves a buscar
+
+    Returns:
+        Dicionário {chave: Configuracao ou None}
+
+    Example:
+        >>> obter_multiplas(["app_name", "theme", "inexistente"])
+        {"app_name": Configuracao(...), "theme": Configuracao(...), "inexistente": None}
+    """
+    resultado = {}
+    for chave in chaves:
+        resultado[chave] = obter_por_chave(chave)
+    return resultado
+
 def atualizar(chave: str, valor: str) -> bool:
     """
     Atualiza o valor de uma configuração existente

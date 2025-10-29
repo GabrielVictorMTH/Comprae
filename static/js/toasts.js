@@ -79,10 +79,13 @@ function mostrarToast(mensagem, tipo = 'info') {
     // Adicionar ao container
     container.appendChild(toastElement);
 
-    // Inicializar e mostrar toast (auto-dismiss após 5s)
+    // Obter delay configurado ou usar padrão de 5s
+    const delay = window.TOAST_AUTO_HIDE_DELAY_MS || 5000;
+
+    // Inicializar e mostrar toast (auto-dismiss)
     const bsToast = new bootstrap.Toast(toastElement, {
         autohide: true,
-        delay: 5000
+        delay: delay
     });
 
     bsToast.show();

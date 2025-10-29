@@ -15,6 +15,10 @@ from util.logger_config import logger
 from util.perfis import Perfil
 from util import backup_util
 from util.rate_limiter import RateLimiter, obter_identificador_cliente
+from util.config import (
+    RATE_LIMIT_BACKUP_DOWNLOAD_MAX,
+    RATE_LIMIT_BACKUP_DOWNLOAD_MINUTOS,
+)
 
 
 router = APIRouter(prefix="/admin/backups")
@@ -25,6 +29,13 @@ admin_backups_limiter = RateLimiter(
     max_tentativas=5,   # Apenas 5 operações
     janela_minutos=5,   # a cada 5 minutos
     nome="admin_backups",
+)
+
+# Rate limiter específico para download de backups
+backup_download_limiter = RateLimiter(
+    max_tentativas=RATE_LIMIT_BACKUP_DOWNLOAD_MAX,
+    janela_minutos=RATE_LIMIT_BACKUP_DOWNLOAD_MINUTOS,
+    nome="backup_download",
 )
 
 
@@ -200,6 +211,19 @@ async def get_download(
         FileResponse com o arquivo de backup
     """
     assert usuario_logado is not None
+
+    # Rate limiting por IP
+    ip = obter_identificador_cliente(request)
+    if not backup_download_limiter.verificar(ip):
+        informar_erro(
+            request,
+            f"Muitas tentativas de download. Aguarde {RATE_LIMIT_BACKUP_DOWNLOAD_MINUTOS} minuto(s).",
+        )
+        logger.warning(f"Rate limit excedido para download de backup - IP: {ip}")
+        return RedirectResponse(
+            "/admin/backups/listar",
+            status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Obter caminho do backup
     caminho_backup = backup_util.obter_caminho_backup(nome_arquivo)
