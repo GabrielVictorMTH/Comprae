@@ -1,0 +1,94 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Gerenciar Curtidas{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-hand-thumbs-up-fill"></i> Gerenciar Curtidas</h2>
+            <a href="/admin/curtidas/cadastrar" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nova Curtida
+            </a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {% if [itens] %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Usuário</th>
+                                <th scope="col">Anúncio</th>
+                                <th scope="col" class="text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in [itens] %}
+                            <tr>
+                                <td>{{ item.usuario.nome }}</td>
+                                <td>{{ item.anuncio.nome }}</td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="/admin/curtidas/editar/{{ item.id_usuario }}/{{ item.id_anuncio }}"
+                                            class="btn btn-outline-primary"
+                                            title="Editar"
+                                            aria-label="Editar Curtida">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger"
+                                            title="Excluir"
+                                            aria-label="Excluir Curtida"
+                                            onclick="excluirCurtida[Curtida]({{ item.id }}, '{{ item.campo1|replace("'", "\\'") }}', '{{ item.campo2|replace("'", "\\'") }}')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info text-center mb-0">
+                    <i class="bi bi-info-circle"></i> Nenhuma curtida cadastrada.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    /**
+     * Função para excluir um item
+     */
+    function excluirCurtida(idUsuario, idAnuncio, nomeUsuario, nomeAnuncio) {
+        const detalhes = `
+        <div class="card bg-light">
+            <div class="card-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr>
+                        <th scope="row" width="30%">Usuário:</th>
+                        <td>${nomeUsuario}</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Anúncio:</th>
+                        <td>${nomeAnuncio}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    `;
+
+        abrirModalConfirmacao({
+            url: `/admin/curtidas/excluir/${idUsuario}/${idAnuncio}`,
+            mensagem: 'Tem certeza que deseja excluir este [item]?',
+            detalhes: detalhes
+        });
+    }
+</script>
+{% endblock %}
