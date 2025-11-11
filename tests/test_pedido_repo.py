@@ -5,10 +5,9 @@ Testa todas as operações do pedido_repo e validações do model/SQL.
 """
 import pytest
 from datetime import datetime
-from repo import pedido_repo, usuario_repo, categoria_repo, anuncio_repo, endereco_repo
+from repo import pedido_repo, usuario_repo, anuncio_repo, endereco_repo
 from model.pedido_model import Pedido
 from model.usuario_model import Usuario
-from model.categoria_model import Categoria
 from model.anuncio_model import Anuncio
 from model.endereco_model import Endereco
 from util.security import criar_hash_senha
@@ -42,14 +41,12 @@ def vendedor_teste():
 
 @pytest.fixture
 def categoria_teste():
-    """Fixture para criar categoria"""
-    import uuid
-    categoria = Categoria(
-        id=0,
-        nome=f"CategoriaPedido_{uuid.uuid4().hex[:8]}",
-        descricao="Categoria de teste para pedidos"
-    )
-    return categoria_repo.inserir(categoria)
+    """
+    Fixture que retorna um ID de categoria mockado.
+    NOTA: Este teste assume que existe uma categoria com ID 1 no banco.
+    Se o aluno implementar o CRUD de categorias, esta fixture funcionará.
+    """
+    return 1  # ID mockado de categoria
 
 
 @pytest.fixture
@@ -85,7 +82,6 @@ def anuncio_teste(vendedor_teste, categoria_teste):
         data_cadastro=datetime.now(),
         ativo=True,
         vendedor=None,
-        categoria=None
     )
     resultado = anuncio_repo.inserir(anuncio)
     return resultado.id if resultado else None
@@ -308,7 +304,6 @@ class TestObterPorVendedor:
             data_cadastro=datetime.now(),
             ativo=True,
             vendedor=None,
-            categoria=None
         )
         anuncio_resultado = anuncio_repo.inserir(anuncio)
         anuncio_id = anuncio_resultado.id if anuncio_resultado else None

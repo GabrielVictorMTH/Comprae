@@ -3,10 +3,9 @@ Testes para o repositório de anúncios.
 """
 import pytest
 from datetime import datetime
-from repo import anuncio_repo, usuario_repo, categoria_repo
+from repo import anuncio_repo, usuario_repo
 from model.anuncio_model import Anuncio
 from model.usuario_model import Usuario
-from model.categoria_model import Categoria
 from util.security import criar_hash_senha
 
 
@@ -25,14 +24,12 @@ def vendedor_teste():
 
 @pytest.fixture
 def categoria_teste():
-    """Fixture para criar categoria"""
-    import uuid
-    categoria = Categoria(
-        id=0,
-        nome=f"Categoria_{uuid.uuid4().hex[:8]}",
-        descricao="Categoria de teste"
-    )
-    return categoria_repo.inserir(categoria)
+    """
+    Fixture que retorna um ID de categoria mockado.
+    NOTA: Este teste assume que existe uma categoria com ID 1 no banco.
+    Se o aluno implementar o CRUD de categorias, esta fixture funcionará.
+    """
+    return 1  # ID mockado de categoria
 
 
 class TestCriarTabela:
@@ -54,7 +51,6 @@ class TestInserir:
             data_cadastro=datetime.now(),
             ativo=True,
             vendedor=None,
-            categoria=None
         )
         resultado = anuncio_repo.inserir(anuncio)
         assert resultado is not None
@@ -73,7 +69,6 @@ class TestInserir:
             data_cadastro=datetime.now(),
             ativo=True,
             vendedor=None,
-            categoria=None
         )
         with pytest.raises(Exception):
             anuncio_repo.inserir(anuncio)
@@ -91,7 +86,6 @@ class TestInserir:
             data_cadastro=datetime.now(),
             ativo=True,
             vendedor=None,
-            categoria=None
         )
         with pytest.raises(Exception):
             anuncio_repo.inserir(anuncio)
@@ -111,7 +105,6 @@ class TestAlterar:
             data_cadastro=datetime.now(),
             ativo=True,
             vendedor=None,
-            categoria=None
         )
         resultado = anuncio_repo.inserir(anuncio)
 
@@ -127,7 +120,6 @@ class TestAlterar:
             data_cadastro=datetime.now(),
             ativo=False,
             vendedor=None,
-            categoria=None
         )
         assert anuncio_repo.alterar(anuncio_alterado) is True
 
@@ -151,7 +143,6 @@ class TestExcluir:
             data_cadastro=datetime.now(),
             ativo=True,
             vendedor=None,
-            categoria=None
         )
         resultado = anuncio_repo.inserir(anuncio)
 
@@ -173,7 +164,6 @@ class TestObterPorId:
             data_cadastro=datetime.now(),
             ativo=True,
             vendedor=None,
-            categoria=None
         )
         resultado = anuncio_repo.inserir(anuncio)
 
@@ -197,7 +187,6 @@ class TestObterTodos:
                 data_cadastro=datetime.now(),
                 ativo=True,
                 vendedor=None,
-                categoria=None
             )
             anuncio_repo.inserir(anuncio)
 
@@ -220,7 +209,6 @@ class TestObterTodosAtivos:
             data_cadastro=datetime.now(),
             ativo=True,
             vendedor=None,
-            categoria=None
         )
         anuncio_repo.inserir(ativo)
 
@@ -237,7 +225,6 @@ class TestObterTodosAtivos:
             data_cadastro=datetime.now(),
             ativo=False,
             vendedor=None,
-            categoria=None
         )
         resultado_inativo = anuncio_repo.inserir(inativo)
 

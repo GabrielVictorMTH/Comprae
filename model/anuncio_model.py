@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
-from model.categoria_model import Categoria
 from model.usuario_model import Usuario
 
 
@@ -20,4 +19,3 @@ class Anuncio:
     ativo: bool
     # Relacionamentos
     vendedor: Optional[Usuario] = None
-    categoria: Optional[Categoria] = None
