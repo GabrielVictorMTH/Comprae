@@ -55,6 +55,12 @@
                             href="/admin/usuarios/listar">Usuários</a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/admin/categorias/' in request.path else '' }}"
+                            href="/admin/categorias/listar">
+                            <i class="bi bi-folder"></i> Categorias
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/configuracoes' in request.path else '' }}"
                             href="/admin/configuracoes">Configurações</a>
                     </li>

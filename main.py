@@ -5,6 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.middleware.sessions import SessionMiddleware
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from pathlib import Path
+from routes.admin_categorias_routes import router as admin_categorias_router
 
 # Configurações
 from util.config import APP_NAME, SECRET_KEY, HOST, PORT, RELOAD, VERSION
@@ -22,7 +23,7 @@ from util.exception_handlers import (
 from util.exceptions import FormValidationError
 
 # Repositórios
-from repo import usuario_repo, configuracao_repo, tarefa_repo, chamado_repo, chamado_interacao_repo, indices_repo
+from repo import usuario_repo, configuracao_repo, tarefa_repo, chamado_repo, chamado_interacao_repo, indices_repo, categoria_repo
 from repo import chat_sala_repo, chat_participante_repo, chat_mensagem_repo
 from repo import anuncio_repo, endereco_repo, mensagem_repo, pedido_repo
 
@@ -41,6 +42,7 @@ from routes.usuario_routes import router as usuario_router
 from routes.chat_routes import router as chat_router
 from routes.public_routes import router as public_router
 from routes.examples_routes import router as examples_router
+
 
 # Seeds
 from util.seed_data import inicializar_dados
@@ -74,6 +76,8 @@ logger.info("Criando tabelas do banco de dados...")
 try:
     usuario_repo.criar_tabela()
     logger.info("Tabela 'usuario' criada/verificada")
+    indices_repo.criar_indices()
+    categoria_repo.criar_tabela() 
 
     configuracao_repo.criar_tabela()
     logger.info("Tabela 'configuracao' criada/verificada")
@@ -173,6 +177,10 @@ logger.info("Router público incluído")
 # Rotas públicas (deve ser por último para não sobrescrever outras rotas)
 app.include_router(examples_router, tags=["Exemplos"])
 logger.info("Router de exemplos incluído")
+
+# Rotas públicas (deve ser por último para não sobrescrever outras rotas)
+app.include_router(admin_categorias_router, tags=["categorias"])
+logger.info("Router de categorias incluído")
 
 @app.get("/health")
 async def health_check():
