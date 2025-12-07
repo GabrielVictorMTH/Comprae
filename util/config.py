@@ -43,7 +43,7 @@ RESEND_FROM_NAME = os.getenv("RESEND_FROM_NAME", APP_NAME)
 
 # === Configurações do Servidor ===
 HOST = os.getenv("HOST", "0.0.0.0")
-PORT = int(os.getenv("PORT", "8000"))
+PORT = int(os.getenv("PORT", "8403"))
 RELOAD = os.getenv("RELOAD", "True").lower() == "true"
 
 # === Modo de Execução ===
