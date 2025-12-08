@@ -1,7 +1,7 @@
 from typing import Optional
 from model.categoria_model import Categoria
 from sql.categoria_sql import *
-from util.db_util import get_connection
+from util.db_util import obter_conexao
 
 
 def criar_tabela():
@@ -9,14 +9,14 @@ def criar_tabela():
     Cria a tabela de categorias se ela não existir.
     Deve ser chamada na inicialização do sistema.
     """
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(CRIAR_TABELA)
 
 
 def inserir(categoria: Categoria) -> Optional[Categoria]:
     try:
-        with get_connection() as conn:
+        with obter_conexao() as conn:
             cursor = conn.cursor()
             cursor.execute(INSERIR, (categoria.nome, categoria.descricao))
 
@@ -31,7 +31,7 @@ def inserir(categoria: Categoria) -> Optional[Categoria]:
 
 def alterar(categoria: Categoria) -> bool:
     try:
-        with get_connection() as conn:
+        with obter_conexao() as conn:
             cursor = conn.cursor()
             cursor.execute(ALTERAR, (categoria.nome, categoria.descricao, categoria.id))
             return cursor.rowcount > 0
@@ -42,7 +42,7 @@ def alterar(categoria: Categoria) -> bool:
 
 def excluir(id: int) -> bool:
     try:
-        with get_connection() as conn:
+        with obter_conexao() as conn:
             cursor = conn.cursor()
             cursor.execute(EXCLUIR, (id,))
             return cursor.rowcount > 0
@@ -53,7 +53,7 @@ def excluir(id: int) -> bool:
 
 def obter_por_id(id: int) -> Optional[Categoria]:
     try:
-        with get_connection() as conn:
+        with obter_conexao() as conn:
             cursor = conn.cursor()
             cursor.execute(OBTER_POR_ID, (id,))
             row = cursor.fetchone()
@@ -74,7 +74,7 @@ def obter_por_id(id: int) -> Optional[Categoria]:
 
 def obter_todos() -> list[Categoria]:
     try:
-        with get_connection() as conn:
+        with obter_conexao() as conn:
             cursor = conn.cursor()
             cursor.execute(OBTER_TODOS)
             rows = cursor.fetchall()
@@ -96,7 +96,7 @@ def obter_todos() -> list[Categoria]:
 
 def obter_por_nome(nome: str) -> Optional[Categoria]:
     try:
-        with get_connection() as conn:
+        with obter_conexao() as conn:
             cursor = conn.cursor()
             cursor.execute(OBTER_POR_NOME, (nome,))
             row = cursor.fetchone()

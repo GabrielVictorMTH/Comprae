@@ -11,11 +11,11 @@ from util.template_util import criar_templates
 from util.flash_messages import informar_sucesso, informar_erro
 from util.logger_config import logger
 from util.perfis import Perfil
-from util.exceptions import FormValidationError
+from util.exceptions import ErroValidacaoFormulario
 from util.rate_limiter import RateLimiter, obter_identificador_cliente
 
 router = APIRouter(prefix="/admin/produtos")
-templates = criar_templates("templates/admin/produtos")
+templates = criar_templates()
 
 # Rate limiter para operações admin
 admin_produtos_limiter = RateLimiter(
@@ -231,7 +231,7 @@ async def post_editar(
         # Adicionar dados necessários para renderizar o template
         dados_formulario["anuncio"] = anuncio_repo.obter_por_id(id)
         dados_formulario["categorias"] = categoria_repo.obter_todos()
-        raise FormValidationError(
+        raise ErroValidacaoFormulario(
             validation_error=e,
             template_path="admin/produtos/editar.html",
             dados_formulario=dados_formulario,

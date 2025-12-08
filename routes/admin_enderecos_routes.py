@@ -10,7 +10,7 @@ from util.perfis import Perfil
 from util.rate_limiter import RateLimiter, obter_identificador_cliente
 
 router = APIRouter(prefix="/admin/enderecos")
-templates = criar_templates("templates/admin/enderecos")
+templates = criar_templates()
 
 # Rate limiter para operações admin
 admin_enderecos_limiter = RateLimiter(

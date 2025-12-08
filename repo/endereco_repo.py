@@ -4,12 +4,12 @@ Repository para operações com Endereços.
 from typing import Optional
 from model.endereco_model import Endereco
 from sql.endereco_sql import *
-from util.db_util import get_connection
+from util.db_util import obter_conexao
 
 
 def criar_tabela() -> bool:
     """Cria a tabela de endereços"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(CRIAR_TABELA)
         return True
@@ -17,7 +17,7 @@ def criar_tabela() -> bool:
 
 def inserir(endereco: Endereco) -> Optional[int]:
     """Insere um novo endereço"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(INSERIR, (
             endereco.id_usuario,
@@ -35,7 +35,7 @@ def inserir(endereco: Endereco) -> Optional[int]:
 
 def alterar(endereco: Endereco) -> bool:
     """Altera um endereço existente"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(ALTERAR, (
             endereco.titulo,
@@ -53,7 +53,7 @@ def alterar(endereco: Endereco) -> bool:
 
 def excluir(id: int) -> bool:
     """Exclui um endereço"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(EXCLUIR, (id,))
         return cursor.rowcount > 0
@@ -61,7 +61,7 @@ def excluir(id: int) -> bool:
 
 def obter_por_id(id: int) -> Optional[Endereco]:
     """Obtém endereço por ID"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_POR_ID, (id,))
         row = cursor.fetchone()
@@ -84,7 +84,7 @@ def obter_por_id(id: int) -> Optional[Endereco]:
 
 def obter_por_usuario(id_usuario: int) -> list[Endereco]:
     """Obtém todos os endereços de um usuário"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_TODOS_POR_USUARIO, (id_usuario,))
         rows = cursor.fetchall()
@@ -108,7 +108,7 @@ def obter_por_usuario(id_usuario: int) -> list[Endereco]:
 
 def obter_todos() -> list[Endereco]:
     """Obtém todos os endereços"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_TODOS)
         rows = cursor.fetchall()
@@ -132,7 +132,7 @@ def obter_todos() -> list[Endereco]:
 
 def obter_por_uf(uf: str) -> list[Endereco]:
     """Obtém endereços por UF"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM endereco WHERE uf = ? ORDER BY cidade, logradouro", (uf,))
         rows = cursor.fetchall()
@@ -156,7 +156,7 @@ def obter_por_uf(uf: str) -> list[Endereco]:
 
 def obter_estatisticas() -> dict:
     """Obtém estatísticas de endereços"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
 
         # Total de endereços
@@ -179,7 +179,7 @@ def obter_estatisticas() -> dict:
 
 def contar_por_uf() -> list[dict]:
     """Conta endereços por UF"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT uf, COUNT(*) as total
@@ -193,7 +193,7 @@ def contar_por_uf() -> list[dict]:
 
 def contar_por_cidade() -> list[dict]:
     """Conta endereços por cidade (top 10)"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT cidade, uf, COUNT(*) as total
@@ -215,7 +215,7 @@ def contar_por_cidade() -> list[dict]:
 
 def obter_duplicados() -> list[dict]:
     """Detecta endereços potencialmente duplicados (mesmo CEP + número)"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             SELECT

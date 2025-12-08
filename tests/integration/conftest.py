@@ -36,6 +36,13 @@ def criar_tabelas_integracao():
         chat_sala_repo,
         chat_participante_repo,
         chat_mensagem_repo,
+        # Tabelas específicas do Compraê
+        endereco_repo,
+        categoria_repo,
+        anuncio_repo,
+        mensagem_repo,
+        pedido_repo,
+        curtida_repo,
     )
 
     # Criar tabelas na ordem correta (respeitando dependencias)
@@ -43,9 +50,17 @@ def criar_tabelas_integracao():
     configuracao_repo.criar_tabela()
     chamado_repo.criar_tabela()
     chamado_interacao_repo.criar_tabela()
-    indices_repo.criar_indices()
     chat_sala_repo.criar_tabela()
     chat_participante_repo.criar_tabela()
     chat_mensagem_repo.criar_tabela()
+    # Tabelas específicas do Compraê
+    endereco_repo.criar_tabela()
+    categoria_repo.criar_tabela()
+    anuncio_repo.criar_tabela()
+    mensagem_repo.criar_tabela()
+    pedido_repo.criar_tabela()
+    curtida_repo.criar_tabela()
+    # Índices por último (após todas as tabelas)
+    indices_repo.criar_indices()
 
     yield

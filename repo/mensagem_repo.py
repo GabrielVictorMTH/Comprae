@@ -6,12 +6,12 @@ from datetime import datetime
 
 from model.mensagem_model import Mensagem
 from sql.mensagem_sql import *
-from util.db_util import get_connection
+from util.db_util import obter_conexao
 
 
 def criar_tabela() -> bool:
     """Cria a tabela de mensagens"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(CRIAR_TABELA)
         return True
@@ -19,7 +19,7 @@ def criar_tabela() -> bool:
 
 def inserir(mensagem: Mensagem) -> Optional[Mensagem]:
     """Insere uma nova mensagem"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(
             INSERIR,
@@ -35,7 +35,7 @@ def inserir(mensagem: Mensagem) -> Optional[Mensagem]:
 
 def marcar_como_lida(id: int) -> bool:
     """Marca uma mensagem como lida"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(MARCAR_COMO_LIDA, (id,))
         return cursor.rowcount > 0
@@ -43,7 +43,7 @@ def marcar_como_lida(id: int) -> bool:
 
 def obter_por_id(id: int) -> Optional[Mensagem]:
     """Obtém uma mensagem por ID"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_POR_ID, (id,))
         row = cursor.fetchone()
@@ -63,7 +63,7 @@ def obter_por_id(id: int) -> Optional[Mensagem]:
 
 def obter_conversa(id_usuario1: int, id_usuario2: int) -> list[Mensagem]:
     """Obtém todas as mensagens entre dois usuários"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_CONVERSA, (id_usuario1, id_usuario2, id_usuario2, id_usuario1))
         rows = cursor.fetchall()
@@ -84,7 +84,7 @@ def obter_conversa(id_usuario1: int, id_usuario2: int) -> list[Mensagem]:
 
 def obter_mensagens_recebidas(id_usuario: int) -> list[Mensagem]:
     """Obtém todas as mensagens recebidas por um usuário"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_MENSAGENS_RECEBIDAS, (id_usuario,))
         rows = cursor.fetchall()
@@ -105,7 +105,7 @@ def obter_mensagens_recebidas(id_usuario: int) -> list[Mensagem]:
 
 def obter_mensagens_nao_lidas(id_usuario: int) -> list[Mensagem]:
     """Obtém mensagens não lidas de um usuário"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_MENSAGENS_NAO_LIDAS, (id_usuario,))
         rows = cursor.fetchall()
@@ -126,7 +126,7 @@ def obter_mensagens_nao_lidas(id_usuario: int) -> list[Mensagem]:
 
 def contar_nao_lidas(id_usuario: int) -> int:
     """Conta mensagens não lidas de um usuário"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(CONTAR_NAO_LIDAS, (id_usuario,))
         row = cursor.fetchone()

@@ -6,12 +6,12 @@ from datetime import datetime
 
 from model.pedido_model import Pedido
 from sql.pedido_sql import *
-from util.db_util import get_connection
+from util.db_util import obter_conexao
 
 
 def criar_tabela() -> bool:
     """Cria a tabela de pedidos"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(CRIAR_TABELA)
         return True
@@ -19,7 +19,7 @@ def criar_tabela() -> bool:
 
 def inserir(pedido: Pedido) -> Optional[int]:
     """Insere um novo pedido"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(
             INSERIR,
@@ -35,7 +35,7 @@ def inserir(pedido: Pedido) -> Optional[int]:
 
 def atualizar_status(id: int, status: str) -> bool:
     """Atualiza o status de um pedido"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(ATUALIZAR_STATUS, (status, id))
         return cursor.rowcount > 0
@@ -43,7 +43,7 @@ def atualizar_status(id: int, status: str) -> bool:
 
 def marcar_como_pago(id: int) -> bool:
     """Marca pedido como pago e registra data/hora"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(ATUALIZAR_PARA_PAGO, (id,))
         return cursor.rowcount > 0
@@ -51,7 +51,7 @@ def marcar_como_pago(id: int) -> bool:
 
 def marcar_como_enviado(id: int, codigo_rastreio: str) -> bool:
     """Marca pedido como enviado com código de rastreio"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(ATUALIZAR_PARA_ENVIADO, (codigo_rastreio, id))
         return cursor.rowcount > 0
@@ -59,7 +59,7 @@ def marcar_como_enviado(id: int, codigo_rastreio: str) -> bool:
 
 def cancelar(id: int) -> bool:
     """Cancela um pedido"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(CANCELAR_PEDIDO, (id,))
         return cursor.rowcount > 0
@@ -67,7 +67,7 @@ def cancelar(id: int) -> bool:
 
 def avaliar(id: int, nota: int, comentario: str) -> bool:
     """Registra avaliação de um pedido"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(AVALIAR_PEDIDO, (nota, comentario, id))
         return cursor.rowcount > 0
@@ -75,7 +75,7 @@ def avaliar(id: int, nota: int, comentario: str) -> bool:
 
 def obter_por_id(id: int) -> Optional[Pedido]:
     """Obtém um pedido por ID"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_POR_ID, (id,))
         row = cursor.fetchone()
@@ -86,7 +86,7 @@ def obter_por_id(id: int) -> Optional[Pedido]:
 
 def obter_por_comprador(id_comprador: int) -> list[Pedido]:
     """Obtém todos os pedidos de um comprador"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_POR_COMPRADOR, (id_comprador,))
         rows = cursor.fetchall()
@@ -95,7 +95,7 @@ def obter_por_comprador(id_comprador: int) -> list[Pedido]:
 
 def obter_por_vendedor(id_vendedor: int) -> list[Pedido]:
     """Obtém todos os pedidos relacionados aos anúncios de um vendedor"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_POR_VENDEDOR, (id_vendedor,))
         rows = cursor.fetchall()
@@ -104,7 +104,7 @@ def obter_por_vendedor(id_vendedor: int) -> list[Pedido]:
 
 def obter_por_status(status: str) -> list[Pedido]:
     """Obtém pedidos por status"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_POR_STATUS, (status,))
         rows = cursor.fetchall()
@@ -113,7 +113,7 @@ def obter_por_status(status: str) -> list[Pedido]:
 
 def obter_todos() -> list[Pedido]:
     """Obtém todos os pedidos"""
-    with get_connection() as conn:
+    with obter_conexao() as conn:
         cursor = conn.cursor()
         cursor.execute(OBTER_TODOS)
         rows = cursor.fetchall()

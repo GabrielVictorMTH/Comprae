@@ -32,7 +32,7 @@ from repo import (
 )
 from repo import chat_sala_repo, chat_participante_repo, chat_mensagem_repo
 # Repositórios específicos do Compraê
-from repo import anuncio_repo, endereco_repo, mensagem_repo, pedido_repo, categoria_repo
+from repo import anuncio_repo, endereco_repo, mensagem_repo, pedido_repo, categoria_repo, curtida_repo
 
 # Rotas
 from routes.auth_routes import router as auth_router
@@ -50,6 +50,7 @@ from routes.admin_produtos_routes import router as admin_produtos_router
 from routes.admin_pedidos_routes import router as admin_pedidos_router
 from routes.admin_enderecos_routes import router as admin_enderecos_router
 from routes.admin_categorias_routes import router as admin_categorias_router
+from routes.admin_curtidas_routes import router as admin_curtidas_router
 
 # Seeds
 from util.seed_data import inicializar_dados
@@ -95,6 +96,7 @@ TABELAS = [
     (anuncio_repo, "anuncio"),
     (mensagem_repo, "mensagem"),
     (pedido_repo, "pedido"),
+    (curtida_repo, "curtida"),
 ]
 
 # Criar tabelas do banco de dados
@@ -139,6 +141,7 @@ ROUTERS = [
     (admin_pedidos_router, ["Admin - Pedidos"], "admin de pedidos"),
     (admin_enderecos_router, ["Admin - Endereços"], "admin de endereços"),
     (admin_categorias_router, ["Admin - Categorias"], "admin de categorias"),
+    (admin_curtidas_router, ["Admin - Curtidas"], "admin de curtidas"),
     (usuario_router, ["Usuário"], "usuário"),
     (chat_router, ["Chat"], "chat"),
     (public_router, ["Público"], "público"),
