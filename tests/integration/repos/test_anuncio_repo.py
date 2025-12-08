@@ -3,9 +3,10 @@ Testes para o repositório de anúncios.
 """
 import pytest
 from datetime import datetime
-from repo import anuncio_repo, usuario_repo
+from repo import anuncio_repo, usuario_repo, categoria_repo
 from model.anuncio_model import Anuncio
 from model.usuario_model import Usuario
+from model.categoria_model import Categoria
 from util.security import criar_hash_senha
 
 
@@ -25,11 +26,12 @@ def vendedor_teste():
 @pytest.fixture
 def categoria_teste():
     """
-    Fixture que retorna um ID de categoria mockado.
-    NOTA: Este teste assume que existe uma categoria com ID 1 no banco.
-    Se o aluno implementar o CRUD de categorias, esta fixture funcionará.
+    Fixture que cria uma categoria de teste e retorna seu ID.
     """
-    return 1  # ID mockado de categoria
+    import uuid
+    nome_unico = f"Categoria Teste {uuid.uuid4().hex[:8]}"
+    categoria = categoria_repo.inserir(Categoria(nome=nome_unico, descricao="Descrição teste"))
+    return categoria.id
 
 
 class TestCriarTabela:
@@ -248,15 +250,15 @@ class TestObterPorVendedor:
 
 class TestObterPorCategoria:
     def test_obter_anuncios_da_categoria(self, vendedor_teste):
-        cat1 = categoria_repo.inserir(Categoria(0, "Cat1", "Categoria 1"))
-        cat2 = categoria_repo.inserir(Categoria(0, "Cat2", "Categoria 2"))
+        cat1 = categoria_repo.inserir(Categoria(nome="Cat1", descricao="Categoria 1"))
+        cat2 = categoria_repo.inserir(Categoria(nome="Cat2", descricao="Categoria 2"))
 
-        anuncio1 = Anuncio(0, vendedor_teste, cat1, "P1", "Desc", 1.0, 10.0, 1, datetime.now(), True, None, None)
+        anuncio1 = Anuncio(0, vendedor_teste, cat1.id, "P1", "Desc", 1.0, 10.0, 1, datetime.now(), True, None, None)
         anuncio_repo.inserir(anuncio1)
 
-        anuncios = anuncio_repo.obter_por_categoria(cat1)
+        anuncios = anuncio_repo.obter_por_categoria(cat1.id)
         assert len(anuncios) >= 1
-        assert all(a.id_categoria == cat1 for a in anuncios)
+        assert all(a.id_categoria == cat1.id for a in anuncios)
 
 
 class TestBuscarPorNome:

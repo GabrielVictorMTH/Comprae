@@ -4,12 +4,14 @@ Testes para o repositório de pedidos.
 Testa todas as operações do pedido_repo e validações do model/SQL.
 """
 import pytest
+import uuid
 from datetime import datetime
-from repo import pedido_repo, usuario_repo, anuncio_repo, endereco_repo
+from repo import pedido_repo, usuario_repo, anuncio_repo, endereco_repo, categoria_repo
 from model.pedido_model import Pedido
 from model.usuario_model import Usuario
 from model.anuncio_model import Anuncio
 from model.endereco_model import Endereco
+from model.categoria_model import Categoria
 from util.security import criar_hash_senha
 
 
@@ -42,11 +44,11 @@ def vendedor_teste():
 @pytest.fixture
 def categoria_teste():
     """
-    Fixture que retorna um ID de categoria mockado.
-    NOTA: Este teste assume que existe uma categoria com ID 1 no banco.
-    Se o aluno implementar o CRUD de categorias, esta fixture funcionará.
+    Fixture que cria uma categoria de teste e retorna seu ID.
     """
-    return 1  # ID mockado de categoria
+    nome_unico = f"Categoria Pedido {uuid.uuid4().hex[:8]}"
+    categoria = categoria_repo.inserir(Categoria(nome=nome_unico, descricao="Descrição teste"))
+    return categoria.id
 
 
 @pytest.fixture

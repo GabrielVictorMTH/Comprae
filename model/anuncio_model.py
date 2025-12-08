@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from model.usuario_model import Usuario
+
+if TYPE_CHECKING:
+    from model.categoria_model import Categoria
 
 
 @dataclass
@@ -19,3 +22,4 @@ class Anuncio:
     ativo: bool
     # Relacionamentos
     vendedor: Optional[Usuario] = None
+    categoria: Optional["Categoria"] = None

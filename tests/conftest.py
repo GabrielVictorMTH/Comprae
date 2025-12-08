@@ -141,23 +141,31 @@ def limpar_banco_dados():
         """Limpa tabelas se elas existirem e reseta autoincrement"""
         with obter_conexao() as conn:
             cursor = conn.cursor()
-            # Verificar se tabelas existem antes de limpar
+            # Lista de todas as tabelas que podem existir (ordem de deleção respeita FKs)
+            tabelas_para_verificar = [
+                'chamado_interacao', 'chamado', 'chat_mensagem', 'chat_participante',
+                'chat_sala', 'pedido', 'curtida', 'mensagem', 'anuncio', 'endereco',
+                'categoria', 'usuario', 'configuracao'
+            ]
+
+            # Verificar quais tabelas existem
             cursor.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' "
-                "AND name IN ('chamado', 'chamado_interacao', 'usuario', 'configuracao')"
+                f"SELECT name FROM sqlite_master WHERE type='table' "
+                f"AND name IN ({','.join(['?' for _ in tabelas_para_verificar])})",
+                tabelas_para_verificar
             )
             tabelas_existentes = [row[0] for row in cursor.fetchall()]
 
-            # Limpar apenas tabelas que existem (respeitando foreign keys)
-            # Limpar chamado_interacao antes de chamado (devido à FK)
-            if 'chamado_interacao' in tabelas_existentes:
-                cursor.execute("DELETE FROM chamado_interacao")
-            if 'chamado' in tabelas_existentes:
-                cursor.execute("DELETE FROM chamado")
-            if 'usuario' in tabelas_existentes:
-                cursor.execute("DELETE FROM usuario")
-            if 'configuracao' in tabelas_existentes:
-                cursor.execute("DELETE FROM configuracao")
+            # Limpar tabelas na ordem correta (respeitando foreign keys)
+            ordem_limpeza = [
+                'chamado_interacao', 'chamado', 'chat_mensagem', 'chat_participante',
+                'chat_sala', 'pedido', 'curtida', 'mensagem', 'anuncio', 'endereco',
+                'categoria', 'usuario', 'configuracao'
+            ]
+
+            for tabela in ordem_limpeza:
+                if tabela in tabelas_existentes:
+                    cursor.execute(f"DELETE FROM {tabela}")
 
             # Resetar autoincrement (limpar sqlite_sequence se existir)
             cursor.execute(
