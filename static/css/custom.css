@@ -13,18 +13,17 @@
 /* ===== UTILITY CLASSES ===== */
 
 /* Hover effects */
-.shadow-hover:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+.shadow-hover {
     transition: box-shadow 0.3s ease-in-out;
+}
+
+.shadow-hover:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
 }
 
 /* Font sizes */
 .fs-hero {
     font-size: 15rem;
-}
-
-.fs-small {
-    font-size: 0.85rem;
 }
 
 /* Resize utilities */
@@ -42,11 +41,6 @@
     font-size: 10rem;
     font-weight: 700;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.error-heading {
-    font-size: 2rem;
-    font-weight: 500;
 }
 
 .error-container {
@@ -73,21 +67,11 @@
     outline: 6px solid var(--primary-color);
 }
 
-/* Toast container offset */
-.toast-offset {
-    margin-bottom: 60px;
-}
-
 /* Preview image size */
 .preview-120 {
     width: 120px;
     height: 120px;
     overflow: hidden;
-}
-
-/* HR separator */
-.hr-separator {
-    max-width: 200px;
 }
 
 /* Text truncation utilities */
@@ -99,4 +83,56 @@
     text-overflow: ellipsis;
     line-height: 1.5;
     max-height: 4.5em; /* 3 lines * 1.5 line-height */
+}
+
+/* ===== BTN-GROUP RESPONSIVO ===== */
+/* Vertical por padrão, horizontal em telas >= sm (576px) */
+
+.btn-group-responsive {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.btn-group-responsive > .btn,
+.btn-group-responsive > .btn-check + .btn {
+    border-radius: 0;
+}
+
+.btn-group-responsive > .btn:first-of-type,
+.btn-group-responsive > .btn-check:first-of-type + .btn {
+    border-top-left-radius: var(--bs-btn-border-radius);
+    border-top-right-radius: var(--bs-btn-border-radius);
+}
+
+.btn-group-responsive > .btn:last-of-type,
+.btn-group-responsive > .btn-check:last-of-type + .btn {
+    border-bottom-left-radius: var(--bs-btn-border-radius);
+    border-bottom-right-radius: var(--bs-btn-border-radius);
+}
+
+@media (min-width: 576px) {
+    .btn-group-responsive {
+        flex-direction: row;
+    }
+
+    .btn-group-responsive > .btn,
+    .btn-group-responsive > .btn-check + .btn {
+        border-radius: 0;
+        flex: 1;
+    }
+
+    .btn-group-responsive > .btn:first-of-type,
+    .btn-group-responsive > .btn-check:first-of-type + .btn {
+        border-top-left-radius: var(--bs-btn-border-radius);
+        border-bottom-left-radius: var(--bs-btn-border-radius);
+        border-top-right-radius: 0;
+    }
+
+    .btn-group-responsive > .btn:last-of-type,
+    .btn-group-responsive > .btn-check:last-of-type + .btn {
+        border-top-right-radius: var(--bs-btn-border-radius);
+        border-bottom-right-radius: var(--bs-btn-border-radius);
+        border-bottom-left-radius: 0;
+    }
 }

@@ -1,22 +1,14 @@
 """
-Middleware de proteção CSRF para FastAPI
+Middleware de proteção CSRF para FastAPI.
 
 Implementa validação de tokens CSRF baseada em sessões para proteger
 contra ataques Cross-Site Request Forgery.
-
-Uso:
-    1. Adicionar middleware em main.py
-    2. Incluir {{ csrf_input() }} em todos formulários
-    3. Rotas POST/PUT/PATCH/DELETE são protegidas automaticamente
-
-Autor: DefaultWebApp
 """
 import secrets
 from typing import Callable, Optional
-from fastapi import Request, HTTPException, status
+from fastapi import Request
 from fastapi.responses import Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.datastructures import FormData
 
 from util.logger_config import logger
 
@@ -38,7 +30,7 @@ CSRF_EXEMPT_PATHS = {
 }
 
 
-def generate_csrf_token() -> str:
+def gerar_token_csrf() -> str:
     """
     Gera um token CSRF aleatório e seguro
 
@@ -48,7 +40,7 @@ def generate_csrf_token() -> str:
     return secrets.token_hex(32)
 
 
-def get_csrf_token(request: Request) -> str:
+def obter_token_csrf(request: Request) -> str:
     """
     Obtém ou cria token CSRF da sessão
 
@@ -63,14 +55,14 @@ def get_csrf_token(request: Request) -> str:
 
     # Se não existe, criar novo
     if not token:
-        token = generate_csrf_token()
+        token = gerar_token_csrf()
         request.session[CSRF_SESSION_KEY] = token
-        logger.debug(f"Novo token CSRF gerado para sessão")
+        logger.debug("Novo token CSRF gerado para sessão")
 
     return token
 
 
-def validate_csrf_token(request: Request, token_from_form: Optional[str]) -> bool:
+def validar_token_csrf(request: Request, token_from_form: Optional[str]) -> bool:
     """
     Valida token CSRF contra o token da sessão
 
@@ -98,7 +90,7 @@ def validate_csrf_token(request: Request, token_from_form: Optional[str]) -> boo
     return secrets.compare_digest(expected_token, token_from_form)
 
 
-def is_csrf_exempt(path: str) -> bool:
+def esta_isento_csrf(path: str) -> bool:
     """
     Verifica se um caminho está isento de validação CSRF
 
@@ -114,7 +106,7 @@ def is_csrf_exempt(path: str) -> bool:
     return False
 
 
-class CSRFProtectionMiddleware(BaseHTTPMiddleware):
+class MiddlewareProtecaoCSRF(BaseHTTPMiddleware):
     """
     Middleware de proteção CSRF
 
@@ -140,7 +132,7 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
         # Por enquanto, apenas logar requisições protegidas
         # A validação real será feita via dependency nos handlers
         if request.method in CSRF_PROTECTED_METHODS:
-            if not is_csrf_exempt(request.url.path):
+            if not esta_isento_csrf(request.url.path):
                 logger.debug(f"CSRF-protected request: {request.method} {request.url.path}")
 
         # Continuar processamento normalmente
@@ -148,7 +140,7 @@ class CSRFProtectionMiddleware(BaseHTTPMiddleware):
         return response
 
 
-def csrf_token_context(request: Request) -> dict:
+def contexto_token_csrf(request: Request) -> dict:
     """
     Retorna contexto com token CSRF para injeção em templates
 
@@ -158,7 +150,7 @@ def csrf_token_context(request: Request) -> dict:
     Returns:
         Dict com função csrf_input() e csrf_token
     """
-    token = get_csrf_token(request)
+    token = obter_token_csrf(request)
 
     # Função helper para gerar input HTML
     def csrf_input():

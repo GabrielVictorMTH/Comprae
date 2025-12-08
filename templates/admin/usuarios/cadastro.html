@@ -12,6 +12,7 @@
 
         <div class="card shadow-sm">
             <form method="POST" action="/admin/usuarios/cadastrar">
+                {{ csrf_input() }}
                 <div class="card-body p-4">
                     <div class="row">
                         <div class="col-12">
@@ -36,11 +37,20 @@
                         </div>                        
 
                         <div class="col-md-6 mb-3 mb-md-0">
-                            {{ field(name='senha', label='Senha', type='password', required=true) }}
+                            {{ field(name='senha', label='Senha', type='password', required=true,
+                            append_icon='bi-eye', append_button_onclick="alternarVisibilidadeSenha('senha')",
+                            attributes={'minlength': 8}) }}
                         </div>
 
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            {{ field(name='confirma_senha', label='Confirmar Senha', type='password', required=true) }}
+                        <div class="col-md-6 mb-1 mb-md-0">
+                            {{ field(name='confirma_senha', label='Confirmar Senha', type='password', required=true,
+                            append_icon='bi-eye', append_button_onclick="alternarVisibilidadeSenha('confirma_senha')",
+                            attributes={'minlength': 8}) }}
+                        </div>
+
+                        <div class="col-12 mb-0">
+                            {% set show_special = true %}
+                            {% include 'components/indicador_senha.html' %}
                         </div>
                     </div>
                 </div>
@@ -62,19 +72,25 @@
 
 {% block scripts %}
 <script>
-    // Inicializar validador de senha
-    const passwordValidator = new PasswordValidator({
+    // Inicializar validador de senha (apenas feedback visual)
+    const validadorSenha = new ValidadorSenha({
         passwordFieldId: 'senha',
         confirmPasswordFieldId: 'confirma_senha',
-        minLength: 6
+        strengthBarId: 'senha-strength',
+        strengthTextId: 'senha-strength-text',
+        matchMessageId: 'senha-match',
+        requirements: {
+            length: 'req-length',
+            uppercase: 'req-uppercase',
+            lowercase: 'req-lowercase',
+            number: 'req-number',
+            special: 'req-special'
+        },
+        minLength: 8,
+        showStrength: true,
+        showRequirements: true
     });
 
-    // Validação do formulário
-    document.querySelector('form').addEventListener('submit', function (e) {
-        if (!passwordValidator.validateForm()) {
-            e.preventDefault();
-            return false;
-        }
-    });
+    // Validação é feita server-side via CadastroUsuarioDTO
 </script>
 {% endblock %}

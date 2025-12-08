@@ -1,12 +1,6 @@
 /**
  * Sistema de Modal de Alerta Bootstrap
  * Substitui alert() nativo por modais Bootstrap bonitos e acessíveis
- *
- * Uso:
- * exibirModalAlerta('Mensagem', 'danger', 'Título', 'Detalhes opcionais');
- *
- * @author DefaultWebApp
- * @version 1.0.0
  */
 
 /**
@@ -16,16 +10,6 @@
  * @param {string} tipo - Tipo do alerta: 'danger', 'warning', 'info', 'success' (padrão: 'info')
  * @param {string|null} titulo - Título do modal (se null, usa título padrão baseado no tipo)
  * @param {string|null} detalhes - Texto ou HTML adicional para detalhes (opcional)
- *
- * @example
- * // Erro
- * exibirModalAlerta('Arquivo muito grande!', 'danger', 'Erro de Upload');
- *
- * // Aviso
- * exibirModalAlerta('Tem certeza que deseja sair?', 'warning', 'Atenção');
- *
- * // Info
- * exibirModalAlerta('Operação concluída com sucesso!', 'success');
  */
 function exibirModalAlerta(mensagem, tipo = 'info', titulo = null, detalhes = null) {
     // Validar tipo
@@ -81,8 +65,7 @@ function exibirModalAlerta(mensagem, tipo = 'info', titulo = null, detalhes = nu
 
     if (!modal) {
         console.error('Modal de alerta não encontrado! Certifique-se de incluir modal_alerta.html no template.');
-        // Fallback para alert nativo
-        alert(mensagem);
+        console.error(`Mensagem não exibida: ${mensagem}`);
         return;
     }
 
@@ -104,10 +87,10 @@ function exibirModalAlerta(mensagem, tipo = 'info', titulo = null, detalhes = nu
     // SEGURANÇA: Usar textContent em vez de innerHTML para prevenir XSS
     if (detalhes) {
         detalhesEl.textContent = detalhes;
-        detalhesEl.style.display = 'block';
+        detalhesEl.classList.remove('d-none');
     } else {
         detalhesEl.textContent = '';
-        detalhesEl.style.display = 'none';
+        detalhesEl.classList.add('d-none');
     }
 
     // Configurar botão OK
@@ -166,29 +149,3 @@ window.App.Modal.showError = exibirErro;
 window.App.Modal.showWarning = exibirAviso;
 window.App.Modal.showInfo = exibirInfo;
 window.App.Modal.showSuccess = exibirSucesso;
-
-/**
- * DEPRECATED: Manter retrocompatibilidade
- * @deprecated Use window.App.Modal.show() em vez disso
- */
-window.exibirModalAlerta = exibirModalAlerta;
-
-/**
- * @deprecated Use window.App.Modal.showError() em vez disso
- */
-window.exibirErro = exibirErro;
-
-/**
- * @deprecated Use window.App.Modal.showWarning() em vez disso
- */
-window.exibirAviso = exibirAviso;
-
-/**
- * @deprecated Use window.App.Modal.showInfo() em vez disso
- */
-window.exibirInfo = exibirInfo;
-
-/**
- * @deprecated Use window.App.Modal.showSuccess() em vez disso
- */
-window.exibirSucesso = exibirSucesso;

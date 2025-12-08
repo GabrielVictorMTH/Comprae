@@ -17,20 +17,53 @@ Este documento define as convenções, padrões e melhores práticas para escrev
 
 ### Organização de Arquivos
 
+Os testes estão organizados em três categorias:
+
 ```
 tests/
-├── conftest.py              # Fixtures compartilhadas
-├── test_helpers.py          # Funções helper para assertions
-├── test_auth.py             # Testes de autenticação
-├── test_perfil.py           # Testes de perfil do usuário
-├── test_usuario.py          # Testes de dashboard do usuário
-├── test_tarefas.py          # Testes CRUD de tarefas
-├── test_admin_usuarios.py   # Testes de administração de usuários
-├── test_admin_backups.py    # Testes de backups
-├── test_admin_configuracoes.py  # Testes de configurações
-├── test_public.py           # Testes de rotas públicas
-└── README.md                # Este arquivo
+├── conftest.py                  # Fixtures compartilhadas (herdadas por todas as pastas)
+├── test_helpers.py              # Funções helper para assertions
+├── test_permission_helpers.py   # Helpers de permissão
+├── test_validation_helpers.py   # Helpers de validação
+├── test_repository_helpers.py   # Helpers de repositório
+├── README.md                    # Este arquivo
+│
+├── unit/                        # Testes unitários (isolados, com mocks)
+│   ├── conftest.py              # Configuração específica para testes unitários
+│   ├── test_validators.py       # Validadores Pydantic
+│   ├── test_senha_util.py       # Funções de senha
+│   ├── test_datetime_util.py    # Funções de datetime
+│   ├── test_config_cache.py     # Cache de configurações
+│   ├── test_enum_base.py        # Classe base de enums
+│   ├── test_usuario_logado_model.py  # Dataclass UsuarioLogado
+│   ├── test_rate_limiter.py     # Rate limiter
+│   ├── test_db_util.py          # Utilitários de banco
+│   └── test_configuracao_dto.py # DTOs de configuração
+│
+├── integration/                 # Testes de integração (HTTP + banco)
+│   ├── conftest.py              # Configuração específica para integração
+│   ├── test_auth.py             # Autenticação
+│   ├── test_security.py         # Segurança
+│   ├── test_perfil.py           # Perfil do usuário
+│   ├── test_usuario.py          # Dashboard do usuário
+│   ├── test_admin_usuarios.py   # Administração de usuários
+│   ├── test_admin_backups.py    # Backups
+│   ├── test_admin_configuracoes.py  # Configurações
+│   ├── test_public.py           # Rotas públicas
+│   ├── test_chamados.py         # Sistema de chamados
+│   └── ...                      # Outros testes de integração
+│
+└── e2e/                         # Testes end-to-end (Playwright)
+    ├── conftest.py              # Fixtures Playwright e servidor
+    ├── test_cadastro.py         # Fluxo de cadastro via browser
+    └── test_e2e_helpers.py      # Helpers E2E
 ```
+
+**Categorias de testes:**
+
+- **unit/**: Testes unitários - testam funções e classes isoladamente, usando mocks
+- **integration/**: Testes de integração - testam múltiplos componentes via HTTP/banco
+- **e2e/**: Testes end-to-end - simulam usuário real via Playwright
 
 ### Organização de Classes
 
@@ -38,13 +71,13 @@ Cada arquivo de teste deve organizar testes em classes temáticas:
 
 ```python
 class TestListarTarefas:
-    """Testes de listagem de tarefas"""
+    """Testes de listagem de categorias"""
 
 class TestCriarTarefa:
-    """Testes de criação de tarefa"""
+    """Testes de criação de categoria"""
 
 class TestExcluirTarefa:
-    """Testes de exclusão de tarefa"""
+    """Testes de exclusão de categoria"""
 ```
 
 **Convenção**: Use o prefixo `Test` nas classes e agrupe testes relacionados.
@@ -377,22 +410,6 @@ assert_redirects_to(response, "/login")
 
 **SEMPRE teste isolamento de dados entre usuários:**
 
-```python
-# ✅ CORRETO - verifica isolamento
-def test_usuario_nao_ve_tarefas_de_outros(client, dois_usuarios, fazer_login):
-    usuario1, usuario2 = dois_usuarios
-
-    # Usuario 1 cria tarefa
-    fazer_login(usuario1["email"], usuario1["senha"])
-    client.post("/tarefas/cadastrar", data={"titulo": "Tarefa do Usuario 1"})
-    client.get("/logout")
-
-    # Usuario 2 não deve ver
-    fazer_login(usuario2["email"], usuario2["senha"])
-    response = client.get("/tarefas/listar")
-    assert "Tarefa do Usuario 1" not in response.text
-```
-
 ---
 
 ## 📛 Convenções de Nomenclatura
@@ -408,9 +425,6 @@ Padrão: `test_<acao>_<condicao>_<resultado_esperado>`
 def test_login_com_credenciais_validas_redireciona_para_dashboard():
     pass
 
-def test_criar_tarefa_sem_titulo_retorna_erro():
-    pass
-
 def test_usuario_nao_autenticado_nao_acessa_dashboard():
     pass
 
@@ -418,7 +432,7 @@ def test_usuario_nao_autenticado_nao_acessa_dashboard():
 def test_login():
     pass
 
-def test_tarefa():
+def test_categoria():
     pass
 
 def test_erro():
@@ -437,7 +451,7 @@ class TestListarUsuarios:
     """Testes de listagem de usuários"""
 
 class TestCriarTarefa:
-    """Testes de criação de tarefa"""
+    """Testes de criação de categoria"""
 
 class TestAutorizacao:
     """Testes de autorização e controle de acesso"""
@@ -537,42 +551,6 @@ def test_cliente_nao_acessa_area_admin(cliente_autenticado):
         assert location in ["/login", "/usuario", "/"]
 ```
 
-### Exemplo 3: Teste de Isolamento de Dados
-
-```python
-def test_usuario_nao_pode_excluir_tarefa_de_outro(client, dois_usuarios, fazer_login):
-    """Usuário não deve poder excluir tarefas de outros usuários."""
-
-    usuario1, usuario2 = dois_usuarios
-
-    # Usuario 1 cria tarefa
-    fazer_login(usuario1["email"], usuario1["senha"])
-    response = client.post("/tarefas/cadastrar", data={
-        "titulo": "Tarefa Privada",
-        "descricao": "Esta é minha tarefa"
-    }, follow_redirects=False)
-    assert_redirects_to(response, "/tarefas/listar")
-
-    # Obter ID da tarefa criada
-    from repo import tarefa_repo
-    tarefas = tarefa_repo.obter_por_usuario(usuario1["id"])  # Precisa ajustar
-    tarefa_id = tarefas[0].id
-
-    # Logout do usuario 1
-    client.get("/logout")
-
-    # Usuario 2 tenta excluir tarefa do usuario 1
-    fazer_login(usuario2["email"], usuario2["senha"])
-    response = client.post(f"/tarefas/{tarefa_id}/excluir", follow_redirects=False)
-
-    # Deve negar (redirect)
-    assert_redirects_to(response, "/tarefas/listar")
-
-    # Verificar que tarefa ainda existe
-    tarefa = tarefa_repo.obter_por_id(tarefa_id)
-    assert tarefa is not None
-```
-
 ### Exemplo 4: Teste com Fixtures Avançadas
 
 ```python
@@ -632,10 +610,10 @@ pytest
 pytest -v
 
 # Rodar arquivo específico
-pytest tests/test_auth.py
+pytest tests/integration/test_auth.py
 
 # Rodar teste específico
-pytest tests/test_auth.py::TestLogin::test_login_com_credenciais_validas
+pytest tests/integration/test_auth.py::TestLogin::test_login_com_credenciais_validas
 
 # Rodar testes que contém palavra-chave
 pytest -k "login"
@@ -647,6 +625,24 @@ pytest --cov
 pytest --cov --cov-report=html
 ```
 
+### Executar por Categoria
+
+```bash
+# Apenas testes unitários
+pytest tests/unit/
+
+# Apenas testes de integração
+pytest tests/integration/
+
+# Apenas testes E2E (requer Playwright instalado)
+pytest tests/e2e/
+
+# Usando markers (aplica automaticamente pelas pastas)
+pytest -m unit
+pytest -m integration
+pytest -m e2e
+```
+
 ### Markers Úteis
 
 ```python
@@ -655,19 +651,20 @@ def test_login():
     pass
 
 @pytest.mark.crud
-def test_criar_tarefa():
+def test_criar_categoria():
     pass
 
-@pytest.mark.integration
-def test_fluxo_completo():
+@pytest.mark.slow
+def test_fluxo_lento():
     pass
 ```
 
 Executar por marker:
 ```bash
-pytest -m auth        # Apenas testes de autenticação
-pytest -m crud        # Apenas testes de CRUD
-pytest -m integration # Apenas testes de integração
+pytest -m auth            # Apenas testes de autenticação
+pytest -m crud            # Apenas testes de CRUD
+pytest -m "not slow"      # Excluir testes lentos
+pytest -m "unit and auth" # Unitários de autenticação
 ```
 
 ---
@@ -680,5 +677,5 @@ pytest -m integration # Apenas testes de integração
 
 ---
 
-**Última atualização**: 2025-10-22
-**Versão**: 1.0
+**Última atualização**: 2025-12-02
+**Versão**: 2.0 - Organização em unit/integration/e2e

@@ -1,29 +1,97 @@
+# =============================================================================
+# Imports
+# =============================================================================
+
+# Standard library
+from datetime import datetime
+
+# Third-party
 from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
-from datetime import datetime
 
+# DTOs
 from dtos.auth_dto import LoginDTO, CadastroDTO, EsqueciSenhaDTO, RedefinirSenhaDTO
+
+# Models
 from model.usuario_model import Usuario
+
+# Repositories
 from repo import usuario_repo
+
+# Utilities
+from util.auth_decorator import criar_sessao
+from util.datetime_util import agora
+from util.email_service import servico_email
+from util.exceptions import ErroValidacaoFormulario
+from util.flash_messages import informar_sucesso, informar_erro
+from util.logger_config import logger
+from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
 from util.security import (
     criar_hash_senha,
     verificar_senha,
     gerar_token_redefinicao,
     obter_data_expiracao_token,
 )
-from util.email_service import email_service
-from util.flash_messages import informar_sucesso, informar_erro
 from util.template_util import criar_templates
-from util.logger_config import logger
-from util.exceptions import FormValidationError
-from util.perfis import Perfil
 from util.validation_helpers import verificar_email_disponivel
-router = APIRouter()
-templates = criar_templates("templates/auth")
+from model.usuario_logado_model import UsuarioLogado
 
-# Rate limiters dinâmicos
-from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
+# =============================================================================
+# Constantes
+# =============================================================================
+
+TOKEN_EXPIRACAO_HORAS = 1  # Tempo de expiração do token de redefinição de senha
+
+# =============================================================================
+# Configuração do Router
+# =============================================================================
+
+router = APIRouter()
+templates = criar_templates()
+
+
+def _validar_url_redirect(url: str, padrao: str = "/usuario") -> str:
+    """
+    Valida URL de redirect para prevenir Open Redirect.
+
+    Args:
+        url: URL a ser validada
+        padrao: URL padrão caso a validação falhe
+
+    Returns:
+        URL segura (relativa) ou URL padrão
+    """
+    if not url:
+        return padrao
+
+    url = url.strip()
+
+    # Deve começar com "/" (relativa)
+    if not url.startswith("/"):
+        logger.warning(f"Tentativa de redirect para URL não relativa: {url}")
+        return padrao
+
+    # Não pode começar com "//" (protocolo relativo - ex: //evil.com)
+    if url.startswith("//"):
+        logger.warning(f"Tentativa de redirect com protocolo relativo: {url}")
+        return padrao
+
+    # Não pode conter "://" em qualquer posição (URL absoluta)
+    if "://" in url:
+        logger.warning(f"Tentativa de redirect para URL absoluta: {url}")
+        return padrao
+
+    # Não pode ter quebra de linha (CRLF injection)
+    if "\n" in url or "\r" in url:
+        logger.warning(f"Tentativa de CRLF injection em redirect: {repr(url)}")
+        return padrao
+
+    return url
+
+# =============================================================================
+# Rate Limiters
+# =============================================================================
 
 login_limiter = DynamicRateLimiter(
     chave_max="rate_limit_login_max",
@@ -55,8 +123,10 @@ async def get_login(request: Request):
     if request.session.get("usuario_logado"):
         return RedirectResponse("/usuario", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Capturar o parâmetro redirect da query string
-    redirect_url = request.query_params.get("redirect", "/usuario")
+    # Capturar e validar o parâmetro redirect da query string
+    redirect_url = _validar_url_redirect(
+        request.query_params.get("redirect", "/usuario")
+    )
 
     return templates.TemplateResponse(
         "auth/login.html", {"request": request, "redirect": redirect_url}
@@ -71,6 +141,9 @@ async def post_login(
     redirect: str = Form(default="/usuario"),
 ):
     """Processa login do usuário"""
+    # Validar URL de redirect para prevenir Open Redirect
+    redirect = _validar_url_redirect(redirect)
+
     try:
         # Rate limiting por IP
         ip = obter_identificador_cliente(request)
@@ -117,19 +190,15 @@ async def post_login(
             )
 
         # Salvar sessão
-        request.session["usuario_logado"] = {
-            "id": usuario.id,
-            "nome": usuario.nome,
-            "email": usuario.email,
-            "perfil": usuario.perfil,
-        }
+        usuario_logado = UsuarioLogado.from_usuario(usuario)
+        criar_sessao(request, usuario_logado)
 
         logger.info(f"Usuário {usuario.email} autenticado com sucesso")
         informar_sucesso(request, f"Bem-vindo(a), {usuario.nome}!")
         return RedirectResponse(redirect, status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        raise FormValidationError(
+        raise ErroValidacaoFormulario(
             validation_error=e,
             template_path="auth/login.html",
             dados_formulario={**dados_formulario, "redirect": redirect},
@@ -214,7 +283,7 @@ async def post_cadastrar(
             logger.info(f"Novo usuário cadastrado: {usuario.email}")
 
             # Enviar e-mail de boas-vindas
-            email_service.enviar_boas_vindas(usuario.email, usuario.nome)
+            servico_email.enviar_boas_vindas(usuario.email, usuario.nome)
 
             informar_sucesso(
                 request, "Cadastro realizado com sucesso! Faça login para continuar."
@@ -227,7 +296,7 @@ async def post_cadastrar(
             )
 
     except ValidationError as e:
-        raise FormValidationError(
+        raise ErroValidacaoFormulario(
             validation_error=e,
             template_path="auth/cadastro.html",
             dados_formulario=dados_formulario,
@@ -269,13 +338,13 @@ async def post_esqueci_senha(request: Request, email: str = Form()):
         if usuario:
             # Gerar token de redefinição
             token = gerar_token_redefinicao()
-            data_expiracao = obter_data_expiracao_token(horas=1)
+            data_expiracao = obter_data_expiracao_token(horas=TOKEN_EXPIRACAO_HORAS)
 
             # Salvar token no banco
             usuario_repo.atualizar_token(usuario.email, token, data_expiracao)
 
             # Enviar e-mail com link de recuperação
-            email_enviado = email_service.enviar_recuperacao_senha(
+            email_enviado = servico_email.enviar_recuperacao_senha(
                 usuario.email, usuario.nome, token
             )
 
@@ -294,7 +363,7 @@ async def post_esqueci_senha(request: Request, email: str = Form()):
         return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        raise FormValidationError(
+        raise ErroValidacaoFormulario(
             validation_error=e,
             template_path="auth/esqueci_senha.html",
             dados_formulario=dados_formulario,
@@ -315,14 +384,16 @@ async def get_redefinir_senha(request: Request, token: str):
     # Verificar expiração
     try:
         data_token = datetime.fromisoformat(usuario.data_token)
-        if datetime.now() > data_token:
+        if agora() > data_token:
             informar_erro(
                 request, "Token expirado. Solicite uma nova recuperação de senha."
             )
             return RedirectResponse(
                 "/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER
             )
-    except:
+    except (ValueError, TypeError):
+        # ValueError: formato de data inválido
+        # TypeError: data_token é None (já verificado, mas por segurança)
         informar_erro(request, "Token inválido")
         return RedirectResponse("/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -359,12 +430,14 @@ async def post_redefinir_senha(
 
         try:
             data_token = datetime.fromisoformat(usuario.data_token)
-            if datetime.now() > data_token:
+            if agora() > data_token:
                 informar_erro(request, "Token expirado")
                 return RedirectResponse(
                     "/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER
                 )
-        except:
+        except (ValueError, TypeError):
+            # ValueError: formato de data inválido
+            # TypeError: data_token é None (já verificado, mas por segurança)
             informar_erro(request, "Token inválido")
             return RedirectResponse(
                 "/esqueci-senha", status_code=status.HTTP_303_SEE_OTHER
@@ -384,7 +457,7 @@ async def post_redefinir_senha(
         return RedirectResponse("/login", status_code=status.HTTP_303_SEE_OTHER)
 
     except ValidationError as e:
-        raise FormValidationError(
+        raise ErroValidacaoFormulario(
             validation_error=e,
             template_path="auth/redefinir_senha.html",
             dados_formulario=dados_formulario,

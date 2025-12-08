@@ -28,8 +28,7 @@
                 <!-- PASSWORD COM BOTÃO ANEXADO -->
                 <h3 class="mt-5 mb-3">Senha com Botão Toggle</h3>
                 {{ field(name='senha', label='Senha', type='password', required=true,
-                append_icon='bi-eye', append_button_onclick="exibirInfo('Exemplo de botão anexado ao campo', 'Botão
-                Clicked')") }}
+                append_icon='bi-eye', append_button_onclick="window.App.Modal.showInfo('Exemplo de botão anexado ao campo', 'Botão Clicked')") }}
 
                 <!-- TEXTAREA -->
                 <h3 class="mt-5 mb-3">Área de Texto</h3>
@@ -282,7 +281,7 @@
                     <pre class="bg-light p-3 rounded"><code>{% raw %}{{ field(name='email', label='E-mail', type='email', required=true) }}
 
 {{ field(name='senha', label='Senha', type='password',
-         append_icon='bi-eye', append_button_onclick="togglePassword('senha')") }}
+         append_icon='bi-eye', append_button_onclick="alternarVisibilidadeSenha('senha')") }}
 
 {{ field(name='perfil', label='Perfil', type='select',
          options={'Admin': 'Administrador', 'Cliente': 'Cliente'}) }}

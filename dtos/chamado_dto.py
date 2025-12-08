@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 from dtos.validators import (
     validar_string_obrigatoria,
     validar_tipo,
@@ -7,9 +7,15 @@ from model.chamado_model import StatusChamado, PrioridadeChamado
 
 
 class CriarChamadoDTO(BaseModel):
-    titulo: str
-    descricao: str
-    prioridade: str = "Média"
+    """DTO para criação de chamado de suporte."""
+
+    titulo: str = Field(..., description="Título resumido do chamado")
+    descricao: str = Field(
+        ..., description="Descrição detalhada do problema ou solicitação"
+    )
+    prioridade: str = Field(
+        default="Média", description="Nível de prioridade do chamado"
+    )
 
     _validar_titulo = field_validator("titulo")(
         validar_string_obrigatoria(
@@ -29,8 +35,8 @@ class CriarChamadoDTO(BaseModel):
 
 
 class AlterarStatusDTO(BaseModel):
-    status: str
+    """DTO para alteração de status do chamado."""
 
-    _validar_status = field_validator("status")(
-        validar_tipo("Status", StatusChamado)
-    )
+    status: str = Field(..., description="Novo status do chamado")
+
+    _validar_status = field_validator("status")(validar_tipo("Status", StatusChamado))

@@ -1,4 +1,6 @@
 {% extends "base_privada.html" %}
+{% from 'macros/badges.html' import badge_status_chamado, badge_prioridade, badge_mensagens_nao_lidas %}
+{% from 'macros/empty_states.html' import empty_state %}
 
 {% block titulo %}Gerenciar Chamados{% endblock %}
 
@@ -33,40 +35,19 @@
                                     <div class="text-truncate" style="max-width: 300px;" title="{{ chamado.titulo }}">
                                         {{ chamado.titulo }}
                                     </div>
-                                    {% if chamado.mensagens_nao_lidas > 0 %}
-                                    <span class="badge bg-warning text-dark mt-1">
-                                        <i class="bi bi-envelope-fill"></i>
-                                        {{ chamado.mensagens_nao_lidas }} não lida{% if chamado.mensagens_nao_lidas > 1 %}s{% endif %}
-                                    </span>
-                                    {% endif %}
+                                    <div class="mt-1">{{ badge_mensagens_nao_lidas(chamado.mensagens_nao_lidas) }}</div>
                                 </td>
                                 <td>
                                     <div>{{ chamado.usuario_nome }}</div>
                                     <small class="text-muted">{{ chamado.usuario_email }}</small>
                                 </td>
                                 <td>
-                                    {% if chamado.status.value == 'Aberto' %}
-                                    <span class="badge bg-primary">{{ chamado.status.value }}</span>
-                                    {% elif chamado.status.value == 'Em Análise' %}
-                                    <span class="badge bg-info">{{ chamado.status.value }}</span>
-                                    {% elif chamado.status.value == 'Resolvido' %}
-                                    <span class="badge bg-success">{{ chamado.status.value }}</span>
-                                    {% elif chamado.status.value == 'Fechado' %}
-                                    <span class="badge bg-secondary">{{ chamado.status.value }}</span>
-                                    {% endif %}
+                                    {{ badge_status_chamado(chamado.status) }}
                                 </td>
                                 <td>
-                                    {% if chamado.prioridade.value == 'Urgente' %}
-                                    <span class="badge bg-danger">{{ chamado.prioridade.value }}</span>
-                                    {% elif chamado.prioridade.value == 'Alta' %}
-                                    <span class="badge bg-warning text-dark">{{ chamado.prioridade.value }}</span>
-                                    {% elif chamado.prioridade.value == 'Média' %}
-                                    <span class="badge bg-info">{{ chamado.prioridade.value }}</span>
-                                    {% elif chamado.prioridade.value == 'Baixa' %}
-                                    <span class="badge bg-secondary">{{ chamado.prioridade.value }}</span>
-                                    {% endif %}
+                                    {{ badge_prioridade(chamado.prioridade) }}
                                 </td>
-                                <td>{{ chamado.data_abertura|format_data_hora if chamado.data_abertura else '-' }}</td>
+                                <td>{{ chamado.data_abertura|formatar_data_hora if chamado.data_abertura else '-' }}</td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="/admin/chamados/{{ chamado.id }}/responder"
@@ -112,9 +93,12 @@
                     </small>
                 </div>
                 {% else %}
-                <div class="alert alert-info text-center mb-0">
-                    <i class="bi bi-info-circle"></i> Nenhum chamado cadastrado.
-                </div>
+                {{ empty_state(
+                    'Nenhum chamado cadastrado',
+                    'Ainda não há chamados no sistema. Aguarde os usuários abrirem chamados de suporte.',
+                    icon='headset',
+                    variant='info'
+                ) }}
                 {% endif %}
             </div>
         </div>

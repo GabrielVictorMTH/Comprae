@@ -4,7 +4,6 @@ Módulo de gerenciamento de backups do banco de dados SQLite.
 Fornece funções para criar, listar, restaurar e excluir backups do banco de dados.
 Os backups são armazenados no diretório 'backups/' com nomenclatura padronizada.
 """
-import os
 import shutil
 import sqlite3
 from pathlib import Path
@@ -171,7 +170,7 @@ def _validar_integridade_backup(caminho: Path) -> tuple[bool, str]:
         logger.error(f"Erro de integridade em {caminho.name}: {mensagem}")
         return False, mensagem
 
-    except Exception as e:
+    except OSError as e:
         mensagem = f"Erro ao validar backup: {str(e)}"
         logger.error(f"Erro ao validar {caminho.name}: {mensagem}")
         return False, mensagem
@@ -229,7 +228,7 @@ def criar_backup(automatico: bool = False) -> tuple[bool, str]:
 
         return True, mensagem
 
-    except Exception as e:
+    except OSError as e:
         mensagem = f"Erro ao criar backup: {str(e)}"
         logger.error(mensagem)
         return False, mensagem
@@ -271,7 +270,7 @@ def listar_backups() -> List[BackupInfo]:
                     tamanho_formatado=_formatar_tamanho(tamanho),
                     tipo=tipo
                 ))
-            except Exception as e:
+            except OSError as e:
                 logger.warning(f"Erro ao processar arquivo de backup {arquivo.name}: {str(e)}")
                 continue
 
@@ -281,7 +280,7 @@ def listar_backups() -> List[BackupInfo]:
         logger.debug(f"{len(backups)} backup(s) encontrado(s)")
         return backups
 
-    except Exception as e:
+    except OSError as e:
         logger.error(f"Erro ao listar backups: {str(e)}")
         return []
 
@@ -354,11 +353,17 @@ def restaurar_backup(nome_arquivo: str, criar_backup_antes: bool = True) -> tupl
 
             if caminho_backup_seguranca and caminho_backup_seguranca.exists():
                 shutil.copy2(caminho_backup_seguranca, db_path)
-                mensagem = f"Restauração falhou! Banco revertido para estado anterior. Backup '{nome_arquivo}' pode estar corrompido."
+                mensagem = (
+                    f"Restauração falhou! Banco revertido para estado anterior. "
+                    f"Backup '{nome_arquivo}' pode estar corrompido."
+                )
                 logger.error(mensagem)
                 return False, mensagem, nome_backup_automatico
             else:
-                mensagem = "ERRO CRÍTICO: Restauração falhou e não foi possível reverter! Banco pode estar inconsistente."
+                mensagem = (
+                    "ERRO CRÍTICO: Restauração falhou e não foi possível reverter! "
+                    "Banco pode estar inconsistente."
+                )
                 logger.critical(mensagem)
                 return False, mensagem, None
 
@@ -367,7 +372,7 @@ def restaurar_backup(nome_arquivo: str, criar_backup_antes: bool = True) -> tupl
 
         return True, mensagem, nome_backup_automatico
 
-    except Exception as e:
+    except OSError as e:
         mensagem = f"Erro ao restaurar backup: {str(e)}"
         logger.error(mensagem)
 
@@ -378,7 +383,7 @@ def restaurar_backup(nome_arquivo: str, criar_backup_antes: bool = True) -> tupl
                 shutil.copy2(caminho_backup_seguranca, db_path)
                 logger.info("Rollback executado com sucesso após exceção")
                 mensagem += " (Banco revertido para estado anterior)"
-            except Exception as rollback_error:
+            except OSError as rollback_error:
                 logger.critical(f"Falha no rollback: {rollback_error}")
                 mensagem += " (CRÍTICO: Falha no rollback!)"
 
@@ -417,7 +422,7 @@ def excluir_backup(nome_arquivo: str) -> tuple[bool, str]:
 
         return True, mensagem
 
-    except Exception as e:
+    except OSError as e:
         mensagem = f"Erro ao excluir backup: {str(e)}"
         logger.error(mensagem)
         return False, mensagem
@@ -463,7 +468,7 @@ def obter_info_backup(nome_arquivo: str) -> Optional[BackupInfo]:
             tipo=tipo
         )
 
-    except Exception as e:
+    except OSError as e:
         logger.error(f"Erro ao obter informações do backup {nome_arquivo}: {str(e)}")
         return None
 

@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 from util.perfis import Perfil
 from dtos.validators import (
     validar_email,
@@ -10,10 +10,12 @@ from dtos.validators import (
 
 
 class CriarUsuarioDTO(BaseModel):
-    nome: str
-    email: str
-    senha: str
-    perfil: str
+    """DTO para criação de usuário pelo administrador."""
+
+    nome: str = Field(..., description="Nome completo do usuário")
+    email: str = Field(..., description="E-mail do usuário")
+    senha: str = Field(..., description="Senha do usuário")
+    perfil: str = Field(..., description="Perfil/Role do usuário")
 
     _validar_nome = field_validator("nome")(validar_nome_pessoa())
     _validar_email = field_validator("email")(validar_email())
@@ -22,10 +24,12 @@ class CriarUsuarioDTO(BaseModel):
 
 
 class AlterarUsuarioDTO(BaseModel):
-    id: int
-    nome: str
-    email: str
-    perfil: str
+    """DTO para alteração de usuário pelo administrador."""
+
+    id: int = Field(..., description="ID do usuário a ser alterado")
+    nome: str = Field(..., description="Nome completo do usuário")
+    email: str = Field(..., description="E-mail do usuário")
+    perfil: str = Field(..., description="Perfil/Role do usuário")
 
     _validar_id = field_validator("id")(validar_id_positivo())
     _validar_nome = field_validator("nome")(validar_nome_pessoa())

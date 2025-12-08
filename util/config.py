@@ -5,7 +5,6 @@ Carrega e disponibiliza todas as variáveis de ambiente e configurações
 do sistema em um único local, facilitando a manutenção e evitando duplicação.
 """
 import os
-from pathlib import Path
 from zoneinfo import ZoneInfo
 from dotenv import load_dotenv
 
@@ -21,12 +20,24 @@ SECRET_KEY = os.getenv("SECRET_KEY", "sua-chave-secreta-super-segura-mude-isso-e
 # Verifica se SECRET_KEY padrão está sendo usada em produção
 RUNNING_MODE_CHECK = os.getenv("RUNNING_MODE", "Production")
 if RUNNING_MODE_CHECK.lower() != "development":
+    # Validação 1: Não pode usar a chave padrão
     if SECRET_KEY == "sua-chave-secreta-super-segura-mude-isso-em-producao":
         raise ValueError(
             "SEGURANÇA CRÍTICA: SECRET_KEY padrão não pode ser usada em produção!\n"
             "Configure uma chave secreta forte no arquivo .env:\n"
             "SECRET_KEY=sua-chave-aleatoria-gerada-aqui\n"
             "Você pode gerar uma com: python -c 'import secrets; print(secrets.token_urlsafe(32))'"
+        )
+
+    # Validação 2: Tamanho mínimo de 32 caracteres para segurança adequada
+    # (32 chars = 256 bits de entropia, recomendado para HMAC/sessões)
+    MIN_SECRET_KEY_LENGTH = 32
+    if len(SECRET_KEY) < MIN_SECRET_KEY_LENGTH:
+        raise ValueError(
+            f"SEGURANÇA CRÍTICA: SECRET_KEY muito curta ({len(SECRET_KEY)} caracteres)!\n"
+            f"Em produção, SECRET_KEY deve ter no mínimo {MIN_SECRET_KEY_LENGTH} caracteres.\n"
+            "Você pode gerar uma chave segura com:\n"
+            "  python -c 'import secrets; print(secrets.token_urlsafe(32))'"
         )
 
 # === Configurações do Banco de Dados ===
@@ -103,14 +114,6 @@ RATE_LIMIT_CHAMADO_RESPONDER_MINUTOS = int(os.getenv("RATE_LIMIT_CHAMADO_RESPOND
 RATE_LIMIT_ADMIN_CHAMADO_RESPONDER_MAX = int(os.getenv("RATE_LIMIT_ADMIN_CHAMADO_RESPONDER_MAX", "20"))
 RATE_LIMIT_ADMIN_CHAMADO_RESPONDER_MINUTOS = int(os.getenv("RATE_LIMIT_ADMIN_CHAMADO_RESPONDER_MINUTOS", "5"))
 
-# Tarefas - Criação
-RATE_LIMIT_TAREFA_CRIAR_MAX = int(os.getenv("RATE_LIMIT_TAREFA_CRIAR_MAX", "20"))
-RATE_LIMIT_TAREFA_CRIAR_MINUTOS = int(os.getenv("RATE_LIMIT_TAREFA_CRIAR_MINUTOS", "10"))
-
-# Tarefas - Operações (Concluir/Excluir)
-RATE_LIMIT_TAREFA_OPERACAO_MAX = int(os.getenv("RATE_LIMIT_TAREFA_OPERACAO_MAX", "30"))
-RATE_LIMIT_TAREFA_OPERACAO_MINUTOS = int(os.getenv("RATE_LIMIT_TAREFA_OPERACAO_MINUTOS", "5"))
-
 # Chat - Listagens (Conversas e Mensagens)
 RATE_LIMIT_CHAT_LISTAGEM_MAX = int(os.getenv("RATE_LIMIT_CHAT_LISTAGEM_MAX", "60"))
 RATE_LIMIT_CHAT_LISTAGEM_MINUTOS = int(os.getenv("RATE_LIMIT_CHAT_LISTAGEM_MINUTOS", "1"))
@@ -139,6 +142,8 @@ TIMEZONE = os.getenv("TIMEZONE", "America/Sao_Paulo")
 APP_TIMEZONE = ZoneInfo(TIMEZONE)
 
 # === Funções Helper para Leitura Híbrida (Database + .env) ===
+
+
 def obter_config_str(chave: str, padrao_env: str) -> str:
     """
     Obtém configuração com leitura híbrida: database primeiro, .env como fallback

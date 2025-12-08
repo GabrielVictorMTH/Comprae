@@ -1,27 +1,60 @@
-from typing import Optional
+# =============================================================================
+# Imports
+# =============================================================================
+
+# Standard library
 import shutil
+import sqlite3
 from pathlib import Path
+from typing import Optional
+
+# Third-party
 from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse
 from pydantic import ValidationError
 
+# DTOs
+from dtos.configuracao_dto import SalvarConfiguracaoLoteDTO
+
+# Models
+from model.usuario_logado_model import UsuarioLogado
+
+# Repositories
 from repo import configuracao_repo
-from util.config_cache import config
+
+# Utilities
 from util.auth_decorator import requer_autenticacao
-from util.template_util import criar_templates
+from util.config_cache import config
+from util.datetime_util import agora
 from util.flash_messages import informar_sucesso, informar_erro, informar_aviso
 from util.logger_config import logger
 from util.perfis import Perfil
-from util.datetime_util import agora
 from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
-from util.exceptions import FormValidationError
+from util.template_util import criar_templates
 from util.validation_util import processar_erros_validacao
-from dtos.configuracao_dto import EditarConfiguracaoDTO, SalvarConfiguracaoLoteDTO
+
+# =============================================================================
+# Configuração do Router
+# =============================================================================
 
 router = APIRouter(prefix="/admin")
-templates = criar_templates("templates/admin")
+templates = criar_templates()
 
-# Rate limiter para operações de configuração
+# =============================================================================
+# Whitelist de Temas (prevenção de Path Traversal)
+# =============================================================================
+
+TEMAS_VALIDOS = frozenset([
+    "brite", "cerulean", "cosmo", "cyborg", "darkly", "flatly", "journal",
+    "litera", "lumen", "lux", "materia", "minty", "morph", "original",
+    "pulse", "quartz", "sandstone", "simplex", "sketchy", "slate", "solar",
+    "spacelab", "superhero", "united", "vapor", "yeti", "zephyr"
+])
+
+# =============================================================================
+# Rate Limiters
+# =============================================================================
+
 admin_config_limiter = DynamicRateLimiter(
     chave_max="rate_limit_admin_config_max",
     chave_minutos="rate_limit_admin_config_minutos",
@@ -35,8 +68,10 @@ admin_config_limiter = DynamicRateLimiter(
 
 @router.get("/configuracoes")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def get_listar_configuracoes(request: Request, usuario_logado: Optional[dict] = None):
+async def get_listar_configuracoes(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
     """Lista todas as configurações agrupadas por categoria"""
+    if not usuario_logado:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     try:
         # Obter configurações agrupadas por categoria
         configs_por_categoria = configuracao_repo.obter_por_categoria()
@@ -49,12 +84,13 @@ async def get_listar_configuracoes(request: Request, usuario_logado: Optional[di
             {
                 "request": request,
                 "configs_por_categoria": configs_por_categoria,
-                "total_configs": total_configs
+                "total_configs": total_configs,
+                "usuario_logado": usuario_logado,
             }
         )
 
-    except Exception as e:
-        logger.error(f"Erro ao listar configurações: {e}")
+    except sqlite3.Error as e:
+        logger.error(f"Erro de banco de dados ao listar configurações: {e}")
         informar_erro(request, "Erro ao carregar configurações")
         return RedirectResponse("/home", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -73,7 +109,7 @@ async def get_listar_configuracoes(request: Request, usuario_logado: Optional[di
 @requer_autenticacao([Perfil.ADMIN.value])
 async def post_salvar_lote_configuracoes(
     request: Request,
-    usuario_logado: Optional[dict] = None
+    usuario_logado: Optional[UsuarioLogado] = None
 ):
     """
     Salva múltiplas configurações de uma vez (salvamento em lote).
@@ -84,7 +120,8 @@ async def post_salvar_lote_configuracoes(
     Returns:
         Redirect para listagem com mensagem de sucesso ou erro
     """
-    assert usuario_logado is not None
+    if not usuario_logado:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
 
     # Rate limiting
     ip = obter_identificador_cliente(request)
@@ -117,7 +154,7 @@ async def post_salvar_lote_configuracoes(
 
         # Log de auditoria
         logger.info(
-            f"Atualização em lote de configurações por admin {usuario_logado['id']} - "
+            f"Atualização em lote de configurações por admin {usuario_logado.id} - "
             f"{quantidade_atualizada} atualizadas, {len(chaves_nao_encontradas)} não encontradas"
         )
 
@@ -162,8 +199,8 @@ async def post_salvar_lote_configuracoes(
         # Redirecionar de volta para a listagem
         return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
 
-    except Exception as e:
-        logger.error(f"Erro ao salvar configurações em lote: {e}")
+    except sqlite3.Error as e:
+        logger.error(f"Erro de banco de dados ao salvar configurações em lote: {e}")
         informar_erro(request, f"Erro ao salvar configurações: {str(e)}")
         return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -172,8 +209,10 @@ async def post_salvar_lote_configuracoes(
 
 @router.get("/tema")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def get_tema(request: Request, usuario_logado: Optional[dict] = None):
+async def get_tema(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
     """Exibe seletor de temas visuais da aplicação"""
+    if not usuario_logado:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     # Obter tema atual do banco de dados
     config_tema = configuracao_repo.obter_por_chave("theme")
     tema_atual = config_tema.valor if config_tema else "original"
@@ -200,16 +239,18 @@ async def get_tema(request: Request, usuario_logado: Optional[dict] = None):
         {
             "request": request,
             "temas": temas_disponiveis,
-            "tema_atual": tema_atual
+            "tema_atual": tema_atual,
+            "usuario_logado": usuario_logado,
         }
     )
+
 
 @router.post("/tema/aplicar")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def post_aplicar_tema(
     request: Request,
     tema: str = Form(...),
-    usuario_logado: Optional[dict] = None
+    usuario_logado: Optional[UsuarioLogado] = None
 ):
     """
     Aplica um tema visual selecionado
@@ -217,7 +258,8 @@ async def post_aplicar_tema(
     Copia o arquivo CSS do tema para static/css/bootstrap.min.css
     e salva a configuração no banco de dados
     """
-    assert usuario_logado is not None
+    if not usuario_logado:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
 
     # Rate limiting
     ip = obter_identificador_cliente(request)
@@ -229,12 +271,21 @@ async def post_aplicar_tema(
         # Obter tema anterior para o log
         config_existente = configuracao_repo.obter_por_chave("theme")
 
-        # Validar se o tema existe
-        css_origem = Path(f"static/css/bootswatch/{tema}.bootstrap.min.css")
+        # Validar tema contra whitelist (prevenção de Path Traversal)
+        tema_normalizado = tema.lower().strip()
+        if tema_normalizado not in TEMAS_VALIDOS:
+            informar_erro(request, f"Tema '{tema}' inválido")
+            logger.warning(
+                f"Tentativa de aplicar tema inválido por admin {usuario_logado.id}: {tema}"
+            )
+            return RedirectResponse("/admin/tema", status_code=status.HTTP_303_SEE_OTHER)
+
+        # Construir caminho seguro após validação da whitelist
+        css_origem = Path(f"static/css/bootswatch/{tema_normalizado}.bootstrap.min.css")
 
         if not css_origem.exists():
-            informar_erro(request, f"Tema '{tema}' não encontrado")
-            logger.warning(f"Tentativa de aplicar tema inexistente: {tema}")
+            informar_erro(request, f"Arquivo do tema '{tema_normalizado}' não encontrado")
+            logger.error(f"Arquivo de tema na whitelist não existe: {css_origem}")
             return RedirectResponse("/admin/tema", status_code=status.HTTP_303_SEE_OTHER)
 
         # Copiar arquivo CSS do tema para bootstrap.min.css
@@ -244,7 +295,7 @@ async def post_aplicar_tema(
         # Atualizar ou inserir configuração no banco (upsert)
         sucesso = configuracao_repo.inserir_ou_atualizar(
             chave="theme",
-            valor=tema,
+            valor=tema_normalizado,
             descricao="Tema visual da aplicação (Bootswatch)"
         )
 
@@ -253,18 +304,19 @@ async def post_aplicar_tema(
             config.limpar()
 
             logger.info(
-                f"Tema alterado para '{tema}' por admin {usuario_logado['id']} "
+                f"Tema alterado para '{tema_normalizado}' por admin {usuario_logado.id} "
                 f"(anterior: {config_existente.valor if config_existente else 'nenhum'})"
             )
             informar_sucesso(
                 request,
-                f"Tema '{tema.capitalize()}' aplicado com sucesso! Recarregue a página para ver as mudanças."
+                f"Tema '{tema_normalizado.capitalize()}' aplicado com sucesso! Recarregue a página para ver as mudanças."
             )
         else:
-            logger.error(f"Erro ao salvar configuração de tema '{tema}' no banco de dados")
+            logger.error(f"Erro ao salvar configuração de tema '{tema_normalizado}' no banco de dados")
             informar_erro(request, "Erro ao salvar configuração do tema")
 
-    except Exception as e:
+    except (sqlite3.Error, OSError) as e:
+        # Usa tema original pois tema_normalizado pode não estar definido em caso de exceção precoce
         logger.error(f"Erro ao aplicar tema '{tema}': {str(e)}")
         informar_erro(request, f"Erro ao aplicar tema: {str(e)}")
 
@@ -295,7 +347,8 @@ def _ler_log_arquivo(data: str, nivel: str) -> tuple[str, int, Optional[str]]:
         tamanho_mb = arquivo_log.stat().st_size / (1024 * 1024)
         if tamanho_mb > 10:
             logger.warning(f"Arquivo de log muito grande ({tamanho_mb:.2f} MB): {arquivo_log}")
-            return "", 0, f"Arquivo de log muito grande ({tamanho_mb:.2f} MB). Considere usar ferramentas externas para análise."
+            msg = f"Arquivo de log muito grande ({tamanho_mb:.2f} MB). Use ferramentas externas."
+            return "", 0, msg
 
         # Ler arquivo
         with open(arquivo_log, 'r', encoding='utf-8') as f:
@@ -315,15 +368,17 @@ def _ler_log_arquivo(data: str, nivel: str) -> tuple[str, int, Optional[str]]:
 
         return conteudo, total, None
 
-    except Exception as e:
+    except OSError as e:
         logger.error(f"Erro ao ler arquivo de log: {str(e)}")
         return "", 0, f"Erro ao ler arquivo de log: {str(e)}"
 
 
 @router.get("/auditoria")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def get_auditoria(request: Request, usuario_logado: Optional[dict] = None):
+async def get_auditoria(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
     """Exibe página de auditoria de logs do sistema"""
+    if not usuario_logado:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     # Data padrão: hoje
     data_hoje = agora().strftime('%Y-%m-%d')
 
@@ -332,7 +387,8 @@ async def get_auditoria(request: Request, usuario_logado: Optional[dict] = None)
         {
             "request": request,
             "data_selecionada": data_hoje,
-            "nivel_selecionado": "TODOS"
+            "nivel_selecionado": "TODOS",
+            "usuario_logado": usuario_logado,
         }
     )
 
@@ -343,7 +399,7 @@ async def post_filtrar_auditoria(
     request: Request,
     data: str = Form(...),
     nivel: str = Form(...),
-    usuario_logado: Optional[dict] = None
+    usuario_logado: Optional[UsuarioLogado] = None
 ):
     """
     Filtra logs do sistema por data e nível
@@ -352,7 +408,8 @@ async def post_filtrar_auditoria(
         data: Data no formato YYYY-MM-DD
         nivel: Nível de log (INFO, WARNING, ERROR, DEBUG, CRITICAL, TODOS)
     """
-    assert usuario_logado is not None
+    if not usuario_logado:
+        return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
 
     # Rate limiting
     ip = obter_identificador_cliente(request)
@@ -365,7 +422,7 @@ async def post_filtrar_auditoria(
 
     # Log da ação de auditoria
     logger.info(
-        f"Auditoria de logs realizada por admin {usuario_logado['id']} - "
+        f"Auditoria de logs realizada por admin {usuario_logado.id} - "
         f"Data: {data}, Nível: {nivel}, Linhas encontradas: {total_linhas}"
     )
 
@@ -377,6 +434,7 @@ async def post_filtrar_auditoria(
             "nivel_selecionado": nivel,
             "logs": logs,
             "total_linhas": total_linhas,
-            "mensagem_erro": mensagem_erro
+            "mensagem_erro": mensagem_erro,
+            "usuario_logado": usuario_logado,
         }
     )

@@ -1,9 +1,5 @@
 {#
 Macro para criar campos de formulário com Bootstrap 5
-
-Uso:
-{% from "macros/form_fields.html" import field %}
-{{ field(name='email', label='E-mail', type='email', required=true) }}
 #}
 
 {% macro field(
@@ -141,7 +137,7 @@ decimal_suffix=''
     {% if label %}
     <label class="form-label">{{ label }}</label>
     {% endif %}
-    <div class="btn-group btn-group-secondary w-100" role="group">
+    <div class="btn-group-responsive w-100" role="group">
         {% for option_value, option_label in options.items() %}
         <input type="radio" class="btn-check" name="{{ name }}" id="{{ field_id }}_{{ option_value }}"
             value="{{ option_value }}" {% if field_value|string==option_value|string %}checked{% endif %} {% if disabled

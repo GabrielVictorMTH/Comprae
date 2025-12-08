@@ -1,5 +1,5 @@
 """
-Repository Helpers
+Repository Helpers.
 
 Funções auxiliares para operações comuns em repositórios,
 eliminando código duplicado em rotas.
@@ -8,34 +8,6 @@ Este módulo fornece funções para:
 - Verificar existência de entidades e redirecionar em caso de erro
 - Validar propriedade de entidades
 - Lidar com erros comuns de forma padronizada
-
-Exemplo de uso:
-    from util.repository_helpers import obter_ou_404
-    from repo import usuario_repo
-
-    @router.get("/editar/{id}")
-    @requer_autenticacao()
-    async def get_editar(request: Request, id: int, usuario_logado: dict):
-        # Ao invés de:
-        # usuario = usuario_repo.obter_por_id(id)
-        # if not usuario:
-        #     informar_erro(request, "Usuário não encontrado")
-        #     return RedirectResponse("/usuarios/listar")
-
-        # Use:
-        usuario = obter_ou_404(
-            usuario_repo.obter_por_id(id),
-            request,
-            "Usuário não encontrado",
-            "/admin/usuarios/listar"
-        )
-
-        # Se usuario for None, a função já retornou RedirectResponse
-        # Se chegou aqui, usuario existe e pode ser usado
-        return templates.TemplateResponse("usuarios/editar.html", {...})
-
-@version 1.0.0
-@author DefaultWebApp
 """
 
 from typing import Optional, TypeVar, Union, Any, Callable
@@ -76,29 +48,6 @@ def obter_ou_404(
     Returns:
         T: A entidade se existir
         RedirectResponse: Redirecionamento se entidade não existir
-
-    Example:
-        >>> # Uso básico
-        >>> usuario = obter_ou_404(
-        ...     usuario_repo.obter_por_id(id),
-        ...     request,
-        ...     "Usuário não encontrado",
-        ...     "/admin/usuarios/listar"
-        ... )
-        >>> if isinstance(usuario, RedirectResponse):
-        ...     return usuario
-        >>> # usuario existe e pode ser usado
-
-    Example:
-        >>> # Uso com type guard automático
-        >>> tarefa = obter_ou_404(
-        ...     tarefa_repo.obter_por_id(id),
-        ...     request,
-        ...     "Tarefa não encontrada",
-        ...     "/tarefas/listar"
-        ... )
-        >>> # Se não houve return, tarefa existe
-        >>> print(tarefa.titulo)  # Safe to use
 
     Note:
         Para uso correto, verifique se o retorno é RedirectResponse:
@@ -142,16 +91,6 @@ def obter_lista_ou_vazia(
 
     Returns:
         list: A lista original ou lista vazia
-
-    Example:
-        >>> tarefas = obter_lista_ou_vazia(
-        ...     tarefa_repo.obter_por_usuario(usuario_id),
-        ...     request,
-        ...     "Nenhuma tarefa encontrada"
-        ... )
-        >>> # tarefas sempre será uma lista, mesmo que vazia
-        >>> for tarefa in tarefas:  # Safe, nunca dá erro
-        ...     print(tarefa.titulo)
     """
     # Se lista for None ou não for list, retornar lista vazia
     if lista is None or not isinstance(lista, list):
@@ -188,21 +127,6 @@ def validar_inteiro_positivo(
     Returns:
         int: O valor convertido para inteiro se válido
         RedirectResponse: Redirecionamento se inválido
-
-    Example:
-        >>> id_valido = validar_inteiro_positivo(
-        ...     id,
-        ...     request,
-        ...     "ID do usuário",
-        ...     "/admin/usuarios/listar"
-        ... )
-        >>> if isinstance(id_valido, RedirectResponse):
-        ...     return id_valido
-        >>> usuario = usuario_repo.obter_por_id(id_valido)
-
-    Note:
-        FastAPI já faz validação básica de tipos em path parameters,
-        mas esta função adiciona validação extra e mensagens amigáveis.
     """
     try:
         valor_int = int(valor)
@@ -237,29 +161,6 @@ def executar_operacao_repo(
     Returns:
         any: Resultado da operação se bem-sucedida
         RedirectResponse: Redirecionamento se houver erro
-
-    Example:
-        >>> resultado = executar_operacao_repo(
-        ...     lambda: usuario_repo.inserir(usuario),
-        ...     request,
-        ...     "Erro ao cadastrar usuário",
-        ...     "/admin/usuarios/listar"
-        ... )
-        >>> if isinstance(resultado, RedirectResponse):
-        ...     return resultado
-        >>> # Operação bem-sucedida
-        >>> user_id = resultado
-
-    Example com múltiplas operações:
-        >>> resultado = executar_operacao_repo(
-        ...     lambda: [
-        ...         usuario_repo.inserir(usuario),
-        ...         foto_util.criar_foto_padrao_usuario(usuario.id)
-        ...     ],
-        ...     request,
-        ...     "Erro ao criar usuário",
-        ...     "/admin/usuarios/cadastrar"
-        ... )
     """
     try:
         return operacao()
@@ -275,39 +176,3 @@ def executar_operacao_repo(
 
         # Redirecionar
         return RedirectResponse(redirect_url, status_code=status.HTTP_303_SEE_OTHER)
-
-
-# Exemplo de uso completo em uma rota:
-"""
-from util.repository_helpers import obter_ou_404, validar_inteiro_positivo
-from repo import tarefa_repo
-
-@router.get("/editar/{id}")
-@requer_autenticacao()
-async def get_editar(request: Request, id: int, usuario_logado: dict):
-    # Validar ID (opcional, FastAPI já valida tipo)
-    id_valido = validar_inteiro_positivo(id, request, "ID da tarefa", "/tarefas/listar")
-    if isinstance(id_valido, RedirectResponse):
-        return id_valido
-
-    # Obter tarefa ou retornar 404
-    tarefa = obter_ou_404(
-        tarefa_repo.obter_por_id(id_valido),
-        request,
-        "Tarefa não encontrada",
-        "/tarefas/listar"
-    )
-    if isinstance(tarefa, RedirectResponse):
-        return tarefa
-
-    # Verificar propriedade
-    if tarefa.usuario_id != usuario_logado["id"]:
-        informar_erro(request, "Você não tem permissão para editar esta tarefa")
-        return RedirectResponse("/tarefas/listar", status_code=status.HTTP_303_SEE_OTHER)
-
-    # Tarefa existe e usuário tem permissão
-    return templates.TemplateResponse("tarefas/editar.html", {
-        "request": request,
-        "tarefa": tarefa
-    })
-"""

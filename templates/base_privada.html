@@ -14,8 +14,10 @@
     <!-- CSS Customizado -->
     <link rel="stylesheet" href="/static/css/custom.css">
 
-    <!-- Chat Widget CSS -->
-    <link rel="stylesheet" href="/static/css/chat-widget.css">
+    <!-- Chat Widget CSS (apenas para usuários logados) -->
+    {% if request.session.get('usuario_logado') %}
+    <link rel="stylesheet" href="/static/css/widget-chat.css">
+    {% endif %}
 
     {% block head %}{% endblock %}
 </head>
@@ -39,20 +41,24 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if request.path == '/usuario' else '' }}"
-                            href="/usuario">Dashboard</a>
+                            href="/usuario"
+                            {{ 'aria-current=page' if request.path == '/usuario' else '' }}>Dashboard</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/usuario/perfil/' in request.path else '' }}"
-                            href="/usuario/perfil/visualizar">Perfil</a>
+                            href="/usuario/perfil/visualizar"
+                            {{ 'aria-current=page' if '/usuario/perfil/' in request.path else '' }}>Perfil</a>
                     </li>
-                    {% if request.session.get('usuario_logado')['perfil'] == 'Administrador' %}
+                    {% if usuario_logado and usuario_logado.perfil == 'Administrador' %}
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/chamados/' in request.path else '' }}"
-                            href="/admin/chamados/listar">Chamados</a>
+                            href="/admin/chamados/listar"
+                            {{ 'aria-current=page' if '/admin/chamados/' in request.path else '' }}>Chamados</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/usuarios/' in request.path else '' }}"
-                            href="/admin/usuarios/listar">Usuários</a>
+                            href="/admin/usuarios/listar"
+                            {{ 'aria-current=page' if '/admin/usuarios/' in request.path else '' }}>Usuários</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/categorias/' in request.path else '' }}"
@@ -62,28 +68,29 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/configuracoes' in request.path else '' }}"
-                            href="/admin/configuracoes">Configurações</a>
+                            href="/admin/configuracoes"
+                            {{ 'aria-current=page' if '/admin/configuracoes' in request.path else '' }}>Configurações</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/tema' in request.path else '' }}"
-                            href="/admin/tema">Tema</a>
+                            href="/admin/tema"
+                            {{ 'aria-current=page' if '/admin/tema' in request.path else '' }}>Tema</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/auditoria' in request.path else '' }}"
-                            href="/admin/auditoria">Auditoria</a>
+                            href="/admin/auditoria"
+                            {{ 'aria-current=page' if '/admin/auditoria' in request.path else '' }}>Auditoria</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/admin/backups/' in request.path else '' }}"
-                            href="/admin/backups/listar">Backup</a>
+                            href="/admin/backups/listar"
+                            {{ 'aria-current=page' if '/admin/backups/' in request.path else '' }}>Backup</a>
                     </li>
                     {% else %}
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if '/tarefas/' in request.path else '' }}"
-                            href="/tarefas/listar">Tarefas</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link {{ 'active' if '/chamados/' in request.path else '' }}"
-                            href="/chamados/listar">Chamados</a>
+                            href="/chamados/listar"
+                            {{ 'aria-current=page' if '/chamados/' in request.path else '' }}>Chamados</a>
                     </li>
                     {% endif %}
                 </ul>
@@ -97,7 +104,7 @@
     </nav>
 
     <!-- Container para Toasts (bottom-right) -->
-    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-4 toast-offset">
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-4 mb-5">
     </div>
 
     <!-- Conteúdo Principal -->
@@ -111,15 +118,17 @@
     <!-- Modal de Alerta (componente genérico) -->
     {% include 'components/modal_alerta.html' %}
 
-    <!-- Chat Widget -->
+    <!-- Chat Widget (apenas para usuários logados) -->
+    {% if request.session.get('usuario_logado') %}
     {% include 'components/chat_widget.html' %}
+    {% endif %}
 
     <!-- Footer -->
     <footer class="bg-light text-center text-muted py-3 mt-auto">
         <div class="container">
             <p class="mb-0">&copy; 2025 {{ APP_NAME }}. Todos os direitos reservados.</p>
+        </div>
     </footer>
-    </div>
 
     <!-- Dados de mensagens (hidden) -->
     <script id="mensagens-data" type="application/json">
@@ -145,21 +154,20 @@
     <script src="/static/js/modal-alerta.js"></script>
 
     <!-- Script de Validação de Senha -->
-    <script src="/static/js/password-validator.js"></script>
+    <script src="/static/js/validador-senha.js"></script>
 
     <!-- Script de Máscaras de Input -->
-    <script src="/static/js/input-mask.js"></script>
+    <script src="/static/js/mascara-input.js"></script>
 
-    <!-- Script de Delete Helpers -->
-    <script src="/static/js/delete-helpers.js"></script>
+    <!-- Script de Auxiliares de Exclusão -->
+    <script src="/static/js/auxiliares-exclusao.js"></script>
 
-    <!-- Chat Widget JS -->
-    <script src="/static/js/chat-widget.js" defer></script>
+    <!-- Chat Widget JS (apenas para usuários logados) -->
+    {% if request.session.get('usuario_logado') %}
+    <script src="/static/js/widget-chat.js" defer></script>
     <script>
         // Guardar ID do usuário logado no body para o chat
-        {% if request.session.get('usuario_logado') %}
         document.body.dataset.usuarioId = {{ request.session.get('usuario_logado')['id'] }};
-        {% endif %}
 
         // Inicializar chat quando DOM estiver pronto
         document.addEventListener('DOMContentLoaded', () => {
@@ -168,6 +176,7 @@
             }
         });
     </script>
+    {% endif %}
 
     {% block scripts %}{% endblock %}
 </body>

@@ -13,7 +13,7 @@ from fastapi import Request
 
 from util.flash_messages import obter_mensagens
 from util.config import APP_NAME, VERSION, TOAST_AUTO_HIDE_DELAY_MS
-from util.csrf_protection import get_csrf_token, CSRF_FORM_FIELD
+from util.csrf_protection import obter_token_csrf, CSRF_FORM_FIELD
 from util.config_cache import config
 
 
@@ -34,12 +34,6 @@ def formatar_data_br(
 
     Returns:
         String formatada no padrão brasileiro ou string vazia se inválido
-
-    Examples:
-        >>> formatar_data_br("2025-10-22")
-        "22/10/2025"
-        >>> formatar_data_br("2025-10-22 14:30:00", com_hora=True)
-        "22/10/2025 14:30:00"
     """
     if not data_str:
         return ""
@@ -68,26 +62,7 @@ def formatar_data_br(
         return str(data_str) if data_str else ""  # Retorna string vazia se falhar
 
 
-def formatar_data_hora_br(data_str: Union[str, datetime, None]) -> str:
-    """
-    Converte data/hora ISO para formato brasileiro completo (DD/MM/YYYY HH:MM:SS).
-
-    Esta função é um wrapper para formatar_data_br(data_str, com_hora=True)
-    mantido para compatibilidade com código legado.
-
-    Args:
-        data_str: String com data/hora no formato ISO ou objeto datetime
-
-    Returns:
-        String formatada no padrão brasileiro ou string vazia se inválido
-
-    Note:
-        Prefira usar formatar_data_br(data_str, com_hora=True) em código novo.
-    """
-    return formatar_data_br(data_str, com_hora=True)
-
-
-def format_data(data: Union[datetime, None]) -> str:
+def formatar_data(data: Union[datetime, None]) -> str:
     """
     Formata datetime para DD/MM/YYYY (sem hora).
 
@@ -104,7 +79,7 @@ def format_data(data: Union[datetime, None]) -> str:
     return ""
 
 
-def format_data_hora(data: Union[datetime, None]) -> str:
+def formatar_data_hora(data: Union[datetime, None]) -> str:
     """
     Formata datetime para DD/MM/YYYY HH:MM (sem segundos).
 
@@ -121,7 +96,7 @@ def format_data_hora(data: Union[datetime, None]) -> str:
     return ""
 
 
-def format_data_as_hora(data: Union[datetime, None]) -> str:
+def formatar_data_as_hora(data: Union[datetime, None]) -> str:
     """
     Formata datetime para DD/MM/YYYY às HH:MM.
 
@@ -138,7 +113,7 @@ def format_data_as_hora(data: Union[datetime, None]) -> str:
     return ""
 
 
-def format_hora(data: Union[datetime, None]) -> str:
+def formatar_hora(data: Union[datetime, None]) -> str:
     """
     Formata datetime para HH:MM (apenas hora).
 
@@ -155,13 +130,6 @@ def format_hora(data: Union[datetime, None]) -> str:
     return ""
 
 
-# Aliases para compatibilidade com código legado
-formatar_data_br_simples = format_data
-formatar_data_br_com_hora = format_data_hora
-formatar_data_br_as = format_data_as_hora
-formatar_hora_br = format_hora
-
-
 def foto_usuario(id: int) -> str:
     """
     Retorna o caminho da foto do usuário para uso em templates.
@@ -174,6 +142,7 @@ def foto_usuario(id: int) -> str:
     """
     return f"/static/img/usuarios/{id:06d}.jpg"
 
+
 def csrf_input(request: Optional[Request] = None) -> str:
     """
     Gera input HTML hidden com token CSRF.
@@ -183,25 +152,16 @@ def csrf_input(request: Optional[Request] = None) -> str:
 
     Returns:
         String HTML com input hidden contendo token CSRF
-
-    Example:
-        No template Jinja2:
-        ```html
-        <form method="POST">
-            {{ csrf_input(request) | safe }}
-            <!-- outros campos -->
-        </form>
-        ```
     """
     if not request:
         # Fallback se request não estiver disponível
         return f'<input type="hidden" name="{CSRF_FORM_FIELD}" value="">'
 
-    token = get_csrf_token(request)
+    token = obter_token_csrf(request)
     return f'<input type="hidden" name="{CSRF_FORM_FIELD}" value="{token}">'
 
 
-def criar_templates(pasta: str) -> Jinja2Templates:
+def criar_templates() -> Jinja2Templates:
     """
     Cria instância de Jinja2Templates com configurações customizadas.
 
@@ -209,9 +169,6 @@ def criar_templates(pasta: str) -> Jinja2Templates:
     - Funções globais (obter_mensagens, csrf_input)
     - Variáveis globais (APP_NAME, VERSION)
     - Filtros customizados (data_br, data_hora_br, foto_usuario)
-
-    Args:
-        pasta: Caminho da pasta de templates (não utilizado, mantido por compatibilidade)
 
     Returns:
         Instância configurada de Jinja2Templates
@@ -243,20 +200,13 @@ def criar_templates(pasta: str) -> Jinja2Templates:
 
     # Adicionar filtros customizados
     env.filters['data_br'] = formatar_data_br
-    env.filters['data_hora_br'] = formatar_data_hora_br
     env.filters['foto_usuario'] = foto_usuario
 
-    # Novos filtros com nomes intuitivos
-    env.filters['format_data'] = format_data
-    env.filters['format_data_hora'] = format_data_hora
-    env.filters['format_data_as_hora'] = format_data_as_hora
-    env.filters['format_hora'] = format_hora
-
-    # Aliases para compatibilidade (deprecados, usar novos nomes)
-    env.filters['data_br_simples'] = format_data
-    env.filters['data_br_com_hora'] = format_data_hora
-    env.filters['data_br_as'] = format_data_as_hora
-    env.filters['hora_br'] = format_hora
+    # Filtros de formatação de data/hora (em português)
+    env.filters['formatar_data'] = formatar_data
+    env.filters['formatar_data_hora'] = formatar_data_hora
+    env.filters['formatar_data_as_hora'] = formatar_data_as_hora
+    env.filters['formatar_hora'] = formatar_hora
 
     templates = Jinja2Templates(env=env)
     return templates

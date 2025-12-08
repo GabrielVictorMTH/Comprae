@@ -9,30 +9,6 @@ Este módulo fornece um decorator que:
 - Exibe mensagem de erro padronizada quando o limite é excedido
 - Registra no log tentativas bloqueadas
 - Redireciona para URL especificada quando bloqueado
-
-Exemplo de uso:
-    from util.rate_limit_decorator import aplicar_rate_limit
-    from util.rate_limiter import RateLimiter
-
-    tarefa_criar_limiter = RateLimiter(
-        nome="tarefa_criar",
-        limite=10,
-        janela_segundos=60
-    )
-
-    @router.post("/cadastrar")
-    @aplicar_rate_limit(
-        limiter=tarefa_criar_limiter,
-        mensagem_erro="Muitas tentativas de criação. Aguarde um momento.",
-        redirect_url="/tarefas/listar"
-    )
-    @requer_autenticacao()
-    async def post_cadastrar(request: Request, ...):
-        # Lógica da rota sem código de rate limiting
-        pass
-
-@version 1.0.0
-@author DefaultWebApp
 """
 
 from functools import wraps
@@ -60,11 +36,6 @@ def obter_identificador_cliente(request: Request) -> str:
 
     Returns:
         String com o IP do cliente
-
-    Example:
-        >>> ip = obter_identificador_cliente(request)
-        >>> print(ip)
-        '192.168.1.100'
     """
     # Verificar header X-Forwarded-For (comum em load balancers/proxies)
     forwarded_for = request.headers.get("X-Forwarded-For")
@@ -111,32 +82,6 @@ def aplicar_rate_limit(
 
     Raises:
         TypeError: Se limiter não for uma instância de RateLimiter
-
-    Example:
-        >>> @aplicar_rate_limit(
-        ...     limiter=login_limiter,
-        ...     mensagem_erro="Muitas tentativas de login",
-        ...     redirect_url="/auth/login"
-        ... )
-        ... async def post_login(request: Request, ...):
-        ...     pass
-
-    Example com log_detalhes:
-        >>> def log_func(ip):
-        ...     return f"Usuário {usuario_id} - IP {ip}"
-        >>>
-        >>> @aplicar_rate_limit(
-        ...     limiter=limiter,
-        ...     redirect_url="/home",
-        ...     log_detalhes=log_func
-        ... )
-        ... async def minha_rota(request: Request, ...):
-        ...     pass
-
-    Note:
-        - O decorator deve ser aplicado ANTES de @requer_autenticacao()
-        - Para rotas que retornam JSON, deixe redirect_url=None
-        - O limiter deve ser criado uma vez (nível de módulo) e reutilizado
     """
     # Validação do parâmetro
     if not isinstance(limiter, RateLimiter):
@@ -213,15 +158,6 @@ def aplicar_rate_limit_async(
 
     Returns:
         Decorator function que retorna JSONResponse
-
-    Example:
-        >>> @router.post("/api/tasks")
-        >>> @aplicar_rate_limit_async(
-        ...     limiter=api_limiter,
-        ...     mensagem_erro="API rate limit exceeded"
-        ... )
-        >>> async def create_task(request: Request, ...):
-        ...     pass
     """
     return aplicar_rate_limit(
         limiter=limiter,
@@ -229,45 +165,3 @@ def aplicar_rate_limit_async(
         redirect_url=None,  # Força retorno JSON
         log_detalhes=log_detalhes
     )
-
-
-# Exemplo de uso em um módulo de rotas:
-"""
-from util.rate_limit_decorator import aplicar_rate_limit
-from util.rate_limiter import RateLimiter
-
-# Criar limiters (uma vez, nível de módulo)
-tarefa_criar_limiter = RateLimiter(
-    nome="tarefa_criar",
-    limite=10,
-    janela_segundos=60
-)
-
-tarefa_alterar_limiter = RateLimiter(
-    nome="tarefa_alterar",
-    limite=20,
-    janela_segundos=60
-)
-
-# Aplicar em rotas
-@router.post("/cadastrar")
-@aplicar_rate_limit(
-    limiter=tarefa_criar_limiter,
-    mensagem_erro="Muitas tentativas de criação de tarefas",
-    redirect_url="/tarefas/listar"
-)
-@requer_autenticacao()
-async def post_cadastrar(request: Request, titulo: str = Form()):
-    # Lógica da rota sem código de rate limiting
-    pass
-
-@router.post("/alterar/{id}")
-@aplicar_rate_limit(
-    limiter=tarefa_alterar_limiter,
-    redirect_url="/tarefas/listar"
-)
-@requer_autenticacao()
-async def post_alterar(request: Request, id: int, titulo: str = Form()):
-    # Lógica da rota
-    pass
-"""

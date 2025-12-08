@@ -1,8 +1,11 @@
+import sqlite3
+
 from repo import usuario_repo
 from model.usuario_model import Usuario
 from util.security import criar_hash_senha
 from util.logger_config import logger
 from util.perfis import Perfil
+
 
 def carregar_usuarios_seed():
     """
@@ -55,7 +58,7 @@ def carregar_usuarios_seed():
                 logger.error(f"✗ Falha ao inserir usuário {email} no banco")
                 usuarios_com_erro += 1
 
-        except Exception as e:
+        except sqlite3.Error as e:
             logger.error(f"✗ Erro ao processar usuário do perfil {perfil_enum.name}: {e}")
             usuarios_com_erro += 1
 
@@ -74,5 +77,5 @@ def inicializar_dados():
         logger.info("=" * 50)
         logger.info("Dados seed carregados!")
         logger.info("=" * 50)
-    except Exception as e:
+    except sqlite3.Error as e:
         logger.error(f"Erro crítico ao inicializar dados seed: {e}", exc_info=True)

@@ -1,20 +1,3 @@
-"""
-Módulo de validadores reutilizáveis para DTOs.
-
-Este módulo contém funções de validação comuns que podem ser usadas
-em múltiplos DTOs para evitar duplicação de código.
-
-Uso:
-    from dtos.validators import validar_email, validar_senha_forte
-
-    class MeuDTO(BaseModel):
-        email: str
-        senha: str
-
-        _validar_email = field_validator('email')(validar_email())
-        _validar_senha = field_validator('senha')(validar_senha_forte())
-"""
-
 import re
 from typing import Optional, Set, Callable, Any
 from datetime import datetime
@@ -22,6 +5,65 @@ from pathlib import Path
 
 
 # ===== VALIDAÇÕES DE CAMPOS DE TEXTO =====
+
+
+def _validar_string_base(
+    valor: Any,
+    nome_campo: str,
+    tamanho_minimo: Optional[int],
+    tamanho_maximo: Optional[int],
+    truncar: bool,
+    obrigatorio: bool,
+) -> str:
+    """
+    Função auxiliar centralizada para validação de strings.
+
+    Args:
+        valor: Valor a validar
+        nome_campo: Nome do campo para mensagens de erro
+        tamanho_minimo: Comprimento mínimo (opcional)
+        tamanho_maximo: Comprimento máximo (opcional)
+        truncar: Se deve remover espaços das bordas
+        obrigatorio: Se o campo é obrigatório
+
+    Returns:
+        String validada e tratada
+
+    Raises:
+        ValueError: Se validação falhar
+    """
+    # Verificar se vazio
+    if not valor:
+        if obrigatorio:
+            raise ValueError(f"{nome_campo} é obrigatório.")
+        return "" if truncar else valor
+
+    # Aplicar truncamento
+    resultado = valor.strip() if truncar else valor
+
+    # Verificar se vazio após truncamento
+    if obrigatorio and not resultado:
+        raise ValueError(f"{nome_campo} é obrigatório.")
+
+    # Validar tamanho mínimo
+    if tamanho_minimo and len(resultado) < tamanho_minimo:
+        msg = (
+            f"{nome_campo} deve ter no mínimo {tamanho_minimo} caracteres."
+            if nome_campo != "Campo"
+            else f"Deve ter no mínimo {tamanho_minimo} caracteres."
+        )
+        raise ValueError(msg)
+
+    # Validar tamanho máximo
+    if tamanho_maximo and len(resultado) > tamanho_maximo:
+        msg = (
+            f"{nome_campo} deve ter no máximo {tamanho_maximo} caracteres."
+            if nome_campo != "Campo"
+            else f"Deve ter no máximo {tamanho_maximo} caracteres."
+        )
+        raise ValueError(msg)
+
+    return resultado
 
 
 def validar_string_obrigatoria(
@@ -41,30 +83,12 @@ def validar_string_obrigatoria(
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_titulo = field_validator('titulo')(
-            validar_string_obrigatoria('Título', tamanho_minimo=3, tamanho_maximo=100)
-        )
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
-        if not v or (truncar and not v.strip()):
-            raise ValueError(f"{nome_campo} é obrigatório.")
-
-        valor = v.strip() if truncar else v
-
-        if tamanho_minimo and len(valor) < tamanho_minimo:
-            raise ValueError(
-                f"{nome_campo} deve ter no mínimo {tamanho_minimo} caracteres."
-            )
-
-        if tamanho_maximo and len(valor) > tamanho_maximo:
-            raise ValueError(
-                f"{nome_campo} deve ter no máximo {tamanho_maximo} caracteres."
-            )
-
-        return valor
+    def validator(cls: Any, v: Any) -> Any:
+        return _validar_string_base(
+            v, nome_campo, tamanho_minimo, tamanho_maximo, truncar, obrigatorio=True
+        )
 
     return validator
 
@@ -86,19 +110,10 @@ def validar_comprimento(
         Função validadora para uso com field_validator
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
-        if not v:
-            return "" if truncar else v
-
-        valor = v.strip() if truncar else v
-
-        if tamanho_minimo and len(valor) < tamanho_minimo:
-            raise ValueError(f"Deve ter no mínimo {tamanho_minimo} caracteres.")
-
-        if tamanho_maximo and len(valor) > tamanho_maximo:
-            raise ValueError(f"Deve ter no máximo {tamanho_maximo} caracteres.")
-
-        return valor
+    def validator(cls: Any, v: Any) -> Any:
+        return _validar_string_base(
+            v, "Campo", tamanho_minimo, tamanho_maximo, truncar, obrigatorio=False
+        )
 
     return validator
 
@@ -118,14 +133,9 @@ def validar_texto_minimo_palavras(
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_titulo = field_validator('titulo')(
-            validar_texto_minimo_palavras(min_palavras=2, tamanho_maximo=128, nome_campo='Título')
-        )
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError(f"{nome_campo} é obrigatório.")
 
@@ -164,16 +174,9 @@ def validar_nome_pessoa(
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        # Nome simples (min 3 caracteres)
-        _validar_nome = field_validator('nome')(validar_nome_pessoa(tamanho_minimo=3))
-
-        # Nome completo (min 2 palavras)
-        _validar_nome = field_validator('nome')(validar_nome_pessoa(min_palavras=2))
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError("Nome é obrigatório.")
 
@@ -207,12 +210,9 @@ def validar_email(
     Returns:
         Função validadora para uso com field_validator
         Retorna e-mail em lowercase
-
-    Example:
-        _validar_email = field_validator('email')(validar_email())
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError("E-mail é obrigatório.")
 
@@ -242,12 +242,9 @@ def validar_cpf(formatar: bool = False) -> Callable[[Any, Any], Any]:
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_cpf = field_validator('cpf')(validar_cpf(formatar=True))
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError("CPF é obrigatório.")
 
@@ -294,12 +291,9 @@ def validar_cnpj(formatar: bool = False) -> Callable[[Any, Any], Any]:
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_cnpj = field_validator('cnpj')(validar_cnpj(formatar=True))
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError("CNPJ é obrigatório.")
 
@@ -355,12 +349,9 @@ def validar_telefone_br(formatar: bool = False) -> Callable[[Any, Any], Any]:
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_telefone = field_validator('telefone')(validar_telefone_br(formatar=True))
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError("Telefone é obrigatório.")
 
@@ -400,12 +391,9 @@ def validar_cep(formatar: bool = True) -> Callable[[Any, Any], Any]:
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_cep = field_validator('cep')(validar_cep(formatar=True))
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError("CEP é obrigatório.")
 
@@ -449,12 +437,9 @@ def validar_senha_forte(
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_senha = field_validator('senha')(validar_senha_forte())
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError("Senha é obrigatória.")
 
@@ -501,27 +486,9 @@ def validar_senhas_coincidem(
 
     Returns:
         Função validadora para uso com @model_validator(mode="after")
-
-    Example:
-        class MeuDTO(BaseModel):
-            senha: str
-            confirmar_senha: str
-
-            _validar_match = model_validator(mode="after")(
-                validar_senhas_coincidem()
-            )
-
-        # Para campos com nomes diferentes:
-        class AlterarSenhaDTO(BaseModel):
-            senha_nova: str
-            confirmar_senha: str
-
-            _validar_match = model_validator(mode="after")(
-                validar_senhas_coincidem("senha_nova", "confirmar_senha")
-            )
     """
 
-    def validator(model: Any) -> Any:  # noqa: ANN401
+    def validator(model: Any) -> Any:
         senha = getattr(model, campo_senha, None)
         confirmacao = getattr(model, campo_confirmacao, None)
 
@@ -529,6 +496,108 @@ def validar_senhas_coincidem(
             raise ValueError(mensagem_erro)
 
         return model
+
+    return validator
+
+
+# ===== VALIDAÇÕES DE RATE LIMITING =====
+
+
+def validar_rate_limit(
+    min_tentativas: int = 1,
+    max_tentativas: int = 1000,
+    min_minutos: int = 1,
+    max_minutos: int = 1440,
+    contexto: str = "",
+) -> tuple[Callable[[Any, Any], Any], Callable[[Any, Any], Any]]:
+    """
+    Cria validadores para campos de rate limit (max_tentativas e minutos).
+
+    Args:
+        min_tentativas: Mínimo de tentativas permitidas
+        max_tentativas: Máximo de tentativas permitidas
+        min_minutos: Mínimo de minutos para o período
+        max_minutos: Máximo de minutos para o período (padrão 1440 = 24h)
+        contexto: Texto adicional para mensagens (ex: "de login", "de cadastro")
+
+    Returns:
+        Tupla com (validador_tentativas, validador_minutos) para uso com field_validator
+    """
+
+    def validador_tentativas(cls: Any, v: Any) -> Any:
+        if v < min_tentativas:
+            msg = f"Deve permitir pelo menos {min_tentativas} tentativa"
+            if min_tentativas > 1:
+                msg += "s"
+            raise ValueError(msg)
+        if v > max_tentativas:
+            raise ValueError(f"Máximo permitido é {max_tentativas} tentativas")
+        return v
+
+    def validador_minutos(cls: Any, v: Any) -> Any:
+        if v < min_minutos:
+            raise ValueError(f"Período deve ser pelo menos {min_minutos} minuto(s)")
+        if v > max_minutos:
+            if max_minutos == 1440:
+                raise ValueError("Período máximo é 24 horas (1440 minutos)")
+            else:
+                raise ValueError(f"Período{contexto} não deve exceder {max_minutos} minutos")
+        return v
+
+    return validador_tentativas, validador_minutos
+
+
+def validar_email_opcional() -> Callable[[Any, Any], Any]:
+    """
+    Valida formato de e-mail opcional (permite None).
+
+    Returns:
+        Função validadora para uso com field_validator
+        Retorna None se vazio, ou e-mail em lowercase
+    """
+
+    def validator(cls: Any, v: Any) -> Any:
+        if v is None:
+            return v
+
+        valor = v.strip() if isinstance(v, str) else v
+        if not valor:
+            return None
+
+        email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        if not re.match(email_regex, valor):
+            raise ValueError("Email inválido")
+
+        return valor.lower()
+
+    return validator
+
+
+def validar_inteiro_range(
+    min_valor: int,
+    max_valor: int,
+    nome_campo: str = "Valor",
+) -> Callable[[Any, Any], Any]:
+    """
+    Valida inteiro dentro de um range específico.
+
+    Args:
+        min_valor: Valor mínimo permitido
+        max_valor: Valor máximo permitido
+        nome_campo: Nome do campo para mensagens de erro
+
+    Returns:
+        Função validadora para uso com field_validator
+    """
+
+    def validator(cls: Any, v: Any) -> Any:
+        if v is None:
+            return v
+        if v < min_valor:
+            raise ValueError(f"{nome_campo} mínimo é {min_valor}")
+        if v > max_valor:
+            raise ValueError(f"{nome_campo} máximo é {max_valor}")
+        return v
 
     return validator
 
@@ -545,12 +614,9 @@ def validar_id_positivo(nome_campo: str = "Identificador") -> Callable[[Any, Any
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_id = field_validator('id')(validar_id_positivo('ID'))
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not isinstance(v, int) or v <= 0:
             raise ValueError(f"{nome_campo} deve ser um número positivo.")
         return v
@@ -567,12 +633,9 @@ def validar_slug(tamanho_maximo: int = 128) -> Callable[[Any, Any], Any]:
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_slug = field_validator('slug')(validar_slug())
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError("Slug é obrigatório.")
 
@@ -607,14 +670,9 @@ def validar_extensao_arquivo(
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_imagem = field_validator('filename')(
-            validar_extensao_arquivo({'.jpg', '.png', '.gif'}, 'Imagem')
-        )
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError(f"Nenhum {nome_campo.lower()} selecionado.")
 
@@ -642,14 +700,9 @@ def validar_tamanho_arquivo(
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_tamanho = field_validator('size')(
-            validar_tamanho_arquivo(5 * 1024 * 1024, 'Imagem')  # 5MB
-        )
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if v <= 0:
             raise ValueError(f"{nome_campo} vazio.")
 
@@ -681,14 +734,9 @@ def validar_data(
     Returns:
         Função validadora para uso com field_validator
         Retorna string da data validada
-
-    Example:
-        _validar_data = field_validator('data_nascimento')(
-            validar_data(data_maxima=datetime.now())
-        )
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError("Data é obrigatória.")
 
@@ -721,12 +769,9 @@ def validar_url(requer_protocolo: bool = True) -> Callable[[Any, Any], Any]:
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        _validar_site = field_validator('site')(validar_url())
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         if not v or not v.strip():
             raise ValueError("URL é obrigatória.")
 
@@ -755,13 +800,9 @@ def validar_tipo(nome_campo: str, tipo_enum: Any) -> Callable[[Any, Any], Any]:
 
     Returns:
         Função validadora para uso com field_validator
-
-    Example:
-        from model.chamado_model import StatusChamado
-        _validar_status = field_validator('status')(validar_tipo(StatusChamado))
     """
 
-    def validator(cls: Any, v: Any) -> Any:  # noqa: N805
+    def validator(cls: Any, v: Any) -> Any:
         valores_validos = [t.value for t in tipo_enum]
         if v not in valores_validos:
             tipos_validos = ", ".join([f"'{t.value}'" for t in tipo_enum])

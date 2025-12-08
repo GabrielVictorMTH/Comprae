@@ -1,9 +1,13 @@
 import os
-import resend
 from typing import Optional
+
+import resend
+from resend.exceptions import ResendError
+
 from util.logger_config import logger
 
-class EmailService:
+
+class ServicoEmail:
     def __init__(self):
         self.api_key = os.getenv('RESEND_API_KEY')
         self.from_email = os.getenv('RESEND_FROM_EMAIL', 'noreply@seudominio.com')
@@ -34,10 +38,10 @@ class EmailService:
         }
 
         try:
-            email = resend.Emails.send(params)  # type: ignore[arg-type]
+            email = resend.Emails.send(params)
             logger.info(f"E-mail enviado para {para_email} - ID: {email.get('id', 'N/A')}")
             return True
-        except Exception as e:
+        except ResendError as e:
             logger.error(f"Erro ao enviar e-mail: {e}")
             return False
 
@@ -86,5 +90,6 @@ class EmailService:
             html=html
         )
 
+
 # Instância global
-email_service = EmailService()
+servico_email = ServicoEmail()
