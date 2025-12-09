@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row">
     <div class="col-lg-8 mx-auto">
-        <!-- Cabecalho -->
+        <!-- Cabeçalho -->
         <div class="mb-4">
             <h2><i class="bi bi-truck"></i> Informar Envio</h2>
             <p class="text-muted">Pedido #{{ pedido.id }}</p>
@@ -31,7 +31,7 @@
                             </div>
                             <div class="col-md-6">
                                 {% if pedido.endereco_completo %}
-                                <p class="mb-1"><strong>Endereco de Entrega:</strong></p>
+                                <p class="mb-1"><strong>Endereço de Entrega:</strong></p>
                                 <p class="mb-0 text-muted">{{ pedido.endereco_completo }}</p>
                                 {% endif %}
                             </div>
@@ -40,29 +40,29 @@
                 </div>
             </div>
 
-            <!-- Formulario de Envio -->
+            <!-- Formulário de Envio -->
             <div class="col-12">
                 <div class="card shadow-sm">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-send"></i> Informacoes de Envio</h5>
+                        <h5 class="mb-0"><i class="bi bi-send"></i> Informações de Envio</h5>
                     </div>
                     <div class="card-body">
                         <form action="/vendedor/pedidos/enviar/{{ pedido.id }}" method="post">
                             {{ csrf_input() }}
 
                             <div class="mb-4">
-                                <label for="codigo_rastreio" class="form-label">Codigo de Rastreio (opcional)</label>
+                                <label for="codigo_rastreio" class="form-label">Código de Rastreio (opcional)</label>
                                 <input type="text" class="form-control form-control-lg" id="codigo_rastreio"
                                        name="codigo_rastreio" placeholder="Ex: BR123456789BR"
                                        maxlength="50">
                                 <div class="form-text">
-                                    Informe o codigo de rastreio dos Correios ou transportadora, se disponivel.
+                                    Informe o código de rastreio dos Correios ou transportadora, se disponível.
                                 </div>
                             </div>
 
                             <div class="alert alert-success">
                                 <i class="bi bi-check-circle"></i>
-                                Ao confirmar o envio, o comprador sera notificado e podera acompanhar a entrega.
+                                Ao confirmar o envio, o comprador será notificado e poderá acompanhar a entrega.
                             </div>
 
                             <div class="d-flex gap-3">

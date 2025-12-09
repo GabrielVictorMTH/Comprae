@@ -1,20 +1,20 @@
 {% extends "base_privada.html" %}
 {% from "macros/form_fields.html" import field with context %}
 
-{% block titulo %}Cadastrar Anuncio{% endblock %}
+{% block titulo %}Cadastrar Anúncio{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-lg-10 mx-auto">
-        <!-- Cabecalho -->
+        <!-- Cabeçalho -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-plus-circle"></i> Cadastrar Anuncio</h2>
+            <h2><i class="bi bi-plus-circle"></i> Cadastrar Anúncio</h2>
             <a href="/vendedor/anuncios" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Voltar
             </a>
         </div>
 
-        <!-- Formulario de Cadastro -->
+        <!-- Formulário de Cadastro -->
         <div class="card shadow-sm">
             <form action="/vendedor/anuncios/cadastrar" method="post" id="form-anuncio">
                 {{ csrf_input() }}
@@ -24,7 +24,7 @@
                             {% include "components/alerta_erro.html" %}
                         </div>
 
-                        <!-- Foto do Anuncio -->
+                        <!-- Foto do Anúncio -->
                         <div class="col-md-4 mb-4">
                             <label class="form-label">Foto do Produto</label>
                             <div class="text-center">
@@ -48,7 +48,7 @@
                             </div>
                         </div>
 
-                        <!-- Dados do Anuncio -->
+                        <!-- Dados do Anúncio -->
                         <div class="col-md-8">
                             <div class="row">
                                 <div class="col-12 mb-3">
@@ -58,7 +58,7 @@
                                 </div>
 
                                 <div class="col-12 mb-3">
-                                    {{ field(name='descricao', label='Descricao', type='textarea', required=true,
+                                    {{ field(name='descricao', label='Descrição', type='textarea', required=true,
                                     value=dados.descricao, placeholder='Descreva o produto em detalhes...',
                                     attributes={'rows': 4, 'minlength': 10, 'maxlength': 1000}) }}
                                 </div>
@@ -87,7 +87,7 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    {{ field(name='preco', label='Preco (R$)', type='number', required=true,
+                                    {{ field(name='preco', label='Preço (R$)', type='number', required=true,
                                     value=dados.preco, placeholder='99.90',
                                     attributes={'step': '0.01', 'min': '0.01', 'max': '999999.99'}) }}
                                 </div>
@@ -104,7 +104,7 @@
                 <div class="card-footer p-4">
                     <div class="d-flex gap-3">
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle"></i> Cadastrar Anuncio
+                            <i class="bi bi-check-circle"></i> Cadastrar Anúncio
                         </button>
                         <a href="/vendedor/anuncios" class="btn btn-outline-secondary">
                             Cancelar
@@ -117,7 +117,7 @@
         <!-- Dica -->
         <div class="alert alert-info mt-4" role="alert">
             <i class="bi bi-lightbulb"></i>
-            <strong>Dica:</strong> Adicione uma foto de qualidade e uma descricao detalhada para atrair mais compradores!
+            <strong>Dica:</strong> Adicione uma foto de qualidade e uma descrição detalhada para atrair mais compradores!
         </div>
     </div>
 </div>
@@ -166,13 +166,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Validar tamanho
         if (file.size > 5 * 1024 * 1024) {
-            alert('Arquivo muito grande. Tamanho maximo: 5MB');
+            alert('Arquivo muito grande. Tamanho máximo: 5MB');
             return;
         }
 
         // Validar tipo
         if (!file.type.match(/^image\/(jpeg|jpg|png|gif|webp)$/)) {
-            alert('Formato invalido. Use: JPG, PNG, GIF ou WEBP');
+            alert('Formato inválido. Use: JPG, PNG, GIF ou WEBP');
             return;
         }
 

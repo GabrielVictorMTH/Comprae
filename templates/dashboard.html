@@ -147,7 +147,7 @@
         </div>
     </div>
     {% else %}
-    <!-- Meus Anuncios (apenas para vendedores) -->
+    <!-- Meus Anúncios (apenas para vendedores) -->
     {% if usuario_logado and usuario_logado.perfil == 'Vendedor' %}
     <div class="col">
         <div class="card h-100 shadow-sm shadow-hover">
@@ -155,9 +155,9 @@
                 <div class="mb-3">
                     <i class="bi bi-megaphone text-success display-3"></i>
                 </div>
-                <h5 class="card-title">Meus Anuncios</h5>
+                <h5 class="card-title">Meus Anúncios</h5>
                 <p class="card-text text-muted">
-                    Gerencie seus anuncios de produtos
+                    Gerencie seus anúncios de produtos
                 </p>
                 <a href="/vendedor/anuncios" class="btn btn-success">
                     <i class="bi bi-arrow-right-circle"></i> Acessar
@@ -175,7 +175,7 @@
                 </div>
                 <h5 class="card-title">Pedidos Recebidos</h5>
                 <p class="card-text text-muted">
-                    Gerencie pedidos dos seus anuncios
+                    Gerencie pedidos dos seus anúncios
                 </p>
                 <a href="/vendedor/pedidos" class="btn btn-warning">
                     <i class="bi bi-arrow-right-circle"></i> Acessar
@@ -185,7 +185,7 @@
     </div>
     {% endif %}
 
-    <!-- Meus Pedidos (para qualquer usuario logado, exceto admin) -->
+    <!-- Meus Pedidos (para qualquer usuário logado, exceto admin) -->
     <div class="col">
         <div class="card h-100 shadow-sm shadow-hover">
             <div class="card-body text-center">

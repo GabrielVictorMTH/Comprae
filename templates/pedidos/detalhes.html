@@ -5,12 +5,12 @@
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <!-- Cabecalho -->
+        <!-- Cabeçalho -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2><i class="bi bi-receipt"></i> Pedido #{{ pedido.id }}</h2>
                 <p class="text-muted mb-0">
-                    Criado em {{ pedido.data_hora_pedido.strftime('%d/%m/%Y as %H:%M') if pedido.data_hora_pedido else '' }}
+                    Criado em {{ pedido.data_hora_pedido.strftime('%d/%m/%Y às %H:%M') if pedido.data_hora_pedido else '' }}
                 </p>
             </div>
             <span class="badge fs-5
@@ -28,7 +28,7 @@
         {% include "components/alerta_erro.html" %}
 
         <div class="row g-4">
-            <!-- Informacoes do Produto -->
+            <!-- Informações do Produto -->
             <div class="col-lg-8">
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
@@ -58,7 +58,7 @@
                                     {% if pedido.preco > 0 %}
                                     R$ {{ "%.2f"|format(pedido.preco)|replace('.', ',') }}
                                     {% else %}
-                                    <span class="text-warning">Aguardando definicao de preco</span>
+                                    <span class="text-warning">Aguardando definição de preço</span>
                                     {% endif %}
                                 </h3>
                             </div>
@@ -66,11 +66,11 @@
                     </div>
                 </div>
 
-                <!-- Endereco de Entrega (apenas para vendedor ou quando pago) -->
+                <!-- Endereço de Entrega (apenas para vendedor ou quando pago) -->
                 {% if pedido.endereco_completo and (is_vendedor or pedido.status in ['Pago', 'Enviado', 'Entregue']) %}
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Endereco de Entrega</h5>
+                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Endereço de Entrega</h5>
                     </div>
                     <div class="card-body">
                         <p class="mb-0">{{ pedido.endereco_completo }}</p>
@@ -78,22 +78,22 @@
                 </div>
                 {% endif %}
 
-                <!-- Informacoes de Envio -->
+                <!-- Informações de Envio -->
                 {% if pedido.codigo_rastreio or pedido.data_hora_envio %}
                 <div class="card shadow-sm mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-truck"></i> Informacoes de Envio</h5>
+                        <h5 class="mb-0"><i class="bi bi-truck"></i> Informações de Envio</h5>
                     </div>
                     <div class="card-body">
                         {% if pedido.data_hora_envio %}
                         <p class="mb-2">
                             <strong>Data de Envio:</strong>
-                            {{ pedido.data_hora_envio.strftime('%d/%m/%Y as %H:%M') }}
+                            {{ pedido.data_hora_envio.strftime('%d/%m/%Y às %H:%M') }}
                         </p>
                         {% endif %}
                         {% if pedido.codigo_rastreio %}
                         <p class="mb-0">
-                            <strong>Codigo de Rastreio:</strong>
+                            <strong>Código de Rastreio:</strong>
                             <span class="badge bg-dark fs-6">{{ pedido.codigo_rastreio }}</span>
                         </p>
                         {% endif %}
@@ -104,7 +104,7 @@
                 <!-- Timeline do Pedido -->
                 <div class="card shadow-sm">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Historico</h5>
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Histórico</h5>
                     </div>
                     <div class="card-body">
                         <ul class="list-group list-group-flush">
@@ -114,7 +114,7 @@
                             </li>
                             {% if pedido.status not in ['Negociando', 'Cancelado'] %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span><i class="bi bi-check-circle text-success"></i> Preco definido</span>
+                                <span><i class="bi bi-check-circle text-success"></i> Preço definido</span>
                                 <small class="text-muted">-</small>
                             </li>
                             {% endif %}
@@ -147,15 +147,15 @@
                 </div>
             </div>
 
-            <!-- Acoes -->
+            <!-- Ações -->
             <div class="col-lg-4">
                 <div class="card shadow-sm">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-gear"></i> Acoes</h5>
+                        <h5 class="mb-0"><i class="bi bi-gear"></i> Ações</h5>
                     </div>
                     <div class="card-body">
                         <div class="d-grid gap-2">
-                            <!-- Acoes do Comprador -->
+                            <!-- Ações do Comprador -->
                             {% if is_comprador %}
                                 {% if pedido.status == 'Pendente' %}
                                 <form action="/pedidos/pagar/{{ pedido.id }}" method="post">
@@ -176,11 +176,11 @@
                                 {% endif %}
                             {% endif %}
 
-                            <!-- Acoes do Vendedor -->
+                            <!-- Ações do Vendedor -->
                             {% if is_vendedor %}
                                 {% if pedido.status == 'Negociando' %}
                                 <a href="/vendedor/pedidos/definir-preco/{{ pedido.id }}" class="btn btn-warning btn-lg">
-                                    <i class="bi bi-currency-dollar"></i> Definir Preco Final
+                                    <i class="bi bi-currency-dollar"></i> Definir Preço Final
                                 </a>
                                 {% endif %}
 
@@ -214,14 +214,14 @@
                     </div>
                 </div>
 
-                <!-- Avaliacao (se entregue e for comprador) -->
+                <!-- Avaliação (se entregue e for comprador) -->
                 {% if pedido.status == 'Entregue' and is_comprador and not pedido.nota_avaliacao %}
                 <div class="card shadow-sm mt-4">
                     <div class="card-header">
                         <h5 class="mb-0"><i class="bi bi-star"></i> Avaliar Pedido</h5>
                     </div>
                     <div class="card-body">
-                        <p class="text-muted small">A funcionalidade de avaliacao sera implementada em breve.</p>
+                        <p class="text-muted small">A funcionalidade de avaliação será implementada em breve.</p>
                     </div>
                 </div>
                 {% endif %}
@@ -229,7 +229,7 @@
                 {% if pedido.nota_avaliacao %}
                 <div class="card shadow-sm mt-4">
                     <div class="card-header">
-                        <h5 class="mb-0"><i class="bi bi-star-fill text-warning"></i> Avaliacao</h5>
+                        <h5 class="mb-0"><i class="bi bi-star-fill text-warning"></i> Avaliação</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-2">
@@ -262,7 +262,7 @@
                 <p>Tem certeza que deseja cancelar este pedido?</p>
                 <p class="text-warning small">
                     <i class="bi bi-exclamation-triangle"></i>
-                    Esta acao nao pode ser desfeita.
+                    Esta ação não pode ser desfeita.
                 </p>
             </div>
             <div class="modal-footer">

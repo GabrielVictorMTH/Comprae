@@ -1,113 +1,84 @@
 {% extends "base_publica.html" %}
 
-{% block titulo %}Bem-vindo!{% endblock %}
+{% block titulo %}Marketplace C2C{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->
 <div class="mb-5">
-    <div class="bg-primary text-white rounded-4 shadow-lg p-5 pb-3">
+    <div class="bg-primary text-white rounded-4 shadow-lg p-5">
         <div class="row align-items-center">
-            <div class="col-lg-6">
-                <h1 class="display-4 fw-bold mb-4">
-                    Bem-vindo ao {{ APP_NAME }}
+            <div class="col-lg-7">
+                <h1 class="display-4 fw-bold mb-3">
+                    Compre e venda entre pessoas
                 </h1>
                 <p class="lead mb-4">
-                    Uma plataforma completa e moderna para gerenciar suas atividades de forma simples e eficiente.
+                    O {{ APP_NAME }} conecta compradores e vendedores de forma simples e segura.
+                    Encontre produtos incríveis ou anuncie o que você não usa mais!
                 </p>
                 <div class="d-flex gap-3 flex-column flex-sm-row">
-                    <a href="/cadastrar" class="btn btn-light btn-lg">
-                        <i class="bi bi-person-plus"></i> Criar Conta
+                    <a href="/anuncios" class="btn btn-light btn-lg">
+                        <i class="bi bi-search"></i> Explorar Produtos
                     </a>
-                    <a href="/login" class="btn btn-outline-light btn-lg">
-                        <i class="bi bi-box-arrow-in-right"></i> Entrar
+                    <a href="/cadastrar" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-plus-circle"></i> Começar a Vender
                     </a>
                 </div>
             </div>
-            <div class="col-lg-6 text-center mt-4 mt-lg-0">
-                <i class="bi bi-laptop fs-hero opacity-25"></i>
+            <div class="col-lg-5 text-center mt-4 mt-lg-0">
+                <i class="bi bi-shop-window display-1 opacity-50" style="font-size: 8rem;"></i>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Recursos Section -->
-<div class="mb-5" id="recursos">
-    <div class="text-center mb-5">
-        <h2 class="fw-bold">Recursos Principais</h2>
-        <p class="text-muted">Tudo que você precisa em um só lugar</p>
+<!-- Como Funciona -->
+<div class="mb-5">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Como funciona o {{ APP_NAME }}?</h2>
+        <p class="text-muted">Comprar ou vender nunca foi tão fácil</p>
     </div>
 
     <div class="row g-4">
-        <!-- Recurso 1 -->
+        <!-- Passo 1 -->
         <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover text-center">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="bi bi-shield-check text-primary display-3"></i>
+            <div class="card h-100 border-0 text-center">
+                <div class="card-body">
+                    <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-person-plus text-primary display-5"></i>
                     </div>
-                    <h5 class="card-title">Segurança</h5>
+                    <h5 class="card-title">1. Crie sua conta</h5>
                     <p class="card-text text-muted">
-                        Sistema seguro com autenticação robusta e criptografia de dados
+                        Cadastre-se gratuitamente e escolha se quer comprar, vender ou ambos.
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- Recurso 2 -->
+        <!-- Passo 2 -->
         <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover text-center">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="bi bi-person-circle text-info display-3"></i>
+            <div class="card h-100 border-0 text-center">
+                <div class="card-body">
+                    <div class="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-chat-dots text-success display-5"></i>
                     </div>
-                    <h5 class="card-title">Perfil Personalizável</h5>
+                    <h5 class="card-title">2. Negocie diretamente</h5>
                     <p class="card-text text-muted">
-                        Personalize seu perfil com foto e informações pessoais
+                        Converse com o vendedor, tire dúvidas e combine o melhor preço.
                     </p>
                 </div>
             </div>
         </div>
 
-        <!-- Recurso 4 -->
+        <!-- Passo 3 -->
         <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover text-center">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="bi bi-speedometer2 text-warning display-3"></i>
+            <div class="card h-100 border-0 text-center">
+                <div class="card-body">
+                    <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-box-seam text-warning display-5"></i>
                     </div>
-                    <h5 class="card-title">Rápido e Responsivo</h5>
+                    <h5 class="card-title">3. Receba em casa</h5>
                     <p class="card-text text-muted">
-                        Interface moderna que funciona em qualquer dispositivo
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recurso 5 -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover text-center">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="bi bi-bell text-danger display-3"></i>
-                    </div>
-                    <h5 class="card-title">Notificações</h5>
-                    <p class="card-text text-muted">
-                        Receba alertas e notificações sobre suas atividades
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Recurso 6 -->
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm shadow-hover text-center">
-                <div class="card-body p-4">
-                    <div class="mb-3">
-                        <i class="bi bi-gear text-secondary display-3"></i>
-                    </div>
-                    <h5 class="card-title">Configurável</h5>
-                    <p class="card-text text-muted">
-                        Ajuste o sistema de acordo com suas preferências
+                        Acompanhe seu pedido e receba o produto no endereço cadastrado.
                     </p>
                 </div>
             </div>
@@ -115,12 +86,17 @@
     </div>
 </div>
 
-<!-- Ultimos Anuncios -->
+<!-- Últimos Anúncios -->
 {% if ultimos_anuncios and ultimos_anuncios|length > 0 %}
 <div class="mb-5" id="anuncios">
-    <div class="text-center mb-4">
-        <h2 class="fw-bold">Ultimos Anuncios</h2>
-        <p class="text-muted">Confira os produtos mais recentes</p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Produtos em Destaque</h2>
+            <p class="text-muted mb-0">Confira os anúncios mais recentes</p>
+        </div>
+        <a href="/anuncios" class="btn btn-outline-primary d-none d-md-inline-block">
+            Ver todos <i class="bi bi-arrow-right"></i>
+        </a>
     </div>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-4">
@@ -131,39 +107,97 @@
         {% endfor %}
     </div>
 
-    <div class="text-center">
-        <a href="/anuncios" class="btn btn-outline-primary btn-lg">
-            <i class="bi bi-shop"></i> Ver Todos os Anuncios
+    <div class="text-center d-md-none">
+        <a href="/anuncios" class="btn btn-outline-primary">
+            <i class="bi bi-grid"></i> Ver Todos os Produtos
+        </a>
+    </div>
+</div>
+{% else %}
+<div class="mb-5">
+    <div class="text-center py-5">
+        <i class="bi bi-box-seam text-muted display-1 mb-3"></i>
+        <h3 class="text-muted">Nenhum produto disponível ainda</h3>
+        <p class="text-muted">Seja o primeiro a anunciar!</p>
+        <a href="/cadastrar" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Criar meu anúncio
         </a>
     </div>
 </div>
 {% endif %}
 
+<!-- Vantagens -->
+<div class="mb-5">
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card bg-success bg-opacity-10 border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start">
+                        <div class="me-3">
+                            <i class="bi bi-cart-check text-success display-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-success">Para Compradores</h4>
+                            <ul class="list-unstyled text-muted mb-0">
+                                <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i>Produtos com preços acessíveis</li>
+                                <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i>Negociação direta com vendedores</li>
+                                <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i>Acompanhamento do pedido</li>
+                                <li><i class="bi bi-check2 text-success me-2"></i>Avaliação após a compra</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card bg-primary bg-opacity-10 border-0 h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-start">
+                        <div class="me-3">
+                            <i class="bi bi-shop text-primary display-5"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-primary">Para Vendedores</h4>
+                            <ul class="list-unstyled text-muted mb-0">
+                                <li class="mb-2"><i class="bi bi-check2 text-primary me-2"></i>Cadastro de produtos simples</li>
+                                <li class="mb-2"><i class="bi bi-check2 text-primary me-2"></i>Controle de estoque</li>
+                                <li class="mb-2"><i class="bi bi-check2 text-primary me-2"></i>Gestão de pedidos</li>
+                                <li><i class="bi bi-check2 text-primary me-2"></i>Sem taxas escondidas</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- CTA Section -->
 <div class="mb-5">
-    <div class="card bg-primary text-white shadow-lg shadow-hover">
+    <div class="card bg-primary text-white shadow-lg">
         <div class="card-body text-center p-5">
-            <h2 class="fw-bold mb-4">Pronto para comecar?</h2>
+            <h2 class="fw-bold mb-3">Pronto para começar?</h2>
             <p class="lead mb-4">
-                Crie sua conta gratuitamente e comece a usar agora mesmo!
+                Junte-se à nossa comunidade de compradores e vendedores!
             </p>
             <div class="d-flex justify-content-center gap-3 flex-column flex-sm-row">
                 <a href="/cadastrar" class="btn btn-light btn-lg">
-                    <i class="bi bi-person-plus"></i> Criar Conta Gratis
+                    <i class="bi bi-person-plus"></i> Criar Conta Grátis
                 </a>
-                <a href="/login" class="btn btn-outline-light btn-lg">
-                    <i class="bi bi-box-arrow-in-right"></i> Ja tenho conta
+                <a href="/anuncios" class="btn btn-outline-light btn-lg">
+                    <i class="bi bi-search"></i> Explorar Produtos
                 </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- FAQ Section (Opcional) -->
+<!-- FAQ Section -->
 <div class="mb-5">
-    <div class="text-center mb-5">
-        <h2 class="fw-bold">Perguntas Frequentes</h2>
-        <p class="text-muted">Tire suas dúvidas sobre o sistema</p>
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Dúvidas Frequentes</h2>
+        <p class="text-muted">Tire suas dúvidas sobre o {{ APP_NAME }}</p>
     </div>
 
     <div class="row">
@@ -173,13 +207,13 @@
                 <div class="accordion-item">
                     <h2 class="accordion-header">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                            Como criar uma conta?
+                            Como faço para comprar um produto?
                         </button>
                     </h2>
                     <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Basta clicar em "Criar Conta" no menu superior, preencher seus dados e confirmar.
-                            O processo é rápido e gratuito!
+                            Navegue pelos anúncios, escolha o produto desejado e clique em "Iniciar Negociação".
+                            Você poderá conversar com o vendedor para combinar detalhes e finalizar a compra.
                         </div>
                     </div>
                 </div>
@@ -187,15 +221,14 @@
                 <!-- FAQ 2 -->
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#faq2">
-                            O sistema é seguro?
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                            Como funciona a negociação?
                         </button>
                     </h2>
                     <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Sim! Utilizamos criptografia de ponta e as melhores práticas de segurança para
-                            proteger seus dados. Suas senhas são armazenadas de forma segura e nunca são expostas.
+                            Após iniciar uma negociação, o vendedor define o preço final considerando frete e outras
+                            condições. Você pode aceitar e realizar o pagamento ou cancelar se não concordar.
                         </div>
                     </div>
                 </div>
@@ -203,15 +236,14 @@
                 <!-- FAQ 3 -->
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#faq3">
-                            Posso alterar meus dados depois?
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                            Como anuncio meus produtos?
                         </button>
                     </h2>
                     <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Claro! Você pode atualizar seus dados pessoais, foto de perfil e senha a qualquer
-                            momento através da seção "Meu Perfil" no seu dashboard.
+                            Crie uma conta como vendedor, acesse seu painel e clique em "Novo Anúncio".
+                            Adicione fotos, descrição, preço e pronto! Seu produto estará disponível para milhares de compradores.
                         </div>
                     </div>
                 </div>
@@ -219,15 +251,29 @@
                 <!-- FAQ 4 -->
                 <div class="accordion-item">
                     <h2 class="accordion-header">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#faq4">
-                            Esqueci minha senha, o que fazer?
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq4">
+                            Posso ser comprador e vendedor ao mesmo tempo?
                         </button>
                     </h2>
                     <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                         <div class="accordion-body">
-                            Na tela de login, clique em "Esqueci minha senha" e siga as instruções.
-                            Você receberá um e-mail com um link para redefinir sua senha.
+                            Sim! Você pode criar anúncios para vender seus produtos e também comprar de outros
+                            usuários na plataforma. Basta ter o perfil de vendedor ativo.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 5 -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq5">
+                            Como acompanho meu pedido?
+                        </button>
+                    </h2>
+                    <div id="faq5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Acesse "Meus Pedidos" no seu painel para ver o status de cada compra.
+                            Quando o vendedor enviar, você receberá o código de rastreio para acompanhar a entrega.
                         </div>
                     </div>
                 </div>

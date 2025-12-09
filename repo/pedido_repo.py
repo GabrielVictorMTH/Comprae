@@ -220,7 +220,7 @@ def _row_to_pedido(row) -> Pedido:
         pedido.email_comprador = row["email_comprador"]
     if "logradouro" in keys:
         pedido.endereco_completo = f"{row['logradouro']}, {row['numero']}"
-        if row.get('complemento'):
+        if "complemento" in keys and row['complemento']:
             pedido.endereco_completo += f" - {row['complemento']}"
         pedido.endereco_completo += f", {row['bairro']} - {row['cidade']}/{row['uf']} - CEP: {row['cep']}"
     return pedido

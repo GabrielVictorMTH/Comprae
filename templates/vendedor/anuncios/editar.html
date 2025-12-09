@@ -1,20 +1,20 @@
 {% extends "base_privada.html" %}
 {% from "macros/form_fields.html" import field with context %}
 
-{% block titulo %}Editar Anuncio{% endblock %}
+{% block titulo %}Editar Anúncio{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-lg-10 mx-auto">
-        <!-- Cabecalho -->
+        <!-- Cabeçalho -->
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-pencil-square"></i> Editar Anuncio</h2>
+            <h2><i class="bi bi-pencil-square"></i> Editar Anúncio</h2>
             <a href="/vendedor/anuncios" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Voltar
             </a>
         </div>
 
-        <!-- Formulario de Edicao -->
+        <!-- Formulário de Edição -->
         <div class="card shadow-sm">
             <form action="/vendedor/anuncios/editar/{{ anuncio.id }}" method="post" id="form-anuncio">
                 {{ csrf_input() }}
@@ -24,7 +24,7 @@
                             {% include "components/alerta_erro.html" %}
                         </div>
 
-                        <!-- Foto do Anuncio -->
+                        <!-- Foto do Anúncio -->
                         <div class="col-md-4 mb-4">
                             <label class="form-label">Foto do Produto</label>
                             <div class="text-center">
@@ -48,7 +48,7 @@
                             </div>
                         </div>
 
-                        <!-- Dados do Anuncio -->
+                        <!-- Dados do Anúncio -->
                         <div class="col-md-8">
                             <div class="row">
                                 <div class="col-12 mb-3">
@@ -58,7 +58,7 @@
                                 </div>
 
                                 <div class="col-12 mb-3">
-                                    {{ field(name='descricao', label='Descricao', type='textarea', required=true,
+                                    {{ field(name='descricao', label='Descrição', type='textarea', required=true,
                                     value=dados.descricao, placeholder='Descreva o produto em detalhes...',
                                     attributes={'rows': 4, 'minlength': 10, 'maxlength': 1000}) }}
                                 </div>
@@ -87,7 +87,7 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    {{ field(name='preco', label='Preco (R$)', type='number', required=true,
+                                    {{ field(name='preco', label='Preço (R$)', type='number', required=true,
                                     value=dados.preco, placeholder='99.90',
                                     attributes={'step': '0.01', 'min': '0.01', 'max': '999999.99'}) }}
                                 </div>
@@ -104,8 +104,8 @@
                                                id="ativo" name="ativo" value="true"
                                                {% if dados.ativo %}checked{% endif %}>
                                         <label class="form-check-label" for="ativo">
-                                            <strong>Anuncio Ativo</strong>
-                                            <br><small class="text-muted">Anuncios inativos nao aparecem para compradores</small>
+                                            <strong>Anúncio Ativo</strong>
+                                            <br><small class="text-muted">Anúncios inativos não aparecem para compradores</small>
                                         </label>
                                     </div>
                                 </div>
@@ -117,7 +117,7 @@
                     <div class="d-flex justify-content-between">
                         <div class="d-flex gap-3">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-check-circle"></i> Salvar Alteracoes
+                                <i class="bi bi-check-circle"></i> Salvar Alterações
                             </button>
                             <a href="/vendedor/anuncios" class="btn btn-outline-secondary">
                                 Cancelar
@@ -132,10 +132,10 @@
             </form>
         </div>
 
-        <!-- Info do Anuncio -->
+        <!-- Info do Anúncio -->
         <div class="card mt-4 shadow-sm">
             <div class="card-header bg-light">
-                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informacoes do Anuncio</h6>
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informações do Anúncio</h6>
             </div>
             <div class="card-body">
                 <div class="row text-muted small">
@@ -159,19 +159,19 @@
     </div>
 </div>
 
-<!-- Modal de Confirmacao de Exclusao -->
+<!-- Modal de Confirmação de Exclusão -->
 <div class="modal fade" id="modalExcluir" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Confirmar Exclusao</h5>
+                <h5 class="modal-title">Confirmar Exclusão</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Deseja realmente excluir o anuncio <strong>{{ anuncio.nome }}</strong>?</p>
+                <p>Deseja realmente excluir o anúncio <strong>{{ anuncio.nome }}</strong>?</p>
                 <p class="text-danger small">
                     <i class="bi bi-exclamation-triangle"></i>
-                    Esta acao nao podera ser desfeita. Anuncios com pedidos vinculados nao podem ser excluidos.
+                    Esta ação não poderá ser desfeita. Anúncios com pedidos vinculados não podem ser excluídos.
                 </p>
             </div>
             <div class="modal-footer">
@@ -230,13 +230,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Validar tamanho
         if (file.size > 5 * 1024 * 1024) {
-            alert('Arquivo muito grande. Tamanho maximo: 5MB');
+            alert('Arquivo muito grande. Tamanho máximo: 5MB');
             return;
         }
 
         // Validar tipo
         if (!file.type.match(/^image\/(jpeg|jpg|png|gif|webp)$/)) {
-            alert('Formato invalido. Use: JPG, PNG, GIF ou WEBP');
+            alert('Formato inválido. Use: JPG, PNG, GIF ou WEBP');
             return;
         }
 
