@@ -5,7 +5,7 @@ Decorator para aplicar rate limiting em rotas FastAPI de forma centralizada,
 eliminando código duplicado em múltiplas rotas.
 
 Este módulo fornece um decorator que:
-- Verifica automaticamente o rate limit baseado no IP do cliente
+- Verifica automaticamente o rate limit baseado no IP do comprador
 - Exibe mensagem de erro padronizada quando o limite é excedido
 - Registra no log tentativas bloqueadas
 - Redireciona para URL especificada quando bloqueado
@@ -23,9 +23,9 @@ from util.logger_config import logger
 
 def obter_identificador_cliente(request: Request) -> str:
     """
-    Obtém identificador único do cliente para rate limiting.
+    Obtém identificador único do comprador para rate limiting.
 
-    Tenta obter o IP real do cliente, considerando proxies reversos.
+    Tenta obter o IP real do comprador, considerando proxies reversos.
     Ordem de prioridade:
     1. X-Forwarded-For (primeiro IP da lista)
     2. X-Real-IP
@@ -35,12 +35,12 @@ def obter_identificador_cliente(request: Request) -> str:
         request: Objeto Request do FastAPI
 
     Returns:
-        String com o IP do cliente
+        String com o IP do comprador
     """
     # Verificar header X-Forwarded-For (comum em load balancers/proxies)
     forwarded_for = request.headers.get("X-Forwarded-For")
     if forwarded_for:
-        # Pegar o primeiro IP da lista (IP original do cliente)
+        # Pegar o primeiro IP da lista (IP original do comprador)
         return forwarded_for.split(",")[0].strip()
 
     # Verificar header X-Real-IP (usado por alguns proxies)
@@ -60,12 +60,12 @@ def aplicar_rate_limit(
     limiter: RateLimiter,
     mensagem_erro: Optional[str] = None,
     redirect_url: Optional[str] = None,
-    log_detalhes: Optional[Callable[[str], str]] = None
+    log_detalhes: Optional[Callable[[str], str]] = None,
 ) -> Callable:
     """
     Decorator para aplicar rate limiting em rotas FastAPI.
 
-    Este decorator verifica se o cliente excedeu o limite de requisições
+    Este decorator verifica se o comprador excedeu o limite de requisições
     e bloqueia automaticamente a requisição se necessário.
 
     Args:
@@ -88,12 +88,14 @@ def aplicar_rate_limit(
         raise TypeError("O parâmetro 'limiter' deve ser uma instância de RateLimiter")
 
     # Mensagem padrão se não fornecida
-    mensagem_padrao = "Muitas requisições. Aguarde um momento antes de tentar novamente."
+    mensagem_padrao = (
+        "Muitas requisições. Aguarde um momento antes de tentar novamente."
+    )
 
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(request: Request, *args, **kwargs):
-            # Obter identificador do cliente (IP)
+            # Obter identificador do comprador (IP)
             ip = obter_identificador_cliente(request)
 
             # Verificar rate limit
@@ -119,32 +121,33 @@ def aplicar_rate_limit(
                 # Redirecionar se URL fornecida
                 if redirect_url:
                     return RedirectResponse(
-                        redirect_url,
-                        status_code=status.HTTP_303_SEE_OTHER
+                        redirect_url, status_code=status.HTTP_303_SEE_OTHER
                     )
 
                 # Se não houver redirect_url, podemos retornar erro JSON
                 # (útil para APIs REST)
                 from fastapi.responses import JSONResponse
+
                 return JSONResponse(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                     content={
                         "detail": mensagem,
-                        "retry_after": limiter.janela_minutos * 60
-                    }
+                        "retry_after": limiter.janela_minutos * 60,
+                    },
                 )
 
             # Rate limit OK - executar função original
             return await func(request, *args, **kwargs)
 
         return wrapper
+
     return decorator
 
 
 def aplicar_rate_limit_async(
     limiter: RateLimiter,
     mensagem_erro: Optional[str] = None,
-    log_detalhes: Optional[Callable[[str], str]] = None
+    log_detalhes: Optional[Callable[[str], str]] = None,
 ):
     """
     Versão assíncrona do decorator de rate limiting para APIs.
@@ -163,5 +166,5 @@ def aplicar_rate_limit_async(
         limiter=limiter,
         mensagem_erro=mensagem_erro,
         redirect_url=None,  # Força retorno JSON
-        log_detalhes=log_detalhes
+        log_detalhes=log_detalhes,
     )

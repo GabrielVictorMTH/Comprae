@@ -5,6 +5,7 @@ Fornece fixtures reutilizaveis para testes de repos.
 A criacao de tabelas e feita pela fixture criar_tabelas_integracao
 no conftest.py do nivel de integracao.
 """
+
 import pytest
 
 from repo import usuario_repo, chamado_repo, chamado_interacao_repo
@@ -33,7 +34,7 @@ def usuario_repo_teste():
         nome="Usuario Repo Teste",
         email="usuario_repo@example.com",
         senha=criar_hash_senha("Senha@123"),
-        perfil=Perfil.CLIENTE.value
+        perfil=Perfil.COMPRADOR.value,
     )
     usuario_id = usuario_repo.inserir(usuario)
     return usuario_id
@@ -52,7 +53,7 @@ def admin_repo_teste():
         nome="Admin Repo Teste",
         email="admin_repo@example.com",
         senha=criar_hash_senha("Senha@123"),
-        perfil=Perfil.ADMIN.value
+        perfil=Perfil.ADMIN.value,
     )
     usuario_id = usuario_repo.inserir(usuario)
     return usuario_id
@@ -74,7 +75,7 @@ def chamado_repo_teste(usuario_repo_teste):
         titulo="Chamado Repo Teste",
         status=StatusChamado.ABERTO,
         prioridade=PrioridadeChamado.MEDIA,
-        usuario_id=usuario_repo_teste
+        usuario_id=usuario_repo_teste,
     )
     chamado_id = chamado_repo.inserir(chamado)
     return chamado_id
@@ -99,7 +100,7 @@ def interacao_repo_teste(chamado_repo_teste, usuario_repo_teste):
         mensagem="Mensagem de teste",
         tipo=TipoInteracao.ABERTURA,
         data_interacao=None,
-        status_resultante=StatusChamado.ABERTO.value
+        status_resultante=StatusChamado.ABERTO.value,
     )
     interacao_id = chamado_interacao_repo.inserir(interacao)
     return interacao_id

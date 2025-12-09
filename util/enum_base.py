@@ -37,7 +37,7 @@ class EnumEntidade(str, Enum):
         Retorna lista de todos os nomes (keys) do enum.
 
         Returns:
-            Lista com os nomes de cada membro (ex: ['ADMIN', 'CLIENTE'])
+            Lista com os nomes de cada membro (ex: ['ADMIN', 'COMPRADOR'])
         """
         return [item.name for item in cls]
 
@@ -55,7 +55,7 @@ class EnumEntidade(str, Enum):
         return valor in cls.valores()
 
     @classmethod
-    def from_valor(cls, valor: str) -> Optional['EnumEntidade']:
+    def from_valor(cls, valor: str) -> Optional["EnumEntidade"]:
         """
         Converte uma string para o Enum correspondente.
 
@@ -92,7 +92,7 @@ class EnumEntidade(str, Enum):
         return valor
 
     @classmethod
-    def obter_por_nome(cls, nome: str) -> Optional['EnumEntidade']:
+    def obter_por_nome(cls, nome: str) -> Optional["EnumEntidade"]:
         """
         Obtém o enum pelo nome (key) ao invés do valor.
 

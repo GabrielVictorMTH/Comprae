@@ -31,13 +31,10 @@ async def home(request: Request):
         return templates_public.TemplateResponse(
             "errors/429.html",
             {"request": request},
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         )
 
-    return templates_public.TemplateResponse(
-        "index.html",
-        {"request": request}
-    )
+    return templates_public.TemplateResponse("index.html", {"request": request})
 
 
 @router.get("/index")
@@ -54,13 +51,10 @@ async def index(request: Request):
         return templates_public.TemplateResponse(
             "errors/429.html",
             {"request": request},
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         )
 
-    return templates_public.TemplateResponse(
-        "index.html",
-        {"request": request}
-    )
+    return templates_public.TemplateResponse("index.html", {"request": request})
 
 
 @router.get("/sobre")
@@ -76,10 +70,7 @@ async def sobre(request: Request):
         return templates_public.TemplateResponse(
             "errors/429.html",
             {"request": request},
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         )
 
-    return templates_public.TemplateResponse(
-        "sobre.html",
-        {"request": request}
-    )
+    return templates_public.TemplateResponse("sobre.html", {"request": request})

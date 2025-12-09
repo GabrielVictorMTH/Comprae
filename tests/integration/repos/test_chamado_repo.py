@@ -3,6 +3,7 @@ Testes de integração para o repositório de chamados.
 
 Testa as operações CRUD e funções auxiliares do chamado_repo.
 """
+
 import pytest
 
 from repo import chamado_repo, chamado_interacao_repo, usuario_repo
@@ -23,7 +24,7 @@ class TestChamadoRepoInserir:
             titulo="Novo Chamado",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.MEDIA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
 
         chamado_id = chamado_repo.inserir(chamado)
@@ -38,7 +39,7 @@ class TestChamadoRepoInserir:
             titulo="Chamado Urgente",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.ALTA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
 
         chamado_id = chamado_repo.inserir(chamado)
@@ -54,7 +55,7 @@ class TestChamadoRepoInserir:
             titulo="Chamado Urgentissimo",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.URGENTE,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
 
         chamado_id = chamado_repo.inserir(chamado)
@@ -101,7 +102,7 @@ class TestChamadoRepoObterTodos:
             titulo="Chamado para Listar",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.BAIXA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
         chamado_id = chamado_repo.inserir(chamado)
 
@@ -130,7 +131,7 @@ class TestChamadoRepoObterPorUsuario:
             nome="Usuario Sem Chamados",
             email="sem_chamados@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario_id = usuario_repo.inserir(usuario)
 
@@ -148,7 +149,7 @@ class TestChamadoRepoObterPorUsuario:
                 titulo=f"Chamado {i}",
                 status=StatusChamado.ABERTO,
                 prioridade=PrioridadeChamado.MEDIA,
-                usuario_id=usuario_repo_teste
+                usuario_id=usuario_repo_teste,
             )
             chamado_repo.inserir(chamado)
 
@@ -163,8 +164,7 @@ class TestChamadoRepoAtualizarStatus:
     def test_atualizar_status_para_em_analise(self, chamado_repo_teste):
         """Deve atualizar status para Em Análise."""
         resultado = chamado_repo.atualizar_status(
-            chamado_repo_teste,
-            StatusChamado.EM_ANALISE.value
+            chamado_repo_teste, StatusChamado.EM_ANALISE.value
         )
 
         assert resultado is True
@@ -174,8 +174,7 @@ class TestChamadoRepoAtualizarStatus:
     def test_atualizar_status_para_resolvido(self, chamado_repo_teste):
         """Deve atualizar status para Resolvido."""
         resultado = chamado_repo.atualizar_status(
-            chamado_repo_teste,
-            StatusChamado.RESOLVIDO.value
+            chamado_repo_teste, StatusChamado.RESOLVIDO.value
         )
 
         assert resultado is True
@@ -185,9 +184,7 @@ class TestChamadoRepoAtualizarStatus:
     def test_atualizar_status_e_fechar(self, chamado_repo_teste):
         """Deve atualizar status e definir data de fechamento."""
         resultado = chamado_repo.atualizar_status(
-            chamado_repo_teste,
-            StatusChamado.FECHADO.value,
-            fechar=True
+            chamado_repo_teste, StatusChamado.FECHADO.value, fechar=True
         )
 
         assert resultado is True
@@ -197,10 +194,7 @@ class TestChamadoRepoAtualizarStatus:
 
     def test_atualizar_status_inexistente(self):
         """Deve retornar False quando chamado não existe."""
-        resultado = chamado_repo.atualizar_status(
-            99999,
-            StatusChamado.EM_ANALISE.value
-        )
+        resultado = chamado_repo.atualizar_status(99999, StatusChamado.EM_ANALISE.value)
 
         assert resultado is False
 
@@ -215,7 +209,7 @@ class TestChamadoRepoExcluir:
             titulo="Chamado para Excluir",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.MEDIA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
         chamado_id = chamado_repo.inserir(chamado)
 
@@ -244,7 +238,7 @@ class TestChamadoRepoContadores:
                 titulo=f"Chamado Aberto {i}",
                 status=StatusChamado.ABERTO,
                 prioridade=PrioridadeChamado.MEDIA,
-                usuario_id=usuario_repo_teste
+                usuario_id=usuario_repo_teste,
             )
             chamado_repo.inserir(chamado)
 
@@ -254,7 +248,7 @@ class TestChamadoRepoContadores:
             titulo="Chamado Fechado",
             status=StatusChamado.FECHADO,
             prioridade=PrioridadeChamado.MEDIA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
         chamado_repo.inserir(chamado_fechado)
 
@@ -270,7 +264,7 @@ class TestChamadoRepoContadores:
             nome="Usuario Contador",
             email="contador@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario_id = usuario_repo.inserir(usuario)
 
@@ -286,7 +280,7 @@ class TestChamadoRepoContadores:
             titulo="Chamado Pendente",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.MEDIA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
         chamado_repo.inserir(chamado)
 
@@ -317,7 +311,7 @@ class TestChamadoRepoEnums:
                 titulo=f"Chamado Status {status.value}",
                 status=status,
                 prioridade=PrioridadeChamado.MEDIA,
-                usuario_id=usuario_repo_teste
+                usuario_id=usuario_repo_teste,
             )
             chamado_id = chamado_repo.inserir(chamado)
 
@@ -332,7 +326,7 @@ class TestChamadoRepoEnums:
                 titulo=f"Chamado Prioridade {prioridade.value}",
                 status=StatusChamado.ABERTO,
                 prioridade=prioridade,
-                usuario_id=usuario_repo_teste
+                usuario_id=usuario_repo_teste,
             )
             chamado_id = chamado_repo.inserir(chamado)
 
@@ -357,7 +351,7 @@ class TestChamadoInteracaoRepoInserir:
             mensagem="Nova interação",
             tipo=TipoInteracao.ABERTURA,
             data_interacao=None,
-            status_resultante=StatusChamado.ABERTO.value
+            status_resultante=StatusChamado.ABERTO.value,
         )
 
         interacao_id = chamado_interacao_repo.inserir(interacao)
@@ -365,7 +359,9 @@ class TestChamadoInteracaoRepoInserir:
         assert interacao_id is not None
         assert interacao_id > 0
 
-    def test_inserir_interacao_tipo_resposta_usuario(self, chamado_repo_teste, usuario_repo_teste):
+    def test_inserir_interacao_tipo_resposta_usuario(
+        self, chamado_repo_teste, usuario_repo_teste
+    ):
         """Deve inserir interação do tipo resposta do usuário."""
         interacao = ChamadoInteracao(
             id=0,
@@ -374,7 +370,7 @@ class TestChamadoInteracaoRepoInserir:
             mensagem="Resposta do usuário",
             tipo=TipoInteracao.RESPOSTA_USUARIO,
             data_interacao=None,
-            status_resultante=None
+            status_resultante=None,
         )
 
         interacao_id = chamado_interacao_repo.inserir(interacao)
@@ -383,7 +379,9 @@ class TestChamadoInteracaoRepoInserir:
         interacao_salva = chamado_interacao_repo.obter_por_id(interacao_id)
         assert interacao_salva.tipo == TipoInteracao.RESPOSTA_USUARIO
 
-    def test_inserir_interacao_tipo_resposta_admin(self, chamado_repo_teste, admin_repo_teste):
+    def test_inserir_interacao_tipo_resposta_admin(
+        self, chamado_repo_teste, admin_repo_teste
+    ):
         """Deve inserir interação do tipo resposta do administrador."""
         interacao = ChamadoInteracao(
             id=0,
@@ -392,7 +390,7 @@ class TestChamadoInteracaoRepoInserir:
             mensagem="Resposta do administrador",
             tipo=TipoInteracao.RESPOSTA_ADMIN,
             data_interacao=None,
-            status_resultante=StatusChamado.EM_ANALISE.value
+            status_resultante=StatusChamado.EM_ANALISE.value,
         )
 
         interacao_id = chamado_interacao_repo.inserir(interacao)
@@ -423,7 +421,9 @@ class TestChamadoInteracaoRepoObterPorId:
 class TestChamadoInteracaoRepoObterPorChamado:
     """Testes para a função obter_por_chamado."""
 
-    def test_obter_por_chamado_com_interacoes(self, chamado_repo_teste, usuario_repo_teste):
+    def test_obter_por_chamado_com_interacoes(
+        self, chamado_repo_teste, usuario_repo_teste
+    ):
         """Deve retornar todas as interações do chamado."""
         # Criar múltiplas interações
         for i in range(3):
@@ -434,7 +434,7 @@ class TestChamadoInteracaoRepoObterPorChamado:
                 mensagem=f"Interação {i}",
                 tipo=TipoInteracao.RESPOSTA_USUARIO,
                 data_interacao=None,
-                status_resultante=None
+                status_resultante=None,
             )
             chamado_interacao_repo.inserir(interacao)
 
@@ -451,7 +451,7 @@ class TestChamadoInteracaoRepoObterPorChamado:
             titulo="Chamado Sem Interações",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.MEDIA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
         chamado_id = chamado_repo.inserir(chamado)
 
@@ -464,7 +464,9 @@ class TestChamadoInteracaoRepoObterPorChamado:
 class TestChamadoInteracaoRepoContarPorChamado:
     """Testes para a função contar_por_chamado."""
 
-    def test_contar_por_chamado_com_interacoes(self, chamado_repo_teste, usuario_repo_teste):
+    def test_contar_por_chamado_com_interacoes(
+        self, chamado_repo_teste, usuario_repo_teste
+    ):
         """Deve contar corretamente as interações do chamado."""
         # Criar 3 interações
         for i in range(3):
@@ -475,7 +477,7 @@ class TestChamadoInteracaoRepoContarPorChamado:
                 mensagem=f"Contagem {i}",
                 tipo=TipoInteracao.RESPOSTA_USUARIO,
                 data_interacao=None,
-                status_resultante=None
+                status_resultante=None,
             )
             chamado_interacao_repo.inserir(interacao)
 
@@ -492,7 +494,7 @@ class TestChamadoInteracaoRepoContarPorChamado:
             titulo="Chamado Vazio",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.MEDIA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
         chamado_id = chamado_repo.inserir(chamado)
 
@@ -512,7 +514,7 @@ class TestChamadoInteracaoRepoExcluirPorChamado:
             titulo="Chamado para Excluir Interações",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.MEDIA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
         chamado_id = chamado_repo.inserir(chamado)
 
@@ -524,7 +526,7 @@ class TestChamadoInteracaoRepoExcluirPorChamado:
                 mensagem=f"Para excluir {i}",
                 tipo=TipoInteracao.RESPOSTA_USUARIO,
                 data_interacao=None,
-                status_resultante=None
+                status_resultante=None,
             )
             chamado_interacao_repo.inserir(interacao)
 
@@ -542,7 +544,7 @@ class TestChamadoInteracaoRepoExcluirPorChamado:
             titulo="Chamado Vazio para Exclusão",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.MEDIA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
         chamado_id = chamado_repo.inserir(chamado)
 
@@ -554,7 +556,9 @@ class TestChamadoInteracaoRepoExcluirPorChamado:
 class TestChamadoInteracaoRepoMarcarComoLidas:
     """Testes para a função marcar_como_lidas."""
 
-    def test_marcar_como_lidas_mensagens_outros(self, chamado_repo_teste, usuario_repo_teste, admin_repo_teste):
+    def test_marcar_como_lidas_mensagens_outros(
+        self, chamado_repo_teste, usuario_repo_teste, admin_repo_teste
+    ):
         """Deve marcar como lidas mensagens de outros usuários."""
         # Criar interação do admin
         interacao = ChamadoInteracao(
@@ -564,16 +568,20 @@ class TestChamadoInteracaoRepoMarcarComoLidas:
             mensagem="Mensagem do admin",
             tipo=TipoInteracao.RESPOSTA_ADMIN,
             data_interacao=None,
-            status_resultante=None
+            status_resultante=None,
         )
         chamado_interacao_repo.inserir(interacao)
 
-        # Usuário cliente visualiza e marca como lido
-        resultado = chamado_interacao_repo.marcar_como_lidas(chamado_repo_teste, usuario_repo_teste)
+        # Usuário comprador visualiza e marca como lido
+        resultado = chamado_interacao_repo.marcar_como_lidas(
+            chamado_repo_teste, usuario_repo_teste
+        )
 
         assert resultado is True
 
-    def test_marcar_como_lidas_nao_marca_proprias(self, chamado_repo_teste, usuario_repo_teste):
+    def test_marcar_como_lidas_nao_marca_proprias(
+        self, chamado_repo_teste, usuario_repo_teste
+    ):
         """Deve retornar True (não precisa marcar próprias mensagens)."""
         # Criar interação do próprio usuário
         interacao = ChamadoInteracao(
@@ -583,11 +591,13 @@ class TestChamadoInteracaoRepoMarcarComoLidas:
             mensagem="Minha mensagem",
             tipo=TipoInteracao.RESPOSTA_USUARIO,
             data_interacao=None,
-            status_resultante=None
+            status_resultante=None,
         )
         chamado_interacao_repo.inserir(interacao)
 
-        resultado = chamado_interacao_repo.marcar_como_lidas(chamado_repo_teste, usuario_repo_teste)
+        resultado = chamado_interacao_repo.marcar_como_lidas(
+            chamado_repo_teste, usuario_repo_teste
+        )
 
         assert resultado is True
 
@@ -595,7 +605,9 @@ class TestChamadoInteracaoRepoMarcarComoLidas:
 class TestChamadoInteracaoRepoObterContadorNaoLidas:
     """Testes para a função obter_contador_nao_lidas."""
 
-    def test_obter_contador_nao_lidas_com_mensagens(self, usuario_repo_teste, admin_repo_teste):
+    def test_obter_contador_nao_lidas_com_mensagens(
+        self, usuario_repo_teste, admin_repo_teste
+    ):
         """Deve retornar contagem de mensagens não lidas por chamado."""
         # Criar chamado
         chamado = Chamado(
@@ -603,11 +615,11 @@ class TestChamadoInteracaoRepoObterContadorNaoLidas:
             titulo="Chamado com Não Lidas",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.MEDIA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
         chamado_id = chamado_repo.inserir(chamado)
 
-        # Criar interações do admin (não lidas pelo cliente)
+        # Criar interações do admin (não lidas pelo comprador)
         for i in range(2):
             interacao = ChamadoInteracao(
                 id=0,
@@ -616,7 +628,7 @@ class TestChamadoInteracaoRepoObterContadorNaoLidas:
                 mensagem=f"Resposta admin {i}",
                 tipo=TipoInteracao.RESPOSTA_ADMIN,
                 data_interacao=None,
-                status_resultante=None
+                status_resultante=None,
             )
             chamado_interacao_repo.inserir(interacao)
 
@@ -637,7 +649,9 @@ class TestChamadoInteracaoRepoObterContadorNaoLidas:
 class TestChamadoInteracaoRepoTemRespostaAdmin:
     """Testes para a função tem_resposta_admin."""
 
-    def test_tem_resposta_admin_quando_existe(self, chamado_repo_teste, admin_repo_teste):
+    def test_tem_resposta_admin_quando_existe(
+        self, chamado_repo_teste, admin_repo_teste
+    ):
         """Deve retornar True quando há resposta de admin."""
         interacao = ChamadoInteracao(
             id=0,
@@ -646,7 +660,7 @@ class TestChamadoInteracaoRepoTemRespostaAdmin:
             mensagem="Resposta administrativa",
             tipo=TipoInteracao.RESPOSTA_ADMIN,
             data_interacao=None,
-            status_resultante=None
+            status_resultante=None,
         )
         chamado_interacao_repo.inserir(interacao)
 
@@ -654,7 +668,9 @@ class TestChamadoInteracaoRepoTemRespostaAdmin:
 
         assert resultado is True
 
-    def test_tem_resposta_admin_quando_nao_existe(self, chamado_repo_teste, usuario_repo_teste):
+    def test_tem_resposta_admin_quando_nao_existe(
+        self, chamado_repo_teste, usuario_repo_teste
+    ):
         """Deve retornar False quando só há respostas de usuário."""
         interacao = ChamadoInteracao(
             id=0,
@@ -663,7 +679,7 @@ class TestChamadoInteracaoRepoTemRespostaAdmin:
             mensagem="Resposta do usuário",
             tipo=TipoInteracao.RESPOSTA_USUARIO,
             data_interacao=None,
-            status_resultante=None
+            status_resultante=None,
         )
         chamado_interacao_repo.inserir(interacao)
 
@@ -678,7 +694,7 @@ class TestChamadoInteracaoRepoTemRespostaAdmin:
             titulo="Chamado Sem Respostas",
             status=StatusChamado.ABERTO,
             prioridade=PrioridadeChamado.MEDIA,
-            usuario_id=usuario_repo_teste
+            usuario_id=usuario_repo_teste,
         )
         chamado_id = chamado_repo.inserir(chamado)
 
@@ -710,7 +726,7 @@ class TestChamadoInteracaoRepoEnums:
                 mensagem=f"Interação tipo {tipo.value}",
                 tipo=tipo,
                 data_interacao=None,
-                status_resultante=None
+                status_resultante=None,
             )
             interacao_id = chamado_interacao_repo.inserir(interacao)
 

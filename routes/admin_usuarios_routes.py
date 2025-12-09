@@ -58,7 +58,9 @@ async def index(request: Request, usuario_logado: Optional[UsuarioLogado] = None
     """Redireciona para lista de usuários"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
-    return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    return RedirectResponse(
+        "/admin/usuarios/listar", status_code=status.HTTP_307_TEMPORARY_REDIRECT
+    )
 
 
 @router.get("/listar")
@@ -70,20 +72,22 @@ async def listar(request: Request, usuario_logado: Optional[UsuarioLogado] = Non
     usuarios = usuario_repo.obter_todos()
     return templates.TemplateResponse(
         "admin/usuarios/listar.html",
-        {"request": request, "usuarios": usuarios, "usuario_logado": usuario_logado}
+        {"request": request, "usuarios": usuarios, "usuario_logado": usuario_logado},
     )
 
 
 @router.get("/cadastrar")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def get_cadastrar(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
+async def get_cadastrar(
+    request: Request, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Exibe formulário de cadastro de usuário"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     perfis = Perfil.valores()
     return templates.TemplateResponse(
         "admin/usuarios/cadastro.html",
-        {"request": request, "perfis": perfis, "usuario_logado": usuario_logado}
+        {"request": request, "perfis": perfis, "usuario_logado": usuario_logado},
     )
 
 
@@ -95,7 +99,7 @@ async def post_cadastrar(
     email: str = Form(...),
     senha: str = Form(...),
     perfil: str = Form(...),
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Cadastra um novo usuário"""
     if not usuario_logado:
@@ -104,20 +108,19 @@ async def post_cadastrar(
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_usuarios_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
+        return RedirectResponse(
+            "/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Armazena os dados do formulário para reexibição em caso de erro
     dados_formulario: dict = {"nome": nome, "email": email, "perfil": perfil}
 
     try:
         # Validar com DTO
-        dto = CriarUsuarioDTO(
-            nome=nome,
-            email=email,
-            senha=senha,
-            perfil=perfil
-        )
+        dto = CriarUsuarioDTO(nome=nome, email=email, senha=senha, perfil=perfil)
 
         # Verificar se e-mail já existe
         disponivel, mensagem_erro = verificar_email_disponivel(dto.email)
@@ -131,7 +134,7 @@ async def post_cadastrar(
                     "perfis": perfis,
                     "dados": {"nome": nome, "email": email, "perfil": perfil},
                     "usuario_logado": usuario_logado,
-                }
+                },
             )
 
         # Criar hash da senha
@@ -139,18 +142,16 @@ async def post_cadastrar(
 
         # Criar usuário
         usuario = Usuario(
-            id=0,
-            nome=dto.nome,
-            email=dto.email,
-            senha=senha_hash,
-            perfil=dto.perfil
+            id=0, nome=dto.nome, email=dto.email, senha=senha_hash, perfil=dto.perfil
         )
 
         usuario_repo.inserir(usuario)
         logger.info(f"Usuário '{dto.email}' cadastrado por admin {usuario_logado.id}")
 
         informar_sucesso(request, "Usuário cadastrado com sucesso!")
-        return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     except ValidationError as e:
         # Adicionar perfis aos dados para renderizar o select no template
@@ -165,7 +166,9 @@ async def post_cadastrar(
 
 @router.get("/editar/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def get_editar(request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None):
+async def get_editar(
+    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Exibe formulário de alteração de usuário"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -174,14 +177,14 @@ async def get_editar(request: Request, id: int, usuario_logado: Optional[Usuario
         usuario_repo.obter_por_id(id),
         request,
         "Usuário não encontrado",
-        "/admin/usuarios/listar"
+        "/admin/usuarios/listar",
     )
     if isinstance(usuario, RedirectResponse):
         return usuario
 
     # Criar cópia dos dados do usuário sem o campo senha (para não expor hash no HTML)
     dados_usuario = usuario.__dict__.copy()
-    dados_usuario.pop('senha', None)
+    dados_usuario.pop("senha", None)
 
     perfis = Perfil.valores()
     return templates.TemplateResponse(
@@ -192,7 +195,7 @@ async def get_editar(request: Request, id: int, usuario_logado: Optional[Usuario
             "dados": dados_usuario,
             "perfis": perfis,
             "usuario_logado": usuario_logado,
-        }
+        },
     )
 
 
@@ -204,7 +207,7 @@ async def post_editar(
     nome: str = Form(...),
     email: str = Form(...),
     perfil: str = Form(...),
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Altera dados de um usuário"""
     if not usuario_logado:
@@ -213,15 +216,19 @@ async def post_editar(
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_usuarios_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
+        return RedirectResponse(
+            "/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Obter usuário ou retornar 404
     usuario_atual = obter_ou_404(
         usuario_repo.obter_por_id(id),
         request,
         "Usuário não encontrado",
-        "/admin/usuarios/listar"
+        "/admin/usuarios/listar",
     )
     if isinstance(usuario_atual, RedirectResponse):
         return usuario_atual
@@ -231,12 +238,7 @@ async def post_editar(
 
     try:
         # Validar com DTO
-        dto = AlterarUsuarioDTO(
-            id=id,
-            nome=nome,
-            email=email,
-            perfil=perfil
-        )
+        dto = AlterarUsuarioDTO(id=id, nome=nome, email=email, perfil=perfil)
 
         # Verificar se e-mail já existe em outro usuário
         disponivel, mensagem_erro = verificar_email_disponivel(dto.email, id)
@@ -251,7 +253,7 @@ async def post_editar(
                     "perfis": perfis,
                     "dados": {"id": id, "nome": nome, "email": email, "perfil": perfil},
                     "usuario_logado": usuario_logado,
-                }
+                },
             )
 
         # Atualizar usuário
@@ -260,14 +262,16 @@ async def post_editar(
             nome=dto.nome,
             email=dto.email,
             senha=usuario_atual.senha,  # Mantém senha existente
-            perfil=dto.perfil
+            perfil=dto.perfil,
         )
 
         usuario_repo.alterar(usuario_atualizado)
         logger.info(f"Usuário {id} alterado por admin {usuario_logado.id}")
 
         informar_sucesso(request, "Usuário alterado com sucesso!")
-        return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     except ValidationError as e:
         # Adicionar perfis e usuario aos dados para renderizar o template
@@ -283,7 +287,9 @@ async def post_editar(
 
 @router.post("/excluir/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def post_excluir(request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None):
+async def post_excluir(
+    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Exclui um usuário"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -291,15 +297,19 @@ async def post_excluir(request: Request, id: int, usuario_logado: Optional[Usuar
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_usuarios_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
+        return RedirectResponse(
+            "/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Obter usuário ou retornar 404
     usuario = obter_ou_404(
         usuario_repo.obter_por_id(id),
         request,
         "Usuário não encontrado",
-        "/admin/usuarios/listar"
+        "/admin/usuarios/listar",
     )
     if isinstance(usuario, RedirectResponse):
         return usuario
@@ -308,9 +318,15 @@ async def post_excluir(request: Request, id: int, usuario_logado: Optional[Usuar
     if usuario.id == usuario_logado.id:
         informar_erro(request, "Você não pode excluir seu próprio usuário")
         logger.warning(f"Admin {usuario_logado.id} tentou excluir a si mesmo")
-        return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     usuario_repo.excluir(id)
-    logger.info(f"Usuário {id} ({usuario.email}) excluído por admin {usuario_logado.id}")
+    logger.info(
+        f"Usuário {id} ({usuario.email}) excluído por admin {usuario_logado.id}"
+    )
     informar_sucesso(request, "Usuário excluído com sucesso!")
-    return RedirectResponse("/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(
+        "/admin/usuarios/listar", status_code=status.HTTP_303_SEE_OTHER
+    )

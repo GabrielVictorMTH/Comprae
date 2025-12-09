@@ -12,7 +12,7 @@ from util.permission_helpers import (
     verificar_propriedade,
     verificar_propriedade_ou_admin,
     verificar_perfil,
-    verificar_multiplas_condicoes
+    verificar_multiplas_condicoes,
 )
 from util.perfis import Perfil
 
@@ -20,6 +20,7 @@ from util.perfis import Perfil
 @dataclass
 class EntidadeExemplo:
     """Entidade de exemplo para testes"""
+
     id: int
     usuario_id: int
     nome: str
@@ -28,6 +29,7 @@ class EntidadeExemplo:
 @dataclass
 class EntidadeCustomField:
     """Entidade com campo de proprietário customizado"""
+
     id: int
     criado_por: int
     nome: str
@@ -35,6 +37,7 @@ class EntidadeCustomField:
 
 class UsuarioLogadoMock:
     """Mock de UsuarioLogado para testes"""
+
     def __init__(self, id: int, perfil: str):
         self.id = id
         self.perfil = perfil
@@ -59,9 +62,7 @@ class TestVerificarPropriedade:
         entidade = EntidadeExemplo(id=1, usuario_id=10, nome="Teste")
 
         resultado = verificar_propriedade(
-            entity=entidade,
-            usuario_id=10,
-            request=request_mock
+            entity=entidade, usuario_id=10, request=request_mock
         )
 
         assert resultado is True
@@ -71,9 +72,7 @@ class TestVerificarPropriedade:
         entidade = EntidadeExemplo(id=1, usuario_id=10, nome="Teste")
 
         resultado = verificar_propriedade(
-            entity=entidade,
-            usuario_id=20,
-            request=request_mock
+            entity=entidade, usuario_id=20, request=request_mock
         )
 
         assert resultado is False
@@ -81,9 +80,7 @@ class TestVerificarPropriedade:
     def test_entidade_none_bloqueia(self, request_mock):
         """Entidade None deve bloquear"""
         resultado = verificar_propriedade(
-            entity=None,
-            usuario_id=10,
-            request=request_mock
+            entity=None, usuario_id=10, request=request_mock
         )
 
         assert resultado is False
@@ -96,7 +93,7 @@ class TestVerificarPropriedade:
             entity=entidade,
             usuario_id=10,
             request=request_mock,
-            campo_usuario="criado_por"
+            campo_usuario="criado_por",
         )
 
         assert resultado is True
@@ -109,7 +106,7 @@ class TestVerificarPropriedade:
             entity=entidade,
             usuario_id=10,
             request=request_mock,
-            campo_usuario="campo_que_nao_existe"
+            campo_usuario="campo_que_nao_existe",
         )
 
         assert resultado is False
@@ -118,12 +115,12 @@ class TestVerificarPropriedade:
         """Deve usar mensagem de erro customizada"""
         entidade = EntidadeExemplo(id=1, usuario_id=10, nome="Teste")
 
-        with patch('util.permission_helpers.informar_erro') as mock_erro:
+        with patch("util.permission_helpers.informar_erro") as mock_erro:
             verificar_propriedade(
                 entity=entidade,
                 usuario_id=20,
                 request=request_mock,
-                mensagem_erro="Acesso negado personalizado"
+                mensagem_erro="Acesso negado personalizado",
             )
 
             mock_erro.assert_called_once()
@@ -134,12 +131,9 @@ class TestVerificarPropriedade:
         """Deve registrar log quando habilitado"""
         entidade = EntidadeExemplo(id=1, usuario_id=10, nome="Teste")
 
-        with patch('util.permission_helpers.logger') as mock_logger:
+        with patch("util.permission_helpers.logger") as mock_logger:
             verificar_propriedade(
-                entity=entidade,
-                usuario_id=20,
-                request=request_mock,
-                log_tentativa=True
+                entity=entidade, usuario_id=20, request=request_mock, log_tentativa=True
             )
 
             mock_logger.warning.assert_called_once()
@@ -148,12 +142,12 @@ class TestVerificarPropriedade:
         """Não deve registrar log quando desabilitado"""
         entidade = EntidadeExemplo(id=1, usuario_id=10, nome="Teste")
 
-        with patch('util.permission_helpers.logger') as mock_logger:
+        with patch("util.permission_helpers.logger") as mock_logger:
             verificar_propriedade(
                 entity=entidade,
                 usuario_id=20,
                 request=request_mock,
-                log_tentativa=False
+                log_tentativa=False,
             )
 
             mock_logger.warning.assert_not_called()
@@ -176,9 +170,7 @@ class TestVerificarPropriedadeOuAdmin:
         admin = UsuarioLogadoMock(id=99, perfil=Perfil.ADMIN.value)
 
         resultado = verificar_propriedade_ou_admin(
-            entity=entidade,
-            usuario_logado=admin,
-            request=request_mock
+            entity=entidade, usuario_logado=admin, request=request_mock
         )
 
         assert resultado is True
@@ -186,12 +178,10 @@ class TestVerificarPropriedadeOuAdmin:
     def test_proprietario_tem_acesso(self, request_mock):
         """Proprietário não-admin deve ter acesso à própria entidade"""
         entidade = EntidadeExemplo(id=1, usuario_id=10, nome="Teste")
-        usuario = UsuarioLogadoMock(id=10, perfil=Perfil.CLIENTE.value)
+        usuario = UsuarioLogadoMock(id=10, perfil=Perfil.COMPRADOR.value)
 
         resultado = verificar_propriedade_ou_admin(
-            entity=entidade,
-            usuario_logado=usuario,
-            request=request_mock
+            entity=entidade, usuario_logado=usuario, request=request_mock
         )
 
         assert resultado is True
@@ -199,12 +189,10 @@ class TestVerificarPropriedadeOuAdmin:
     def test_nao_proprietario_nao_admin_bloqueado(self, request_mock):
         """Não-proprietário não-admin deve ser bloqueado"""
         entidade = EntidadeExemplo(id=1, usuario_id=10, nome="Teste")
-        usuario = UsuarioLogadoMock(id=20, perfil=Perfil.CLIENTE.value)
+        usuario = UsuarioLogadoMock(id=20, perfil=Perfil.COMPRADOR.value)
 
         resultado = verificar_propriedade_ou_admin(
-            entity=entidade,
-            usuario_logado=usuario,
-            request=request_mock
+            entity=entidade, usuario_logado=usuario, request=request_mock
         )
 
         assert resultado is False
@@ -216,9 +204,7 @@ class TestVerificarPropriedadeOuAdmin:
         # Admin bypassa verificação de propriedade, mas entidade None
         # deveria ser tratada antes
         resultado = verificar_propriedade_ou_admin(
-            entity=None,
-            usuario_logado=admin,
-            request=request_mock
+            entity=None, usuario_logado=admin, request=request_mock
         )
 
         # Admin retorna True antes de verificar entidade
@@ -241,7 +227,7 @@ class TestVerificarPerfil:
         resultado = verificar_perfil(
             usuario_perfil=Perfil.ADMIN.value,
             perfis_permitidos=[Perfil.ADMIN.value],
-            request=request_mock
+            request=request_mock,
         )
 
         assert resultado is True
@@ -249,9 +235,9 @@ class TestVerificarPerfil:
     def test_perfil_nao_permitido(self, request_mock):
         """Perfil fora da lista de permitidos deve ser bloqueado"""
         resultado = verificar_perfil(
-            usuario_perfil=Perfil.CLIENTE.value,
+            usuario_perfil=Perfil.COMPRADOR.value,
             perfis_permitidos=[Perfil.ADMIN.value],
-            request=request_mock
+            request=request_mock,
         )
 
         assert resultado is False
@@ -261,19 +247,19 @@ class TestVerificarPerfil:
         resultado = verificar_perfil(
             usuario_perfil=Perfil.VENDEDOR.value,
             perfis_permitidos=[Perfil.ADMIN.value, Perfil.VENDEDOR.value],
-            request=request_mock
+            request=request_mock,
         )
 
         assert resultado is True
 
     def test_mensagem_erro_customizada(self, request_mock):
         """Deve usar mensagem de erro customizada"""
-        with patch('util.permission_helpers.informar_erro') as mock_erro:
+        with patch("util.permission_helpers.informar_erro") as mock_erro:
             verificar_perfil(
-                usuario_perfil=Perfil.CLIENTE.value,
+                usuario_perfil=Perfil.COMPRADOR.value,
                 perfis_permitidos=[Perfil.ADMIN.value],
                 request=request_mock,
-                mensagem_erro="Apenas administradores"
+                mensagem_erro="Apenas administradores",
             )
 
             mock_erro.assert_called_once()
@@ -282,12 +268,12 @@ class TestVerificarPerfil:
 
     def test_log_tentativa_registrado(self, request_mock):
         """Deve registrar log de tentativa de acesso"""
-        with patch('util.permission_helpers.logger') as mock_logger:
+        with patch("util.permission_helpers.logger") as mock_logger:
             verificar_perfil(
-                usuario_perfil=Perfil.CLIENTE.value,
+                usuario_perfil=Perfil.COMPRADOR.value,
                 perfis_permitidos=[Perfil.ADMIN.value],
                 request=request_mock,
-                log_tentativa=True
+                log_tentativa=True,
             )
 
             mock_logger.warning.assert_called_once()
@@ -313,9 +299,7 @@ class TestVerificarMultiplasCondicoes:
         ]
 
         resultado = verificar_multiplas_condicoes(
-            condicoes=condicoes,
-            request=request_mock,
-            operador="AND"
+            condicoes=condicoes, request=request_mock, operador="AND"
         )
 
         assert resultado is True
@@ -328,11 +312,9 @@ class TestVerificarMultiplasCondicoes:
             (True, "Erro 3"),
         ]
 
-        with patch('util.permission_helpers.informar_erro') as mock_erro:
+        with patch("util.permission_helpers.informar_erro") as mock_erro:
             resultado = verificar_multiplas_condicoes(
-                condicoes=condicoes,
-                request=request_mock,
-                operador="AND"
+                condicoes=condicoes, request=request_mock, operador="AND"
             )
 
             assert resultado is False
@@ -349,9 +331,7 @@ class TestVerificarMultiplasCondicoes:
         ]
 
         resultado = verificar_multiplas_condicoes(
-            condicoes=condicoes,
-            request=request_mock,
-            operador="OR"
+            condicoes=condicoes, request=request_mock, operador="OR"
         )
 
         assert resultado is True
@@ -364,12 +344,12 @@ class TestVerificarMultiplasCondicoes:
             (False, "Erro 3"),
         ]
 
-        with patch('util.permission_helpers.informar_erro') as mock_erro:
+        with patch("util.permission_helpers.informar_erro") as mock_erro:
             resultado = verificar_multiplas_condicoes(
                 condicoes=condicoes,
                 request=request_mock,
                 operador="OR",
-                mensagem_erro_padrao="Nenhuma condição satisfeita"
+                mensagem_erro_padrao="Nenhuma condição satisfeita",
             )
 
             assert resultado is False
@@ -381,9 +361,7 @@ class TestVerificarMultiplasCondicoes:
 
         with pytest.raises(ValueError) as exc_info:
             verificar_multiplas_condicoes(
-                condicoes=condicoes,
-                request=request_mock,
-                operador="XOR"
+                condicoes=condicoes, request=request_mock, operador="XOR"
             )
 
         assert "inválido" in str(exc_info.value).lower()
@@ -394,12 +372,12 @@ class TestVerificarMultiplasCondicoes:
             (False, None),
         ]
 
-        with patch('util.permission_helpers.informar_erro') as mock_erro:
+        with patch("util.permission_helpers.informar_erro") as mock_erro:
             verificar_multiplas_condicoes(
                 condicoes=condicoes,
                 request=request_mock,
                 operador="AND",
-                mensagem_erro_padrao="Mensagem padrão"
+                mensagem_erro_padrao="Mensagem padrão",
             )
 
             mock_erro.assert_called_once()
@@ -410,12 +388,12 @@ class TestVerificarMultiplasCondicoes:
         """OR: lista vazia deve falhar com mensagem padrão"""
         condicoes = []
 
-        with patch('util.permission_helpers.informar_erro') as mock_erro:
+        with patch("util.permission_helpers.informar_erro") as mock_erro:
             resultado = verificar_multiplas_condicoes(
                 condicoes=condicoes,
                 request=request_mock,
                 operador="OR",
-                mensagem_erro_padrao="Sem condições"
+                mensagem_erro_padrao="Sem condições",
             )
 
             assert resultado is False
@@ -425,9 +403,7 @@ class TestVerificarMultiplasCondicoes:
         condicoes = []
 
         resultado = verificar_multiplas_condicoes(
-            condicoes=condicoes,
-            request=request_mock,
-            operador="AND"
+            condicoes=condicoes, request=request_mock, operador="AND"
         )
 
         assert resultado is True

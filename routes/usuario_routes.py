@@ -76,10 +76,7 @@ async def dashboard(request: Request, usuario_logado: Optional[UsuarioLogado] = 
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
 
     # Preparar dados do contexto
-    context = {
-        "request": request,
-        "usuario_logado": usuario_logado
-    }
+    context = {"request": request, "usuario_logado": usuario_logado}
 
     # Adicionar contador de chamados conforme perfil
     if usuario_logado.is_admin():
@@ -87,14 +84,18 @@ async def dashboard(request: Request, usuario_logado: Optional[UsuarioLogado] = 
         context["chamados_pendentes"] = chamado_repo.contar_pendentes()
     else:
         # Usuário comum vê seus próprios chamados em aberto
-        context["chamados_abertos"] = chamado_repo.contar_abertos_por_usuario(usuario_logado.id)
+        context["chamados_abertos"] = chamado_repo.contar_abertos_por_usuario(
+            usuario_logado.id
+        )
 
     return templates_usuario.TemplateResponse("dashboard.html", context)
 
 
 @router.get("/usuario/perfil/visualizar")
 @requer_autenticacao()
-async def get_visualizar_perfil(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
+async def get_visualizar_perfil(
+    request: Request, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Visualizar perfil do usuário logado"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -104,19 +105,22 @@ async def get_visualizar_perfil(request: Request, usuario_logado: Optional[Usuar
         usuario_repo.obter_por_id(usuario_logado.id),
         request,
         "Usuário não encontrado!",
-        "/logout"
+        "/logout",
     )
     if isinstance(usuario, RedirectResponse):
         return usuario
 
     return templates_usuario.TemplateResponse(
-        "perfil/visualizar.html", {"request": request, "usuario": usuario, "usuario_logado": usuario_logado}
+        "perfil/visualizar.html",
+        {"request": request, "usuario": usuario, "usuario_logado": usuario_logado},
     )
 
 
 @router.get("/usuario/perfil/editar")
 @requer_autenticacao()
-async def get_editar_perfil(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
+async def get_editar_perfil(
+    request: Request, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Formulário para editar dados do perfil"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -124,7 +128,10 @@ async def get_editar_perfil(request: Request, usuario_logado: Optional[UsuarioLo
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not form_get_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {form_get_limiter.janela_minutos} minuto(s).")
+        informar_erro(
+            request,
+            f"Muitas requisições. Aguarde {form_get_limiter.janela_minutos} minuto(s).",
+        )
         logger.warning(f"Rate limit excedido para formulário GET - IP: {ip}")
         return RedirectResponse("/usuario", status_code=status.HTTP_303_SEE_OTHER)
 
@@ -133,13 +140,18 @@ async def get_editar_perfil(request: Request, usuario_logado: Optional[UsuarioLo
         usuario_repo.obter_por_id(usuario_logado.id),
         request,
         "Usuário não encontrado!",
-        "/logout"
+        "/logout",
     )
     if isinstance(usuario, RedirectResponse):
         return usuario
 
     return templates_usuario.TemplateResponse(
-        "perfil/editar.html", {"request": request, "dados": usuario.__dict__, "usuario_logado": usuario_logado}
+        "perfil/editar.html",
+        {
+            "request": request,
+            "dados": usuario.__dict__,
+            "usuario_logado": usuario_logado,
+        },
     )
 
 
@@ -160,7 +172,7 @@ async def post_editar_perfil(
         usuario_repo.obter_por_id(usuario_logado.id),
         request,
         "Usuário não encontrado!",
-        "/logout"
+        "/logout",
     )
     if isinstance(usuario, RedirectResponse):
         return usuario
@@ -172,7 +184,9 @@ async def post_editar_perfil(
         dto = EditarPerfilDTO(nome=nome, email=email)
 
         # Verificar se o e-mail já está em uso por outro usuário
-        disponivel, mensagem_erro = verificar_email_disponivel(dto.email, usuario_logado.id)
+        disponivel, mensagem_erro = verificar_email_disponivel(
+            dto.email, usuario_logado.id
+        )
         if not disponivel:
             informar_erro(request, mensagem_erro)
             return templates_usuario.TemplateResponse(
@@ -180,9 +194,7 @@ async def post_editar_perfil(
                 {
                     "request": request,
                     "dados": dados_formulario,
-                    "erros": {
-                        "email": mensagem_erro
-                    },
+                    "erros": {"email": mensagem_erro},
                     "usuario_logado": usuario_logado,
                 },
             )
@@ -232,7 +244,9 @@ async def post_editar_perfil(
 
 @router.get("/usuario/perfil/alterar-senha")
 @requer_autenticacao()
-async def get_alterar_senha(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
+async def get_alterar_senha(
+    request: Request, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Formulário para alterar senha"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -240,11 +254,17 @@ async def get_alterar_senha(request: Request, usuario_logado: Optional[UsuarioLo
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not form_get_limiter.verificar(ip):
-        informar_erro(request, f"Muitas requisições. Aguarde {form_get_limiter.janela_minutos} minuto(s).")
+        informar_erro(
+            request,
+            f"Muitas requisições. Aguarde {form_get_limiter.janela_minutos} minuto(s).",
+        )
         logger.warning(f"Rate limit excedido para formulário GET - IP: {ip}")
         return RedirectResponse("/usuario", status_code=status.HTTP_303_SEE_OTHER)
 
-    return templates_usuario.TemplateResponse("perfil/alterar-senha.html", {"request": request, "usuario_logado": usuario_logado})
+    return templates_usuario.TemplateResponse(
+        "perfil/alterar-senha.html",
+        {"request": request, "usuario_logado": usuario_logado},
+    )
 
 
 @router.post("/usuario/perfil/alterar-senha")
@@ -274,7 +294,11 @@ async def post_alterar_senha(
         )
         return templates_usuario.TemplateResponse(
             "perfil/alterar-senha.html",
-            {"request": request, "erros": {"geral": msg_rate}, "usuario_logado": usuario_logado},
+            {
+                "request": request,
+                "erros": {"geral": msg_rate},
+                "usuario_logado": usuario_logado,
+            },
         )
 
     try:
@@ -290,7 +314,7 @@ async def post_alterar_senha(
             usuario_repo.obter_por_id(usuario_logado.id),
             request,
             "Usuário não encontrado!",
-            "/logout"
+            "/logout",
         )
         if isinstance(usuario, RedirectResponse):
             return usuario
@@ -340,7 +364,11 @@ async def post_alterar_senha(
             informar_erro(request, "Erro ao alterar senha. Tente novamente.")
             return templates_usuario.TemplateResponse(
                 "perfil/alterar-senha.html",
-                {"request": request, "erros": {"geral": msg_erro}, "usuario_logado": usuario_logado},
+                {
+                    "request": request,
+                    "erros": {"geral": msg_erro},
+                    "usuario_logado": usuario_logado,
+                },
             )
 
     except ValidationError as e:

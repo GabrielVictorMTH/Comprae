@@ -3,6 +3,7 @@ Testes para o repositório de mensagens.
 
 Testa todas as operações do mensagem_repo e validações do model/SQL.
 """
+
 import pytest
 from datetime import datetime
 from repo import mensagem_repo, usuario_repo
@@ -19,7 +20,7 @@ def remetente_teste():
         nome="Remetente Teste",
         email=f"remetente_{id(Usuario)}@test.com",
         senha=criar_hash_senha("senha123"),
-        perfil="Cliente"
+        perfil="Comprador",
     )
     return usuario_repo.inserir(usuario)
 
@@ -32,7 +33,7 @@ def destinatario_teste():
         nome="Destinatario Teste",
         email=f"destinatario_{id(Usuario)}@test.com",
         senha=criar_hash_senha("senha123"),
-        perfil="Vendedor"
+        perfil="Vendedor",
     )
     return usuario_repo.inserir(usuario)
 
@@ -52,7 +53,7 @@ class TestInserir:
             data_hora=datetime.now(),
             visualizada=False,
             remetente=None,
-            destinatario=None
+            destinatario=None,
         )
         resultado = mensagem_repo.inserir(mensagem)
         assert resultado is not None
@@ -68,7 +69,7 @@ class TestInserir:
             data_hora=datetime.now(),
             visualizada=False,
             remetente=None,
-            destinatario=None
+            destinatario=None,
         )
         with pytest.raises(Exception):
             mensagem_repo.inserir(mensagem)
@@ -82,7 +83,7 @@ class TestInserir:
             data_hora=datetime.now(),
             visualizada=False,
             remetente=None,
-            destinatario=None
+            destinatario=None,
         )
         with pytest.raises(Exception):
             mensagem_repo.inserir(mensagem)
@@ -98,13 +99,15 @@ class TestInserir:
             data_hora=datetime.now(),
             visualizada=False,
             remetente=None,
-            destinatario=None
+            destinatario=None,
         )
         resultado = mensagem_repo.inserir(mensagem)
         assert resultado is not None
         assert resultado.mensagem == texto_longo
 
-    def test_inserir_mensagem_visualizada_default_false(self, remetente_teste, destinatario_teste):
+    def test_inserir_mensagem_visualizada_default_false(
+        self, remetente_teste, destinatario_teste
+    ):
         """Testa que visualizada é False por padrão"""
         mensagem = Mensagem(
             id=0,
@@ -114,7 +117,7 @@ class TestInserir:
             data_hora=datetime.now(),
             visualizada=False,
             remetente=None,
-            destinatario=None
+            destinatario=None,
         )
         resultado = mensagem_repo.inserir(mensagem)
         assert resultado.visualizada is False
@@ -122,7 +125,16 @@ class TestInserir:
 
 class TestMarcarComoLida:
     def test_marcar_como_lida_sucesso(self, remetente_teste, destinatario_teste):
-        mensagem = Mensagem(0, remetente_teste, destinatario_teste, "Teste", datetime.now(), False, None, None)
+        mensagem = Mensagem(
+            0,
+            remetente_teste,
+            destinatario_teste,
+            "Teste",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         resultado = mensagem_repo.inserir(mensagem)
 
         assert mensagem_repo.marcar_como_lida(resultado.id) is True
@@ -136,7 +148,16 @@ class TestMarcarComoLida:
 
 class TestObterPorId:
     def test_obter_mensagem_existente(self, remetente_teste, destinatario_teste):
-        mensagem = Mensagem(0, remetente_teste, destinatario_teste, "Busca ID", datetime.now(), False, None, None)
+        mensagem = Mensagem(
+            0,
+            remetente_teste,
+            destinatario_teste,
+            "Busca ID",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         resultado = mensagem_repo.inserir(mensagem)
 
         recuperada = mensagem_repo.obter_por_id(resultado.id)
@@ -152,13 +173,40 @@ class TestObterPorId:
 class TestObterConversa:
     def test_obter_conversa_entre_usuarios(self, remetente_teste, destinatario_teste):
         # Criar mensagens em ambas direções
-        m1 = Mensagem(0, remetente_teste, destinatario_teste, "Msg 1", datetime.now(), False, None, None)
+        m1 = Mensagem(
+            0,
+            remetente_teste,
+            destinatario_teste,
+            "Msg 1",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         mensagem_repo.inserir(m1)
 
-        m2 = Mensagem(0, destinatario_teste, remetente_teste, "Msg 2", datetime.now(), False, None, None)
+        m2 = Mensagem(
+            0,
+            destinatario_teste,
+            remetente_teste,
+            "Msg 2",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         mensagem_repo.inserir(m2)
 
-        m3 = Mensagem(0, remetente_teste, destinatario_teste, "Msg 3", datetime.now(), False, None, None)
+        m3 = Mensagem(
+            0,
+            remetente_teste,
+            destinatario_teste,
+            "Msg 3",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         mensagem_repo.inserir(m3)
 
         conversa = mensagem_repo.obter_conversa(remetente_teste, destinatario_teste)
@@ -166,15 +214,40 @@ class TestObterConversa:
 
         # Verificar que todas as mensagens são entre esses dois usuários
         for msg in conversa:
-            assert (msg.id_remetente == remetente_teste and msg.id_destinatario == destinatario_teste) or \
-                   (msg.id_remetente == destinatario_teste and msg.id_destinatario == remetente_teste)
+            assert (
+                msg.id_remetente == remetente_teste
+                and msg.id_destinatario == destinatario_teste
+            ) or (
+                msg.id_remetente == destinatario_teste
+                and msg.id_destinatario == remetente_teste
+            )
 
-    def test_obter_conversa_ordenacao_cronologica(self, remetente_teste, destinatario_teste):
+    def test_obter_conversa_ordenacao_cronologica(
+        self, remetente_teste, destinatario_teste
+    ):
         """Testa que conversa vem ordenada por data_hora ASC"""
-        m1 = Mensagem(0, remetente_teste, destinatario_teste, "Primeira", datetime.now(), False, None, None)
+        m1 = Mensagem(
+            0,
+            remetente_teste,
+            destinatario_teste,
+            "Primeira",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         r1 = mensagem_repo.inserir(m1)
 
-        m2 = Mensagem(0, destinatario_teste, remetente_teste, "Segunda", datetime.now(), False, None, None)
+        m2 = Mensagem(
+            0,
+            destinatario_teste,
+            remetente_teste,
+            "Segunda",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         r2 = mensagem_repo.inserir(m2)
 
         conversa = mensagem_repo.obter_conversa(remetente_teste, destinatario_teste)
@@ -187,8 +260,12 @@ class TestObterConversa:
 
     def test_obter_conversa_vazia(self):
         """Testa conversa entre usuários que nunca conversaram"""
-        u1 = usuario_repo.inserir(Usuario(0, "U1", "u1@t.com", criar_hash_senha("123"), "Cliente"))
-        u2 = usuario_repo.inserir(Usuario(0, "U2", "u2@t.com", criar_hash_senha("123"), "Cliente"))
+        u1 = usuario_repo.inserir(
+            Usuario(0, "U1", "u1@t.com", criar_hash_senha("123"), "Comprador")
+        )
+        u2 = usuario_repo.inserir(
+            Usuario(0, "U2", "u2@t.com", criar_hash_senha("123"), "Comprador")
+        )
 
         conversa = mensagem_repo.obter_conversa(u1, u2)
         assert isinstance(conversa, list)
@@ -199,7 +276,16 @@ class TestObterMensagensRecebidas:
     def test_obter_mensagens_recebidas(self, remetente_teste, destinatario_teste):
         # Criar mensagens para destinatario_teste
         for i in range(3):
-            m = Mensagem(0, remetente_teste, destinatario_teste, f"Msg {i}", datetime.now(), False, None, None)
+            m = Mensagem(
+                0,
+                remetente_teste,
+                destinatario_teste,
+                f"Msg {i}",
+                datetime.now(),
+                False,
+                None,
+                None,
+            )
             mensagem_repo.inserir(m)
 
         recebidas = mensagem_repo.obter_mensagens_recebidas(destinatario_teste)
@@ -208,17 +294,39 @@ class TestObterMensagensRecebidas:
 
     def test_obter_mensagens_recebidas_vazio(self):
         """Testa usuário sem mensagens recebidas"""
-        u = usuario_repo.inserir(Usuario(0, "Sem Msgs", "sem@msg.com", criar_hash_senha("123"), "Cliente"))
+        u = usuario_repo.inserir(
+            Usuario(0, "Sem Msgs", "sem@msg.com", criar_hash_senha("123"), "Comprador")
+        )
         recebidas = mensagem_repo.obter_mensagens_recebidas(u)
         assert isinstance(recebidas, list)
         assert len(recebidas) == 0
 
-    def test_obter_mensagens_recebidas_ordenacao(self, remetente_teste, destinatario_teste):
+    def test_obter_mensagens_recebidas_ordenacao(
+        self, remetente_teste, destinatario_teste
+    ):
         """Testa que mensagens recebidas vêm ordenadas por data DESC"""
-        m1 = Mensagem(0, remetente_teste, destinatario_teste, "Msg1", datetime.now(), False, None, None)
+        m1 = Mensagem(
+            0,
+            remetente_teste,
+            destinatario_teste,
+            "Msg1",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         r1 = mensagem_repo.inserir(m1)
 
-        m2 = Mensagem(0, remetente_teste, destinatario_teste, "Msg2", datetime.now(), False, None, None)
+        m2 = Mensagem(
+            0,
+            remetente_teste,
+            destinatario_teste,
+            "Msg2",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         r2 = mensagem_repo.inserir(m2)
 
         recebidas = mensagem_repo.obter_mensagens_recebidas(destinatario_teste)
@@ -233,14 +341,41 @@ class TestObterMensagensRecebidas:
 class TestObterMensagensNaoLidas:
     def test_obter_mensagens_nao_lidas(self, remetente_teste, destinatario_teste):
         # Criar mensagens não lidas
-        m1 = Mensagem(0, remetente_teste, destinatario_teste, "Não lida 1", datetime.now(), False, None, None)
+        m1 = Mensagem(
+            0,
+            remetente_teste,
+            destinatario_teste,
+            "Não lida 1",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         r1 = mensagem_repo.inserir(m1)
 
-        m2 = Mensagem(0, remetente_teste, destinatario_teste, "Não lida 2", datetime.now(), False, None, None)
+        m2 = Mensagem(
+            0,
+            remetente_teste,
+            destinatario_teste,
+            "Não lida 2",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         r2 = mensagem_repo.inserir(m2)
 
         # Criar mensagem lida
-        m3 = Mensagem(0, remetente_teste, destinatario_teste, "Lida", datetime.now(), False, None, None)
+        m3 = Mensagem(
+            0,
+            remetente_teste,
+            destinatario_teste,
+            "Lida",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         r3 = mensagem_repo.inserir(m3)
         mensagem_repo.marcar_como_lida(r3.id)
 
@@ -253,7 +388,9 @@ class TestObterMensagensNaoLidas:
 
     def test_obter_mensagens_nao_lidas_vazio(self):
         """Testa usuário sem mensagens não lidas"""
-        u = usuario_repo.inserir(Usuario(0, "Sem NL", "semnl@t.com", criar_hash_senha("123"), "Cliente"))
+        u = usuario_repo.inserir(
+            Usuario(0, "Sem NL", "semnl@t.com", criar_hash_senha("123"), "Comprador")
+        )
         nao_lidas = mensagem_repo.obter_mensagens_nao_lidas(u)
         assert isinstance(nao_lidas, list)
         assert len(nao_lidas) == 0
@@ -263,12 +400,30 @@ class TestContarNaoLidas:
     def test_contar_nao_lidas(self, remetente_teste, destinatario_teste):
         # Criar mensagens não lidas
         for i in range(5):
-            m = Mensagem(0, remetente_teste, destinatario_teste, f"NL {i}", datetime.now(), False, None, None)
+            m = Mensagem(
+                0,
+                remetente_teste,
+                destinatario_teste,
+                f"NL {i}",
+                datetime.now(),
+                False,
+                None,
+                None,
+            )
             mensagem_repo.inserir(m)
 
         # Criar mensagens lidas
         for i in range(3):
-            m = Mensagem(0, remetente_teste, destinatario_teste, f"L {i}", datetime.now(), False, None, None)
+            m = Mensagem(
+                0,
+                remetente_teste,
+                destinatario_teste,
+                f"L {i}",
+                datetime.now(),
+                False,
+                None,
+                None,
+            )
             r = mensagem_repo.inserir(m)
             mensagem_repo.marcar_como_lida(r.id)
 
@@ -277,7 +432,9 @@ class TestContarNaoLidas:
 
     def test_contar_nao_lidas_zero(self):
         """Testa contagem quando não há mensagens não lidas"""
-        u = usuario_repo.inserir(Usuario(0, "Zero NL", "zero@t.com", criar_hash_senha("123"), "Cliente"))
+        u = usuario_repo.inserir(
+            Usuario(0, "Zero NL", "zero@t.com", criar_hash_senha("123"), "Comprador")
+        )
         total = mensagem_repo.contar_nao_lidas(u)
         assert total == 0
 
@@ -285,9 +442,20 @@ class TestContarNaoLidas:
 class TestCascadeDelete:
     def test_excluir_remetente_exclui_mensagens(self, destinatario_teste):
         """Testa CASCADE: excluir remetente exclui mensagens"""
-        remetente = usuario_repo.inserir(Usuario(0, "Rem", "rem@t.com", criar_hash_senha("123"), "Cliente"))
+        remetente = usuario_repo.inserir(
+            Usuario(0, "Rem", "rem@t.com", criar_hash_senha("123"), "Comprador")
+        )
 
-        m = Mensagem(0, remetente, destinatario_teste, "Teste CASCADE", datetime.now(), False, None, None)
+        m = Mensagem(
+            0,
+            remetente,
+            destinatario_teste,
+            "Teste CASCADE",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         resultado = mensagem_repo.inserir(m)
 
         # Excluir remetente
@@ -299,9 +467,20 @@ class TestCascadeDelete:
 
     def test_excluir_destinatario_exclui_mensagens(self, remetente_teste):
         """Testa CASCADE: excluir destinatário exclui mensagens"""
-        destinatario = usuario_repo.inserir(Usuario(0, "Dest", "dest@t.com", criar_hash_senha("123"), "Cliente"))
+        destinatario = usuario_repo.inserir(
+            Usuario(0, "Dest", "dest@t.com", criar_hash_senha("123"), "Comprador")
+        )
 
-        m = Mensagem(0, remetente_teste, destinatario, "Teste CASCADE", datetime.now(), False, None, None)
+        m = Mensagem(
+            0,
+            remetente_teste,
+            destinatario,
+            "Teste CASCADE",
+            datetime.now(),
+            False,
+            None,
+            None,
+        )
         resultado = mensagem_repo.inserir(m)
 
         # Excluir destinatário
@@ -323,25 +502,29 @@ class TestModelValidation:
             data_hora=datetime.now(),
             visualizada=False,
             remetente=None,
-            destinatario=None
+            destinatario=None,
         )
 
-        assert hasattr(mensagem, 'id')
-        assert hasattr(mensagem, 'id_remetente')
-        assert hasattr(mensagem, 'id_destinatario')
-        assert hasattr(mensagem, 'mensagem')
-        assert hasattr(mensagem, 'data_hora')
-        assert hasattr(mensagem, 'visualizada')
-        assert hasattr(mensagem, 'remetente')
-        assert hasattr(mensagem, 'destinatario')
+        assert hasattr(mensagem, "id")
+        assert hasattr(mensagem, "id_remetente")
+        assert hasattr(mensagem, "id_destinatario")
+        assert hasattr(mensagem, "mensagem")
+        assert hasattr(mensagem, "data_hora")
+        assert hasattr(mensagem, "visualizada")
+        assert hasattr(mensagem, "remetente")
+        assert hasattr(mensagem, "destinatario")
 
 
 class TestIntegracaoCompleta:
     def test_fluxo_troca_mensagens(self):
         """Testa fluxo completo de troca de mensagens"""
         # Criar usuários
-        u1 = usuario_repo.inserir(Usuario(0, "User1", "u1@flow.com", criar_hash_senha("123"), "Cliente"))
-        u2 = usuario_repo.inserir(Usuario(0, "User2", "u2@flow.com", criar_hash_senha("123"), "Vendedor"))
+        u1 = usuario_repo.inserir(
+            Usuario(0, "User1", "u1@flow.com", criar_hash_senha("123"), "Comprador")
+        )
+        u2 = usuario_repo.inserir(
+            Usuario(0, "User2", "u2@flow.com", criar_hash_senha("123"), "Vendedor")
+        )
 
         # U1 envia mensagem para U2
         m1 = Mensagem(0, u1, u2, "Olá U2!", datetime.now(), False, None, None)

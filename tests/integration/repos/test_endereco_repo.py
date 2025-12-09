@@ -3,6 +3,7 @@ Testes para o repositório de endereços.
 
 Testa todas as operações CRUD do endereco_repo e validações do model/SQL.
 """
+
 import pytest
 from repo import endereco_repo, usuario_repo
 from model.endereco_model import Endereco
@@ -18,7 +19,7 @@ def usuario_teste():
         nome="Usuário Teste Endereco",
         email=f"usuario_endereco_{id(Usuario)}@test.com",
         senha=criar_hash_senha("senha123"),
-        perfil="Cliente"
+        perfil="Comprador",
     )
     usuario_id = usuario_repo.inserir(usuario)
     return usuario_id
@@ -49,7 +50,7 @@ class TestInserir:
             uf="SP",
             cep="01234-567",
             complemento="Apto 101",
-            usuario=None
+            usuario=None,
         )
         endereco_id = endereco_repo.inserir(endereco)
 
@@ -69,7 +70,7 @@ class TestInserir:
             uf="RJ",
             cep="20000-000",
             complemento=None,
-            usuario=None
+            usuario=None,
         )
         endereco_id = endereco_repo.inserir(endereco)
 
@@ -91,7 +92,7 @@ class TestInserir:
             cidade="Teste",
             uf="SP",
             cep="00000-000",
-            usuario=None
+            usuario=None,
         )
 
         with pytest.raises(Exception):
@@ -110,7 +111,7 @@ class TestInserir:
             uf="SP",
             cep="11065-001",
             complemento="Casa 2, Condomínio Sol",
-            usuario=None
+            usuario=None,
         )
         endereco_id = endereco_repo.inserir(endereco)
         assert endereco_id is not None
@@ -132,7 +133,7 @@ class TestAlterar:
             cidade="Cidade Original",
             uf="MG",
             cep="30000-000",
-            usuario=None
+            usuario=None,
         )
         end_id = endereco_repo.inserir(endereco)
 
@@ -148,7 +149,7 @@ class TestAlterar:
             uf="RJ",
             cep="20000-000",
             complemento="Novo complemento",
-            usuario=None
+            usuario=None,
         )
         resultado = endereco_repo.alterar(endereco_alterado)
 
@@ -172,7 +173,7 @@ class TestAlterar:
             cidade="Teste",
             uf="SP",
             cep="00000-000",
-            usuario=None
+            usuario=None,
         )
         resultado = endereco_repo.alterar(endereco)
 
@@ -194,7 +195,7 @@ class TestExcluir:
             cidade="Cidade",
             uf="SP",
             cep="99999-999",
-            usuario=None
+            usuario=None,
         )
         end_id = endereco_repo.inserir(endereco)
 
@@ -226,7 +227,7 @@ class TestObterPorId:
             cidade="São Paulo",
             uf="SP",
             cep="01000-000",
-            usuario=None
+            usuario=None,
         )
         end_id = endereco_repo.inserir(endereco)
 
@@ -261,7 +262,7 @@ class TestObterPorUsuario:
                 cidade="Cidade",
                 uf="SP",
                 cep="00000-000",
-                usuario=None
+                usuario=None,
             )
             endereco_repo.inserir(endereco)
 
@@ -279,7 +280,7 @@ class TestObterPorUsuario:
             nome="Sem Endereços",
             email=f"sem_enderecos_{id(Usuario)}@test.com",
             senha=criar_hash_senha("senha123"),
-            perfil="Cliente"
+            perfil="Comprador",
         )
         usuario_id = usuario_repo.inserir(usuario)
 
@@ -303,7 +304,7 @@ class TestObterPorUsuario:
                 cidade="C",
                 uf="SP",
                 cep="00000-000",
-                usuario=None
+                usuario=None,
             )
             endereco_repo.inserir(endereco)
 
@@ -332,7 +333,7 @@ class TestObterTodos:
                 cidade="C",
                 uf="SP",
                 cep="00000-000",
-                usuario=None
+                usuario=None,
             )
             endereco_repo.inserir(endereco)
 
@@ -353,7 +354,7 @@ class TestCascadeDelete:
             nome="Usuario Cascade",
             email=f"cascade_{id(Usuario)}@test.com",
             senha=criar_hash_senha("senha123"),
-            perfil="Cliente"
+            perfil="Comprador",
         )
         usuario_id = usuario_repo.inserir(usuario)
 
@@ -368,7 +369,7 @@ class TestCascadeDelete:
             cidade="C",
             uf="SP",
             cep="00000-000",
-            usuario=None
+            usuario=None,
         )
         end_id = endereco_repo.inserir(endereco)
 
@@ -396,20 +397,20 @@ class TestModelValidation:
             uf="SP",
             cep="00000-000",
             complemento="Apto 1",
-            usuario=None
+            usuario=None,
         )
 
-        assert hasattr(endereco, 'id')
-        assert hasattr(endereco, 'id_usuario')
-        assert hasattr(endereco, 'titulo')
-        assert hasattr(endereco, 'logradouro')
-        assert hasattr(endereco, 'numero')
-        assert hasattr(endereco, 'bairro')
-        assert hasattr(endereco, 'cidade')
-        assert hasattr(endereco, 'uf')
-        assert hasattr(endereco, 'cep')
-        assert hasattr(endereco, 'complemento')
-        assert hasattr(endereco, 'usuario')
+        assert hasattr(endereco, "id")
+        assert hasattr(endereco, "id_usuario")
+        assert hasattr(endereco, "titulo")
+        assert hasattr(endereco, "logradouro")
+        assert hasattr(endereco, "numero")
+        assert hasattr(endereco, "bairro")
+        assert hasattr(endereco, "cidade")
+        assert hasattr(endereco, "uf")
+        assert hasattr(endereco, "cep")
+        assert hasattr(endereco, "complemento")
+        assert hasattr(endereco, "usuario")
 
 
 class TestIntegracaoCompleta:
@@ -428,7 +429,7 @@ class TestIntegracaoCompleta:
             cidade="Cidade Fluxo",
             uf="SP",
             cep="12345-678",
-            usuario=None
+            usuario=None,
         )
         end_id = endereco_repo.inserir(endereco)
         assert end_id is not None
@@ -450,7 +451,7 @@ class TestIntegracaoCompleta:
             uf="RJ",
             cep="98765-432",
             complemento="Novo complemento",
-            usuario=None
+            usuario=None,
         )
         resultado = endereco_repo.alterar(end_atualizado)
         assert resultado is True

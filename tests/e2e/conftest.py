@@ -7,6 +7,7 @@ para interacao com o browser via Playwright.
 Testes E2E simulam interacoes reais do usuario via browser,
 testando fluxos completos da aplicacao.
 """
+
 import os
 import socket
 import sqlite3
@@ -57,10 +58,7 @@ def e2e_test_database():
     Session-scoped para persistir durante toda a sessao de testes.
     """
     test_db = tempfile.NamedTemporaryFile(
-        mode='w',
-        delete=False,
-        suffix='_e2e.db',
-        prefix='test_'
+        mode="w", delete=False, suffix="_e2e.db", prefix="test_"
     )
     test_db_path = test_db.name
     test_db.close()
@@ -74,10 +72,10 @@ def e2e_test_database():
 
     # Inserir rate limits muito altos para evitar bloqueios nos testes
     configs = [
-        ('rate_limit_cadastro_max', '10000', 'Rate limit cadastro - maximo'),
-        ('rate_limit_cadastro_minutos', '1', 'Rate limit cadastro - janela'),
-        ('rate_limit_login_max', '10000', 'Rate limit login - maximo'),
-        ('rate_limit_login_minutos', '1', 'Rate limit login - janela'),
+        ("rate_limit_cadastro_max", "10000", "Rate limit cadastro - maximo"),
+        ("rate_limit_cadastro_minutos", "1", "Rate limit cadastro - janela"),
+        ("rate_limit_login_max", "10000", "Rate limit login - maximo"),
+        ("rate_limit_login_minutos", "1", "Rate limit login - janela"),
     ]
 
     for chave, valor, descricao in configs:
@@ -106,27 +104,29 @@ def e2e_server(e2e_test_database) -> Generator[str, None, None]:
         pytest.skip(f"Porta {E2E_SERVER_PORT} ja esta em uso")
 
     env = os.environ.copy()
-    env.update({
-        'DATABASE_PATH': e2e_test_database,
-        'HOST': E2E_SERVER_HOST,
-        'PORT': str(E2E_SERVER_PORT),
-        'RUNNING_MODE': 'Development',
-        'RESEND_API_KEY': '',
-        'LOG_LEVEL': 'ERROR',
-        'RELOAD': 'False',
-        # Rate limits muito altos para evitar bloqueios durante testes
-        'RATE_LIMIT_CADASTRO_MAX': '1000',
-        'RATE_LIMIT_CADASTRO_MINUTOS': '1',
-        'RATE_LIMIT_LOGIN_MAX': '1000',
-        'RATE_LIMIT_LOGIN_MINUTOS': '1',
-    })
+    env.update(
+        {
+            "DATABASE_PATH": e2e_test_database,
+            "HOST": E2E_SERVER_HOST,
+            "PORT": str(E2E_SERVER_PORT),
+            "RUNNING_MODE": "Development",
+            "RESEND_API_KEY": "",
+            "LOG_LEVEL": "ERROR",
+            "RELOAD": "False",
+            # Rate limits muito altos para evitar bloqueios durante testes
+            "RATE_LIMIT_CADASTRO_MAX": "1000",
+            "RATE_LIMIT_CADASTRO_MINUTOS": "1",
+            "RATE_LIMIT_LOGIN_MAX": "1000",
+            "RATE_LIMIT_LOGIN_MINUTOS": "1",
+        }
+    )
 
     process = subprocess.Popen(
-        ['python', 'main.py'],
+        ["python", "main.py"],
         env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        cwd=os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+        cwd=os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
     )
 
     if not _aguardar_servidor_online(
@@ -181,6 +181,7 @@ def limpar_banco_e2e(e2e_test_database):
 
     Garante isolamento entre testes E2E.
     """
+
     def _limpar():
         try:
             conn = sqlite3.connect(e2e_test_database)
@@ -194,17 +195,21 @@ def limpar_banco_e2e(e2e_test_database):
 
             # Nao limpar 'configuracao' para manter rate limits altos
             ordem_limpeza = [
-                'chamado_interacao', 'chamado',
-                'chat_mensagem', 'chat_participante', 'chat_sala',
-                'usuario'
+                "chamado_interacao",
+                "chamado",
+                "chat_mensagem",
+                "chat_participante",
+                "chat_sala",
+                "usuario",
             ]
 
             for tabela in ordem_limpeza:
                 if tabela in tabelas:
                     cursor.execute(f"DELETE FROM {tabela}")
 
-            if 'sqlite_sequence' in [
-                row[0] for row in cursor.execute(
+            if "sqlite_sequence" in [
+                row[0]
+                for row in cursor.execute(
                     "SELECT name FROM sqlite_master WHERE type='table'"
                 ).fetchall()
             ]:
@@ -224,7 +229,7 @@ def limpar_banco_e2e(e2e_test_database):
 def usuario_e2e_dados():
     """Dados de usuario para testes E2E."""
     return {
-        "perfil": "Cliente",
+        "perfil": "Comprador",
         "nome": "Usuario E2E Teste",
         "email": "e2e_teste@example.com",
         "senha": "SenhaE2E@123",

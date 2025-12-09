@@ -8,6 +8,7 @@ Testa os módulos:
 
 Esses testes usam banco de dados real para validar integração.
 """
+
 import pytest
 
 from repo import chat_sala_repo
@@ -22,6 +23,7 @@ from util.perfis import Perfil
 # =============================================================================
 # Testes de chat_sala_repo
 # =============================================================================
+
 
 class TestChatSalaRepoGerarId:
     """Testes para a função gerar_sala_id (função pura, sem banco)."""
@@ -70,14 +72,14 @@ class TestChatSalaRepoCriarOuObter:
             nome="Usuario Chat 1",
             email="chat1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Chat 2",
             email="chat2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -97,14 +99,14 @@ class TestChatSalaRepoCriarOuObter:
             nome="Usuario Sala Existente 1",
             email="sala_exist1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Sala Existente 2",
             email="sala_exist2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -125,14 +127,14 @@ class TestChatSalaRepoCriarOuObter:
             nome="Usuario Ordem 1",
             email="ordem1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Ordem 2",
             email="ordem2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -157,14 +159,14 @@ class TestChatSalaRepoObterPorId:
             nome="Usuario Obter 1",
             email="obter1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Obter 2",
             email="obter2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -193,14 +195,14 @@ class TestChatSalaRepoAtualizar:
             nome="Usuario Atividade 1",
             email="atividade1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Atividade 2",
             email="atividade2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -228,14 +230,14 @@ class TestChatSalaRepoExcluir:
             nome="Usuario Excluir 1",
             email="excluir_sala1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Excluir 2",
             email="excluir_sala2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -267,6 +269,7 @@ class TestChatSalaRepoCriarTabela:
 # Testes de chat_mensagem_repo
 # =============================================================================
 
+
 class TestChatMensagemRepoInserir:
     """Testes para a função inserir."""
 
@@ -278,14 +281,14 @@ class TestChatMensagemRepoInserir:
             nome="Usuario Msg 1",
             email="msg1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Msg 2",
             email="msg2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -309,14 +312,14 @@ class TestChatMensagemRepoInserir:
             nome="Usuario Multi Msg 1",
             email="multi_msg1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Multi Msg 2",
             email="multi_msg2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -343,14 +346,14 @@ class TestChatMensagemRepoObterPorId:
             nome="Usuario Obter Msg 1",
             email="obter_msg1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Obter Msg 2",
             email="obter_msg2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -381,14 +384,14 @@ class TestChatMensagemRepoListar:
             nome="Usuario Lista Vazia 1",
             email="lista_vazia1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Lista Vazia 2",
             email="lista_vazia2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -407,14 +410,14 @@ class TestChatMensagemRepoListar:
             nome="Usuario Lista 1",
             email="lista1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Lista 2",
             email="lista2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -437,14 +440,14 @@ class TestChatMensagemRepoListar:
             nome="Usuario Limite 1",
             email="limite1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Limite 2",
             email="limite2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -470,14 +473,14 @@ class TestChatMensagemRepoContar:
             nome="Usuario Contar 1",
             email="contar1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Contar 2",
             email="contar2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -500,14 +503,14 @@ class TestChatMensagemRepoContar:
             nome="Usuario Contar Vazia 1",
             email="contar_vazia1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Contar Vazia 2",
             email="contar_vazia2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -530,14 +533,14 @@ class TestChatMensagemRepoMarcar:
             nome="Usuario Marcar 1",
             email="marcar1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Marcar 2",
             email="marcar2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -563,14 +566,14 @@ class TestChatMensagemRepoUltima:
             nome="Usuario Ultima 1",
             email="ultima1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Ultima 2",
             email="ultima2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -594,14 +597,14 @@ class TestChatMensagemRepoUltima:
             nome="Usuario Ultima Vazia 1",
             email="ultima_vazia1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Ultima Vazia 2",
             email="ultima_vazia2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -624,19 +627,21 @@ class TestChatMensagemRepoExcluir:
             nome="Usuario Excluir Msg 1",
             email="excluir_msg1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Excluir Msg 2",
             email="excluir_msg2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
         sala = chat_sala_repo.criar_ou_obter_sala(usuario1_id, usuario2_id)
-        mensagem = chat_mensagem_repo.inserir(sala.id, usuario1_id, "Mensagem a excluir")
+        mensagem = chat_mensagem_repo.inserir(
+            sala.id, usuario1_id, "Mensagem a excluir"
+        )
 
         # Excluir
         resultado = chat_mensagem_repo.excluir(mensagem.id)
@@ -662,6 +667,7 @@ class TestChatMensagemRepoCriarTabela:
 # Testes de chat_participante_repo
 # =============================================================================
 
+
 class TestChatParticipanteRepoInserir:
     """Testes para a função adicionar_participante."""
 
@@ -673,21 +679,23 @@ class TestChatParticipanteRepoInserir:
             nome="Usuario Part 1",
             email="part1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Part 2",
             email="part2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
         sala = chat_sala_repo.criar_ou_obter_sala(usuario1_id, usuario2_id)
 
         # Adicionar participante
-        participante = chat_participante_repo.adicionar_participante(sala.id, usuario1_id)
+        participante = chat_participante_repo.adicionar_participante(
+            sala.id, usuario1_id
+        )
 
         assert participante is not None
         assert participante.sala_id == sala.id
@@ -705,14 +713,14 @@ class TestChatParticipanteRepoObter:
             nome="Usuario Obter Part 1",
             email="obter_part1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Obter Part 2",
             email="obter_part2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -720,14 +728,18 @@ class TestChatParticipanteRepoObter:
         chat_participante_repo.adicionar_participante(sala.id, usuario1_id)
 
         # Obter
-        resultado = chat_participante_repo.obter_por_sala_e_usuario(sala.id, usuario1_id)
+        resultado = chat_participante_repo.obter_por_sala_e_usuario(
+            sala.id, usuario1_id
+        )
 
         assert resultado is not None
         assert resultado.usuario_id == usuario1_id
 
     def test_obter_por_sala_e_usuario_inexistente(self):
         """Deve retornar None para participante inexistente."""
-        resultado = chat_participante_repo.obter_por_sala_e_usuario("inexistente", 99999)
+        resultado = chat_participante_repo.obter_por_sala_e_usuario(
+            "inexistente", 99999
+        )
         assert resultado is None
 
 
@@ -742,14 +754,14 @@ class TestChatParticipanteRepoListar:
             nome="Usuario Listar Sala 1",
             email="listar_sala1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Listar Sala 2",
             email="listar_sala2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -768,14 +780,14 @@ class TestChatParticipanteRepoListar:
             nome="Usuario Listar Part 1",
             email="listar_part1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Listar Part 2",
             email="listar_part2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -796,21 +808,21 @@ class TestChatParticipanteRepoListar:
             nome="Usuario Listar User 1",
             email="listar_user1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Listar User 2",
             email="listar_user2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario3 = Usuario(
             id=0,
             nome="Usuario Listar User 3",
             email="listar_user3@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -839,14 +851,14 @@ class TestChatParticipanteRepoAtualizar:
             nome="Usuario Leitura 1",
             email="leitura1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Leitura 2",
             email="leitura2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -854,13 +866,17 @@ class TestChatParticipanteRepoAtualizar:
         chat_participante_repo.adicionar_participante(sala.id, usuario1_id)
 
         # Atualizar leitura
-        resultado = chat_participante_repo.atualizar_ultima_leitura(sala.id, usuario1_id)
+        resultado = chat_participante_repo.atualizar_ultima_leitura(
+            sala.id, usuario1_id
+        )
 
         assert resultado is True
 
     def test_atualizar_ultima_leitura_inexistente(self):
         """Deve retornar False para participante inexistente."""
-        resultado = chat_participante_repo.atualizar_ultima_leitura("inexistente", 99999)
+        resultado = chat_participante_repo.atualizar_ultima_leitura(
+            "inexistente", 99999
+        )
         assert resultado is False
 
 
@@ -875,14 +891,14 @@ class TestChatParticipanteRepoContar:
             nome="Usuario Nao Lidas 1",
             email="nao_lidas1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Nao Lidas 2",
             email="nao_lidas2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -912,14 +928,14 @@ class TestChatParticipanteRepoExcluir:
             nome="Usuario Excluir Part 1",
             email="excluir_part1@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario2 = Usuario(
             id=0,
             nome="Usuario Excluir Part 2",
             email="excluir_part2@example.com",
             senha=criar_hash_senha("Senha@123"),
-            perfil=Perfil.CLIENTE.value
+            perfil=Perfil.COMPRADOR.value,
         )
         usuario1_id = usuario_repo.inserir(usuario1)
         usuario2_id = usuario_repo.inserir(usuario2)
@@ -930,7 +946,10 @@ class TestChatParticipanteRepoExcluir:
         resultado = chat_participante_repo.excluir(sala.id, usuario1_id)
 
         assert resultado is True
-        assert chat_participante_repo.obter_por_sala_e_usuario(sala.id, usuario1_id) is None
+        assert (
+            chat_participante_repo.obter_por_sala_e_usuario(sala.id, usuario1_id)
+            is None
+        )
 
     def test_excluir_participante_inexistente(self):
         """Deve retornar False para participante inexistente."""

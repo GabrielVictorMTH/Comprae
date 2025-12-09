@@ -14,12 +14,12 @@ from starlette.middleware.sessions import SessionMiddleware
 from util.rate_limit_decorator import (
     obter_identificador_cliente,
     aplicar_rate_limit,
-    aplicar_rate_limit_async
+    aplicar_rate_limit_async,
 )
 from util.rate_limiter import RateLimiter
 
 
-class TestObterIdentificadorCliente:
+class TestObterIdentificadorComprador:
     """Testes para a função obter_identificador_cliente"""
 
     def test_ip_via_x_forwarded_for(self):
@@ -88,10 +88,7 @@ class TestObterIdentificadorCliente:
     def test_prioridade_x_forwarded_for_sobre_x_real_ip(self):
         """X-Forwarded-For deve ter prioridade sobre X-Real-IP"""
         request = MagicMock(spec=Request)
-        request.headers = {
-            "X-Forwarded-For": "10.0.0.1",
-            "X-Real-IP": "20.0.0.2"
-        }
+        request.headers = {"X-Forwarded-For": "10.0.0.1", "X-Real-IP": "20.0.0.2"}
         request.client = MagicMock(host="127.0.0.1")
 
         ip = obter_identificador_cliente(request)

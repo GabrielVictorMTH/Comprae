@@ -23,7 +23,12 @@ from dtos.chat_dto import CriarSalaDTO, EnviarMensagemDTO
 from model.usuario_logado_model import UsuarioLogado
 
 # Repositories
-from repo import chat_sala_repo, chat_participante_repo, chat_mensagem_repo, usuario_repo
+from repo import (
+    chat_sala_repo,
+    chat_participante_repo,
+    chat_mensagem_repo,
+    usuario_repo,
+)
 
 # Utilities
 from util.auth_decorator import requer_autenticacao
@@ -76,13 +81,17 @@ chat_listagem_limiter = DynamicRateLimiter(
 
 @router.get("/stream")
 @requer_autenticacao()
-async def stream_mensagens(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
+async def stream_mensagens(
+    request: Request, usuario_logado: Optional[UsuarioLogado] = None
+):
     """
     Endpoint SSE para receber mensagens em tempo real.
     Cada usuário mantém UMA conexão que recebe mensagens de TODAS as suas salas.
     """
     if not usuario_logado:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado"
+        )
     usuario_id = usuario_logado.id
 
     async def event_generator():
@@ -112,7 +121,7 @@ async def stream_mensagens(request: Request, usuario_logado: Optional[UsuarioLog
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
             "X-Accel-Buffering": "no",
-        }
+        },
     )
 
 
@@ -121,13 +130,15 @@ async def stream_mensagens(request: Request, usuario_logado: Optional[UsuarioLog
 async def criar_ou_obter_sala(
     request: Request,
     outro_usuario_id: int = Form(...),
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """
     Cria ou obtém uma sala de chat entre o usuário logado e outro usuário.
     """
     if not usuario_logado:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado"
+        )
 
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
@@ -135,7 +146,7 @@ async def criar_ou_obter_sala(
         logger.warning(f"Rate limit excedido para criação de sala de chat - IP: {ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Muitas tentativas de criação de salas. Aguarde alguns minutos."
+            detail="Muitas tentativas de criação de salas. Aguarde alguns minutos.",
         )
 
     try:
@@ -146,39 +157,40 @@ async def criar_ou_obter_sala(
         if dto.outro_usuario_id == usuario_logado.id:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Não é possível criar chat consigo mesmo."
+                detail="Não é possível criar chat consigo mesmo.",
             )
 
         # Verificar se outro usuário existe
         outro_usuario = usuario_repo.obter_por_id(dto.outro_usuario_id)
         if not outro_usuario:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Usuário não encontrado."
+                status_code=status.HTTP_404_NOT_FOUND, detail="Usuário não encontrado."
             )
 
         # Criar ou obter sala
-        sala = chat_sala_repo.criar_ou_obter_sala(usuario_logado.id, dto.outro_usuario_id)
+        sala = chat_sala_repo.criar_ou_obter_sala(
+            usuario_logado.id, dto.outro_usuario_id
+        )
 
         # Adicionar participantes se sala foi recém-criada
-        participante1 = chat_participante_repo.obter_por_sala_e_usuario(sala.id, usuario_logado.id)
+        participante1 = chat_participante_repo.obter_por_sala_e_usuario(
+            sala.id, usuario_logado.id
+        )
         if not participante1:
             chat_participante_repo.adicionar_participante(sala.id, usuario_logado.id)
 
-        participante2 = chat_participante_repo.obter_por_sala_e_usuario(sala.id, dto.outro_usuario_id)
+        participante2 = chat_participante_repo.obter_por_sala_e_usuario(
+            sala.id, dto.outro_usuario_id
+        )
         if not participante2:
             chat_participante_repo.adicionar_participante(sala.id, dto.outro_usuario_id)
 
         return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={"sala_id": sala.id}
+            status_code=status.HTTP_200_OK, content={"sala_id": sala.id}
         )
 
     except ValidationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.get("/conversas")
@@ -187,13 +199,15 @@ async def listar_conversas(
     request: Request,
     limit: int = 12,
     offset: int = 0,
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """
     Lista conversas do usuário (salas com última mensagem e contador de não lidas).
     """
     if not usuario_logado:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado"
+        )
 
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
@@ -201,7 +215,7 @@ async def listar_conversas(
         logger.warning(f"Rate limit excedido para listagem de conversas - IP: {ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Muitas requisições de listagem. Aguarde alguns minutos."
+            detail="Muitas requisições de listagem. Aguarde alguns minutos.",
         )
 
     usuario_id = usuario_logado.id
@@ -218,8 +232,7 @@ async def listar_conversas(
         # Obter o outro participante da sala
         participantes = chat_participante_repo.listar_por_sala(sala.id)
         outro_participante = next(
-            (p for p in participantes if p.usuario_id != usuario_id),
-            None
+            (p for p in participantes if p.usuario_id != usuario_id), None
         )
 
         if not outro_participante:
@@ -234,7 +247,9 @@ async def listar_conversas(
         ultima_mensagem = chat_mensagem_repo.obter_ultima_mensagem_sala(sala.id)
 
         # Contar não lidas
-        nao_lidas = chat_participante_repo.contar_mensagens_nao_lidas(sala.id, usuario_id)
+        nao_lidas = chat_participante_repo.contar_mensagens_nao_lidas(
+            sala.id, usuario_id
+        )
 
         conversa = {
             "sala_id": sala.id,
@@ -242,15 +257,25 @@ async def listar_conversas(
                 "id": outro_usuario.id,
                 "nome": outro_usuario.nome,
                 "email": outro_usuario.email,
-                "foto_url": obter_caminho_foto_usuario(outro_usuario.id)
+                "foto_url": obter_caminho_foto_usuario(outro_usuario.id),
             },
-            "ultima_mensagem": {
-                "mensagem": ultima_mensagem.mensagem,
-                "data_envio": ultima_mensagem.data_envio.isoformat() if ultima_mensagem.data_envio else None,
-                "usuario_id": ultima_mensagem.usuario_id
-            } if ultima_mensagem else None,
+            "ultima_mensagem": (
+                {
+                    "mensagem": ultima_mensagem.mensagem,
+                    "data_envio": (
+                        ultima_mensagem.data_envio.isoformat()
+                        if ultima_mensagem.data_envio
+                        else None
+                    ),
+                    "usuario_id": ultima_mensagem.usuario_id,
+                }
+                if ultima_mensagem
+                else None
+            ),
             "nao_lidas": nao_lidas,
-            "ultima_atividade": sala.ultima_atividade.isoformat() if sala.ultima_atividade else ""
+            "ultima_atividade": (
+                sala.ultima_atividade.isoformat() if sala.ultima_atividade else ""
+            ),
         }
         conversas.append(conversa)
 
@@ -258,12 +283,9 @@ async def listar_conversas(
     conversas.sort(key=lambda c: c["ultima_atividade"], reverse=True)
 
     # Aplicar paginação
-    conversas_paginadas = conversas[offset:offset + limit]
+    conversas_paginadas = conversas[offset : offset + limit]
 
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=conversas_paginadas
-    )
+    return JSONResponse(status_code=status.HTTP_200_OK, content=conversas_paginadas)
 
 
 @router.get("/mensagens/{sala_id}")
@@ -273,13 +295,15 @@ async def listar_mensagens(
     sala_id: str,
     limit: int = 50,
     offset: int = 0,
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """
     Lista mensagens de uma sala específica com paginação.
     """
     if not usuario_logado:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado"
+        )
 
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
@@ -287,7 +311,7 @@ async def listar_mensagens(
         logger.warning(f"Rate limit excedido para listagem de mensagens - IP: {ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Muitas requisições de listagem. Aguarde alguns minutos."
+            detail="Muitas requisições de listagem. Aguarde alguns minutos.",
         )
 
     usuario_id = usuario_logado.id
@@ -297,7 +321,7 @@ async def listar_mensagens(
     if not participante:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Você não tem acesso a esta sala."
+            detail="Você não tem acesso a esta sala.",
         )
 
     # Obter mensagens
@@ -310,15 +334,12 @@ async def listar_mensagens(
             "usuario_id": msg.usuario_id,
             "mensagem": msg.mensagem,
             "data_envio": msg.data_envio.isoformat() if msg.data_envio else None,
-            "lida_em": msg.lida_em.isoformat() if msg.lida_em else None
+            "lida_em": msg.lida_em.isoformat() if msg.lida_em else None,
         }
         for msg in mensagens
     ]
 
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=mensagens_json
-    )
+    return JSONResponse(status_code=status.HTTP_200_OK, content=mensagens_json)
 
 
 @router.post("/mensagens")
@@ -327,13 +348,15 @@ async def enviar_mensagem(
     request: Request,
     sala_id: str = Form(...),
     mensagem: str = Form(...),
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """
     Envia uma mensagem em uma sala.
     """
     if not usuario_logado:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado"
+        )
 
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
@@ -341,7 +364,7 @@ async def enviar_mensagem(
         logger.warning(f"Rate limit excedido para envio de mensagem no chat - IP: {ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Muitas mensagens enviadas. Aguarde alguns minutos."
+            detail="Muitas mensagens enviadas. Aguarde alguns minutos.",
         )
 
     try:
@@ -351,23 +374,26 @@ async def enviar_mensagem(
         usuario_id = usuario_logado.id
 
         # Verificar se usuário participa da sala
-        participante = chat_participante_repo.obter_por_sala_e_usuario(dto.sala_id, usuario_id)
+        participante = chat_participante_repo.obter_por_sala_e_usuario(
+            dto.sala_id, usuario_id
+        )
         if not participante:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Você não tem acesso a esta sala."
+                detail="Você não tem acesso a esta sala.",
             )
 
         # Verificar se sala existe
         sala = chat_sala_repo.obter_por_id(dto.sala_id)
         if not sala:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Sala não encontrada."
+                status_code=status.HTTP_404_NOT_FOUND, detail="Sala não encontrada."
             )
 
         # Inserir mensagem
-        nova_mensagem = chat_mensagem_repo.inserir(dto.sala_id, usuario_id, dto.mensagem)
+        nova_mensagem = chat_mensagem_repo.inserir(
+            dto.sala_id, usuario_id, dto.mensagem
+        )
 
         # Atualizar última atividade da sala
         chat_sala_repo.atualizar_ultima_atividade(dto.sala_id)
@@ -381,9 +407,13 @@ async def enviar_mensagem(
                 "sala_id": nova_mensagem.sala_id,
                 "usuario_id": nova_mensagem.usuario_id,
                 "mensagem": nova_mensagem.mensagem,
-                "data_envio": nova_mensagem.data_envio.isoformat() if nova_mensagem.data_envio else None,
-                "lida_em": None
-            }
+                "data_envio": (
+                    nova_mensagem.data_envio.isoformat()
+                    if nova_mensagem.data_envio
+                    else None
+                ),
+                "lida_em": None,
+            },
         }
         await gerenciador_chat.broadcast_para_sala(dto.sala_id, mensagem_sse)
 
@@ -394,30 +424,31 @@ async def enviar_mensagem(
                 "sala_id": nova_mensagem.sala_id,
                 "usuario_id": nova_mensagem.usuario_id,
                 "mensagem": nova_mensagem.mensagem,
-                "data_envio": nova_mensagem.data_envio.isoformat() if nova_mensagem.data_envio else None,
-                "lida_em": None
-            }
+                "data_envio": (
+                    nova_mensagem.data_envio.isoformat()
+                    if nova_mensagem.data_envio
+                    else None
+                ),
+                "lida_em": None,
+            },
         )
 
     except ValidationError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 @router.post("/mensagens/lidas/{sala_id}")
 @requer_autenticacao()
 async def marcar_como_lidas(
-    request: Request,
-    sala_id: str,
-    usuario_logado: Optional[UsuarioLogado] = None
+    request: Request, sala_id: str, usuario_logado: Optional[UsuarioLogado] = None
 ):
     """
     Marca todas as mensagens de uma sala como lidas para o usuário logado.
     """
     if not usuario_logado:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado"
+        )
     usuario_id = usuario_logado.id
 
     # Verificar se usuário participa da sala
@@ -425,7 +456,7 @@ async def marcar_como_lidas(
     if not participante:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Você não tem acesso a esta sala."
+            detail="Você não tem acesso a esta sala.",
         )
 
     # Marcar mensagens como lidas
@@ -435,23 +466,17 @@ async def marcar_como_lidas(
     chat_participante_repo.atualizar_ultima_leitura(sala_id, usuario_id)
 
     # Notificar via SSE para atualizar contador
-    await gerenciador_chat.broadcast_para_sala(sala_id, {
-        "tipo": "atualizar_contador",
-        "sala_id": sala_id
-    })
-
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"sucesso": True}
+    await gerenciador_chat.broadcast_para_sala(
+        sala_id, {"tipo": "atualizar_contador", "sala_id": sala_id}
     )
+
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"sucesso": True})
 
 
 @router.get("/usuarios/buscar")
 @requer_autenticacao()
 async def buscar_usuarios(
-    request: Request,
-    q: str,
-    usuario_logado: Optional[UsuarioLogado] = None
+    request: Request, q: str, usuario_logado: Optional[UsuarioLogado] = None
 ):
     """
     Busca usuários por termo (para autocomplete).
@@ -459,7 +484,9 @@ async def buscar_usuarios(
     Administradores só podem ser contactados via sistema de chamados.
     """
     if not usuario_logado:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado"
+        )
 
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
@@ -467,21 +494,19 @@ async def buscar_usuarios(
         logger.warning(f"Rate limit excedido para busca de usuários - IP: {ip}")
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Muitas buscas. Aguarde alguns minutos."
+            detail="Muitas buscas. Aguarde alguns minutos.",
         )
 
     if len(q) < 2:
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content=[]
-        )
+        return JSONResponse(status_code=status.HTTP_200_OK, content=[])
 
     # Buscar usuários
     usuarios = usuario_repo.buscar_por_termo(q, limit=10)
 
     # Excluir o próprio usuário e administradores dos resultados
     usuarios_filtrados = [
-        u for u in usuarios
+        u
+        for u in usuarios
         if u.id != usuario_logado.id and u.perfil != Perfil.ADMIN.value
     ]
 
@@ -490,28 +515,26 @@ async def buscar_usuarios(
             "id": u.id,
             "nome": u.nome,
             "email": u.email,
-            "foto_url": obter_caminho_foto_usuario(u.id)
+            "foto_url": obter_caminho_foto_usuario(u.id),
         }
         for u in usuarios_filtrados
     ]
 
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=usuarios_json
-    )
+    return JSONResponse(status_code=status.HTTP_200_OK, content=usuarios_json)
 
 
 @router.get("/mensagens/nao-lidas/total")
 @requer_autenticacao()
 async def contar_nao_lidas_total(
-    request: Request,
-    usuario_logado: Optional[UsuarioLogado] = None
+    request: Request, usuario_logado: Optional[UsuarioLogado] = None
 ):
     """
     Conta o total de mensagens não lidas em todas as salas do usuário.
     """
     if not usuario_logado:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Não autenticado"
+        )
     usuario_id = usuario_logado.id
 
     # Obter todas as participações do usuário
@@ -520,14 +543,12 @@ async def contar_nao_lidas_total(
     total_nao_lidas = 0
     for participacao in participacoes:
         nao_lidas = chat_participante_repo.contar_mensagens_nao_lidas(
-            participacao.sala_id,
-            usuario_id
+            participacao.sala_id, usuario_id
         )
         total_nao_lidas += nao_lidas
 
     return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"total": total_nao_lidas}
+        status_code=status.HTTP_200_OK, content={"total": total_nao_lidas}
     )
 
 
@@ -541,6 +562,6 @@ async def chat_health():
         content={
             "status": "healthy",
             "conexoes_ativas": estatisticas["total_usuarios_ativos"],
-            "timestamp": agora().isoformat()
-        }
+            "timestamp": agora().isoformat(),
+        },
     )

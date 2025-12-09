@@ -18,9 +18,9 @@ class UsuarioLogado:
         """Verifica se o usuário é administrador."""
         return self.perfil == Perfil.ADMIN.value
 
-    def is_cliente(self) -> bool:
-        """Verifica se o usuário é cliente."""
-        return self.perfil == Perfil.CLIENTE.value
+    def is_comprador(self) -> bool:
+        """Verifica se o usuário é comprador."""
+        return self.perfil == Perfil.COMPRADOR.value
 
     def is_vendedor(self) -> bool:
         """Verifica se o usuário é vendedor."""

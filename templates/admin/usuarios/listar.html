@@ -42,15 +42,15 @@
                                 <td>{{ usuario.data_cadastro|data_br if usuario.data_cadastro else '-' }}</td>
                                 <td class="text-center">
                                     {{ btn_group_crud(
-                                        usuario.id,
-                                        'usuário ' ~ usuario.nome,
-                                        '/admin/usuarios',
-                                        "excluirUsuario(%d, '%s', '%s', '%s')" | format(
-                                            usuario.id,
-                                            usuario.nome|replace("'", "\\'"),
-                                            usuario.email,
-                                            usuario.perfil
-                                        )
+                                    usuario.id,
+                                    'usuário ' ~ usuario.nome,
+                                    '/admin/usuarios',
+                                    "excluirUsuario(%d, '%s', '%s', '%s')" | format(
+                                    usuario.id,
+                                    usuario.nome|replace("'", "\\'"),
+                                    usuario.email,
+                                    usuario.perfil
+                                    )
                                     ) }}
                                 </td>
                             </tr>
@@ -70,20 +70,20 @@
                         {% if vendedores %}
                         | Vendedores: <strong class="text-warning">{{ vendedores|length }}</strong>
                         {% endif %}
-                        {% set clientes = usuarios|selectattr('perfil', 'equalto', 'Cliente')|list %}
-                        {% if clientes %}
-                        | Clientes: <strong class="text-info">{{ clientes|length }}</strong>
+                        {% set compradors = usuarios|selectattr('perfil', 'equalto', 'Comprador')|list %}
+                        {% if compradors %}
+                        | Compradors: <strong class="text-info">{{ compradors|length }}</strong>
                         {% endif %}
                     </small>
                 </div>
                 {% else %}
                 {{ empty_state(
-                    'Nenhum usuário cadastrado',
-                    'Comece cadastrando o primeiro usuário do sistema.',
-                    action_url='/admin/usuarios/cadastrar',
-                    action_text='Cadastrar Primeiro Usuário',
-                    icon='people',
-                    variant='info'
+                'Nenhum usuário cadastrado',
+                'Comece cadastrando o primeiro usuário do sistema.',
+                action_url='/admin/usuarios/cadastrar',
+                action_text='Cadastrar Primeiro Usuário',
+                icon='people',
+                variant='info'
                 ) }}
                 {% endif %}
             </div>

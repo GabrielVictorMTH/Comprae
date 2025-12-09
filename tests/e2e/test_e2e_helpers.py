@@ -3,6 +3,7 @@ Funcoes auxiliares e Page Objects para testes E2E.
 
 Fornece helpers para interacoes comuns com a UI.
 """
+
 from typing import Optional
 
 from playwright.sync_api import Page, expect
@@ -26,13 +27,13 @@ class CadastroPage:
         nome: str,
         email: str,
         senha: str,
-        confirmar_senha: Optional[str] = None
+        confirmar_senha: Optional[str] = None,
     ) -> None:
         """
         Preenche o formulario de cadastro.
 
         Args:
-            perfil: "Cliente" ou "Vendedor"
+            perfil: "Comprador" ou "Vendedor"
             nome: Nome completo
             email: E-mail
             senha: Senha
@@ -61,7 +62,7 @@ class CadastroPage:
         nome: str,
         email: str,
         senha: str,
-        confirmar_senha: Optional[str] = None
+        confirmar_senha: Optional[str] = None,
     ) -> None:
         """
         Realiza cadastro completo: preenche e submete.
@@ -93,11 +94,11 @@ class CadastroPage:
         Returns:
             Texto da mensagem ou None
         """
-        toast = self.page.locator('.toast-body').first
+        toast = self.page.locator(".toast-body").first
         if toast.is_visible():
             return toast.text_content()
 
-        alert = self.page.locator('.alert').first
+        alert = self.page.locator(".alert").first
         if alert.is_visible():
             return alert.text_content()
 
@@ -175,11 +176,11 @@ class LoginPage:
         Returns:
             Texto da mensagem ou None
         """
-        toast = self.page.locator('.toast-body').first
+        toast = self.page.locator(".toast-body").first
         if toast.is_visible():
             return toast.text_content()
 
-        alert = self.page.locator('.alert').first
+        alert = self.page.locator(".alert").first
         if alert.is_visible():
             return alert.text_content()
 
@@ -193,12 +194,12 @@ def verificar_mensagem_sucesso_cadastro(page: Page) -> bool:
     A mensagem esperada e: "Cadastro realizado com sucesso!"
     """
     try:
-        toast = page.locator('.toast-body')
+        toast = page.locator(".toast-body")
         if toast.is_visible():
             texto = toast.text_content() or ""
             return "cadastro realizado com sucesso" in texto.lower()
 
-        alert = page.locator('.alert-success')
+        alert = page.locator(".alert-success")
         if alert.is_visible():
             texto = alert.text_content() or ""
             return "cadastro realizado com sucesso" in texto.lower()

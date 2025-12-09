@@ -29,7 +29,7 @@ class TestMiddlewareSegurancaHeaders:
 
     @pytest.fixture
     def client(self, app_com_middleware):
-        """Cliente de teste"""
+        """Comprador de teste"""
         return TestClient(app_com_middleware)
 
     def test_header_x_content_type_options(self, client):
@@ -65,7 +65,9 @@ class TestMiddlewareSegurancaHeaders:
     def test_header_referrer_policy(self, client):
         """Deve adicionar Referrer-Policy: strict-origin-when-cross-origin"""
         response = client.get("/test")
-        assert response.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+        assert (
+            response.headers.get("Referrer-Policy") == "strict-origin-when-cross-origin"
+        )
 
     def test_header_permissions_policy(self, client):
         """Deve adicionar Permissions-Policy com restrições"""
@@ -111,7 +113,7 @@ class TestMiddlewareSegurancaCORS:
         app = FastAPI()
         app.add_middleware(
             MiddlewareSegurancaCORS,
-            allowed_origins=["http://example.com", "https://trusted.com"]
+            allowed_origins=["http://example.com", "https://trusted.com"],
         )
 
         @app.get("/test")
@@ -125,7 +127,10 @@ class TestMiddlewareSegurancaCORS:
         client = TestClient(app_cors_default)
         response = client.get("/test", headers={"Origin": "http://localhost:8000"})
 
-        assert response.headers.get("Access-Control-Allow-Origin") == "http://localhost:8000"
+        assert (
+            response.headers.get("Access-Control-Allow-Origin")
+            == "http://localhost:8000"
+        )
         assert response.headers.get("Access-Control-Allow-Credentials") == "true"
         assert "GET" in response.headers.get("Access-Control-Allow-Methods", "")
         assert "POST" in response.headers.get("Access-Control-Allow-Methods", "")
@@ -149,14 +154,18 @@ class TestMiddlewareSegurancaCORS:
         client = TestClient(app_cors_custom)
         response = client.get("/test", headers={"Origin": "http://example.com"})
 
-        assert response.headers.get("Access-Control-Allow-Origin") == "http://example.com"
+        assert (
+            response.headers.get("Access-Control-Allow-Origin") == "http://example.com"
+        )
 
     def test_cors_origem_customizada_https(self, app_cors_custom):
         """Origem HTTPS customizada permitida deve ter headers CORS"""
         client = TestClient(app_cors_custom)
         response = client.get("/test", headers={"Origin": "https://trusted.com"})
 
-        assert response.headers.get("Access-Control-Allow-Origin") == "https://trusted.com"
+        assert (
+            response.headers.get("Access-Control-Allow-Origin") == "https://trusted.com"
+        )
 
     def test_cors_origem_customizada_nao_permitida(self, app_cors_custom):
         """Origem não na lista customizada não deve ter headers CORS"""

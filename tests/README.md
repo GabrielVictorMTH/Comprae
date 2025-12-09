@@ -91,7 +91,7 @@ Todas as fixtures estão definidas em `conftest.py` e disponíveis automaticamen
 ### Fixtures Básicas
 
 #### `client` - TestClient FastAPI
-Cliente de teste com sessão limpa para cada teste.
+Comprador de teste com sessão limpa para cada teste.
 
 ```python
 def test_acessar_home(client):
@@ -100,12 +100,12 @@ def test_acessar_home(client):
 ```
 
 #### `usuario_teste` - Dados de usuário padrão
-Dicionário com dados de um usuário de teste (Cliente).
+Dicionário com dados de um usuário de teste (Comprador).
 
 ```python
 def test_com_dados_usuario(usuario_teste):
     assert usuario_teste["email"] == "teste@example.com"
-    assert usuario_teste["perfil"] == Perfil.CLIENTE.value
+    assert usuario_teste["perfil"] == Perfil.COMPRADOR.value
 ```
 
 #### `admin_teste` - Dados de admin
@@ -145,19 +145,19 @@ def test_fazer_login(client, criar_usuario, usuario_teste, fazer_login):
     assert response.status_code == 303
 ```
 
-### Fixtures de Cliente Autenticado
+### Fixtures de Comprador Autenticado
 
-#### `cliente_autenticado` - Cliente logado como usuário
-Cliente TestClient já autenticado como usuário padrão (Cliente).
+#### `comprador_autenticado` - Comprador logado como usuário
+Comprador TestClient já autenticado como usuário padrão (Comprador).
 
 ```python
-def test_acessar_dashboard(cliente_autenticado):
-    response = cliente_autenticado.get("/usuario")
+def test_acessar_dashboard(comprador_autenticado):
+    response = comprador_autenticado.get("/usuario")
     assert response.status_code == 200
 ```
 
-#### `admin_autenticado` - Cliente logado como admin
-Cliente TestClient já autenticado como administrador.
+#### `admin_autenticado` - Comprador logado como admin
+Comprador TestClient já autenticado como administrador.
 
 ```python
 def test_listar_usuarios(admin_autenticado):
@@ -165,8 +165,8 @@ def test_listar_usuarios(admin_autenticado):
     assert response.status_code == 200
 ```
 
-#### `vendedor_autenticado` - Cliente logado como vendedor
-Cliente TestClient já autenticado como vendedor.
+#### `vendedor_autenticado` - Comprador logado como vendedor
+Comprador TestClient já autenticado como vendedor.
 
 ```python
 def test_acessar_vendas(vendedor_autenticado):
@@ -188,8 +188,8 @@ def test_isolamento_dados(client, dois_usuarios, fazer_login):
     # ... verificar que só vê seus dados
 ```
 
-#### `usuario_com_foto` - Cliente com foto de perfil
-Cliente autenticado que já tem foto de perfil salva.
+#### `usuario_com_foto` - Comprador com foto de perfil
+Comprador autenticado que já tem foto de perfil salva.
 
 ```python
 def test_visualizar_foto(usuario_com_foto):
@@ -202,8 +202,8 @@ def test_visualizar_foto(usuario_com_foto):
 Retorna uma imagem PNG 1x1 pixel em formato base64 para testes de upload.
 
 ```python
-def test_upload_foto(cliente_autenticado, foto_teste_base64):
-    response = cliente_autenticado.post("/perfil/atualizar-foto", json={
+def test_upload_foto(comprador_autenticado, foto_teste_base64):
+    response = comprador_autenticado.post("/perfil/atualizar-foto", json={
         "imagem": foto_teste_base64
     })
     assert response.status_code == 303
@@ -292,8 +292,8 @@ Verifica que resposta contém texto específico.
 ```python
 from tests.test_helpers import assert_contains_text
 
-def test_dashboard_exibe_nome(cliente_autenticado, usuario_teste):
-    response = cliente_autenticado.get("/usuario")
+def test_dashboard_exibe_nome(comprador_autenticado, usuario_teste):
+    response = comprador_autenticado.get("/usuario")
     assert_contains_text(response, usuario_teste["nome"])
 ```
 
@@ -498,7 +498,7 @@ def test_fluxo_completo_cadastro_e_login(client):
 
     # 1. Cadastrar novo usuário
     response_cadastro = client.post("/cadastrar", data={
-        "perfil": Perfil.CLIENTE.value,
+        "perfil": Perfil.COMPRADOR.value,
         "nome": "João da Silva",
         "email": "joao@example.com",
         "senha": "Senha@123",
@@ -513,7 +513,7 @@ def test_fluxo_completo_cadastro_e_login(client):
     usuario = usuario_repo.obter_por_email("joao@example.com")
     assert usuario is not None
     assert usuario.nome == "João da Silva"
-    assert usuario.perfil == Perfil.CLIENTE.value
+    assert usuario.perfil == Perfil.COMPRADOR.value
 
     # 3. Fazer login
     response_login = client.post("/login", data={
@@ -533,11 +533,11 @@ def test_fluxo_completo_cadastro_e_login(client):
 ### Exemplo 2: Teste de Autorização
 
 ```python
-def test_cliente_nao_acessa_area_admin(cliente_autenticado):
-    """Cliente não deve ter acesso a áreas administrativas."""
+def test_comprador_nao_acessa_area_admin(comprador_autenticado):
+    """Comprador não deve ter acesso a áreas administrativas."""
 
     # Tentar acessar listagem de usuários (admin only)
-    response = cliente_autenticado.get("/admin/usuarios/listar", follow_redirects=False)
+    response = comprador_autenticado.get("/admin/usuarios/listar", follow_redirects=False)
 
     # Deve negar acesso (redirect ou 403)
     assert response.status_code in [
@@ -579,7 +579,7 @@ def test_restaurar_backup_cria_backup_automatico(
         nome="Usuario Teste",
         email="teste_restauracao@example.com",
         senha=criar_hash_senha("Senha@123"),
-        perfil=Perfil.CLIENTE.value
+        perfil=Perfil.COMPRADOR.value
     )
     usuario_id = usuario_repo.inserir(novo_usuario)
     assert usuario_id is not None

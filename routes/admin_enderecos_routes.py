@@ -24,7 +24,9 @@ admin_enderecos_limiter = RateLimiter(
 @requer_autenticacao([Perfil.ADMIN.value])
 async def index(request: Request, usuario_logado: Optional[dict] = None):
     """Redireciona para lista de endereços"""
-    return RedirectResponse("/admin/enderecos/listar", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    return RedirectResponse(
+        "/admin/enderecos/listar", status_code=status.HTTP_307_TEMPORARY_REDIRECT
+    )
 
 
 @router.get("/listar")
@@ -32,7 +34,7 @@ async def index(request: Request, usuario_logado: Optional[dict] = None):
 async def listar(
     request: Request,
     uf_filtro: Optional[str] = Query(None),
-    usuario_logado: Optional[dict] = None
+    usuario_logado: Optional[dict] = None,
 ):
     """Lista todos os endereços do sistema com filtros opcionais"""
     assert usuario_logado is not None
@@ -42,14 +44,20 @@ async def listar(
     if not admin_enderecos_limiter.verificar(ip):
         return templates.TemplateResponse(
             "admin/enderecos/listar.html",
-            {"request": request, "enderecos": [], "erro": "Muitas requisições. Aguarde um momento."}
+            {
+                "request": request,
+                "enderecos": [],
+                "erro": "Muitas requisições. Aguarde um momento.",
+            },
         )
 
     try:
         # Buscar endereços
         if uf_filtro:
             enderecos = endereco_repo.obter_por_uf(uf_filtro)
-            logger.info(f"Admin {usuario_logado['id']} listou endereços da UF {uf_filtro}")
+            logger.info(
+                f"Admin {usuario_logado['id']} listou endereços da UF {uf_filtro}"
+            )
         else:
             enderecos = endereco_repo.obter_todos()
             logger.info(f"Admin {usuario_logado['id']} listou todos os endereços")
@@ -58,10 +66,7 @@ async def listar(
         enderecos_com_usuario = []
         for endereco in enderecos:
             usuario = usuario_repo.obter_por_id(endereco.id_usuario)
-            enderecos_com_usuario.append({
-                "endereco": endereco,
-                "usuario": usuario
-            })
+            enderecos_com_usuario.append({"endereco": endereco, "usuario": usuario})
 
         # Obter lista de UFs para o filtro
         ufs = sorted(set([e.uf for e in enderecos]))
@@ -72,15 +77,15 @@ async def listar(
                 "request": request,
                 "enderecos": enderecos_com_usuario,
                 "ufs": ufs,
-                "uf_filtro": uf_filtro
-            }
+                "uf_filtro": uf_filtro,
+            },
         )
 
     except Exception as e:
         logger.error(f"Erro ao listar endereços: {e}", exc_info=True)
         return templates.TemplateResponse(
             "admin/enderecos/listar.html",
-            {"request": request, "enderecos": [], "erro": "Erro ao carregar endereços"}
+            {"request": request, "enderecos": [], "erro": "Erro ao carregar endereços"},
         )
 
 
@@ -93,14 +98,18 @@ async def detalhes(request: Request, id: int, usuario_logado: Optional[dict] = N
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_enderecos_limiter.verificar(ip):
-        return RedirectResponse("/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     try:
         # Buscar endereço
         endereco = endereco_repo.obter_por_id(id)
         if not endereco:
             logger.warning(f"Endereço {id} não encontrado")
-            return RedirectResponse("/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(
+                "/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER
+            )
 
         # Buscar usuário
         usuario = usuario_repo.obter_por_id(endereco.id_usuario)
@@ -109,7 +118,9 @@ async def detalhes(request: Request, id: int, usuario_logado: Optional[dict] = N
         todos_pedidos = pedido_repo.obter_todos()
         pedidos_endereco = [p for p in todos_pedidos if p.id_endereco == id]
 
-        logger.info(f"Admin {usuario_logado['id']} visualizou detalhes do endereço {id}")
+        logger.info(
+            f"Admin {usuario_logado['id']} visualizou detalhes do endereço {id}"
+        )
 
         return templates.TemplateResponse(
             "admin/enderecos/detalhes.html",
@@ -117,13 +128,15 @@ async def detalhes(request: Request, id: int, usuario_logado: Optional[dict] = N
                 "request": request,
                 "endereco": endereco,
                 "usuario": usuario,
-                "pedidos": pedidos_endereco
-            }
+                "pedidos": pedidos_endereco,
+            },
         )
 
     except Exception as e:
         logger.error(f"Erro ao exibir detalhes do endereço {id}: {e}", exc_info=True)
-        return RedirectResponse("/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
 
 @router.get("/estatisticas")
@@ -135,7 +148,9 @@ async def estatisticas(request: Request, usuario_logado: Optional[dict] = None):
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_enderecos_limiter.verificar(ip):
-        return RedirectResponse("/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     try:
         # Buscar estatísticas
@@ -143,7 +158,9 @@ async def estatisticas(request: Request, usuario_logado: Optional[dict] = None):
         por_uf = endereco_repo.contar_por_uf()
         por_cidade = endereco_repo.contar_por_cidade()
 
-        logger.info(f"Admin {usuario_logado['id']} visualizou estatísticas de endereços")
+        logger.info(
+            f"Admin {usuario_logado['id']} visualizou estatísticas de endereços"
+        )
 
         return templates.TemplateResponse(
             "admin/enderecos/estatisticas.html",
@@ -151,13 +168,15 @@ async def estatisticas(request: Request, usuario_logado: Optional[dict] = None):
                 "request": request,
                 "stats": stats,
                 "por_uf": por_uf,
-                "por_cidade": por_cidade
-            }
+                "por_cidade": por_cidade,
+            },
         )
 
     except Exception as e:
         logger.error(f"Erro ao gerar estatísticas de endereços: {e}", exc_info=True)
-        return RedirectResponse("/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
 
 @router.get("/duplicados")
@@ -169,23 +188,29 @@ async def duplicados(request: Request, usuario_logado: Optional[dict] = None):
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_enderecos_limiter.verificar(ip):
-        return RedirectResponse("/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     try:
         # Buscar endereços duplicados
         duplicados_list = endereco_repo.obter_duplicados()
 
-        logger.info(f"Admin {usuario_logado['id']} visualizou detecção de endereços duplicados")
+        logger.info(
+            f"Admin {usuario_logado['id']} visualizou detecção de endereços duplicados"
+        )
 
         return templates.TemplateResponse(
             "admin/enderecos/duplicados.html",
             {
                 "request": request,
                 "duplicados": duplicados_list,
-                "total_grupos": len(duplicados_list)
-            }
+                "total_grupos": len(duplicados_list),
+            },
         )
 
     except Exception as e:
         logger.error(f"Erro ao detectar endereços duplicados: {e}", exc_info=True)
-        return RedirectResponse("/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/enderecos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )

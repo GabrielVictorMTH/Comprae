@@ -81,19 +81,21 @@ async def listar(request: Request, usuario_logado: Optional[UsuarioLogado] = Non
     chamados = chamado_repo.obter_por_usuario(usuario_logado.id)
     return templates.TemplateResponse(
         "chamados/listar.html",
-        {"request": request, "chamados": chamados, "usuario_logado": usuario_logado}
+        {"request": request, "chamados": chamados, "usuario_logado": usuario_logado},
     )
 
 
 @router.get("/cadastrar")
 @requer_autenticacao()
-async def get_cadastrar(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
+async def get_cadastrar(
+    request: Request, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Exibe formulário de abertura de chamado."""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     return templates.TemplateResponse(
         "chamados/cadastrar.html",
-        {"request": request, "usuario_logado": usuario_logado}
+        {"request": request, "usuario_logado": usuario_logado},
     )
 
 
@@ -104,7 +106,7 @@ async def post_cadastrar(
     titulo: str = Form(),
     descricao: str = Form(),
     prioridade: str = Form(default="Média"),
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Cadastra um novo chamado."""
     if not usuario_logado:
@@ -133,16 +135,12 @@ async def post_cadastrar(
     dados_formulario = {
         "titulo": titulo,
         "descricao": descricao,
-        "prioridade": prioridade
+        "prioridade": prioridade,
     }
 
     try:
         # Validar com DTO
-        dto = CriarChamadoDTO(
-            titulo=titulo,
-            descricao=descricao,
-            prioridade=prioridade
-        )
+        dto = CriarChamadoDTO(titulo=titulo, descricao=descricao, prioridade=prioridade)
 
         # Criar chamado (sem descricao - será armazenada na interacao)
         chamado = Chamado(
@@ -150,7 +148,7 @@ async def post_cadastrar(
             titulo=dto.titulo,
             prioridade=PrioridadeChamado(dto.prioridade),
             status=StatusChamado.ABERTO,
-            usuario_id=usuario_logado.id
+            usuario_id=usuario_logado.id,
         )
 
         chamado_id = chamado_repo.inserir(chamado)
@@ -163,7 +161,7 @@ async def post_cadastrar(
             mensagem=dto.descricao,
             tipo=TipoInteracao.ABERTURA,
             data_interacao=agora(),
-            status_resultante=StatusChamado.ABERTO.value
+            status_resultante=StatusChamado.ABERTO.value,
         )
         chamado_interacao_repo.inserir(interacao)
 
@@ -172,7 +170,9 @@ async def post_cadastrar(
         )
 
         informar_sucesso(request, "Chamado aberto com sucesso! Em breve responderemos.")
-        return RedirectResponse("/chamados/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/chamados/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     except ValidationError as e:
         raise ErroValidacaoFormulario(
@@ -185,7 +185,9 @@ async def post_cadastrar(
 
 @router.get("/{id}/visualizar")
 @requer_autenticacao()
-async def visualizar(request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None):
+async def visualizar(
+    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Exibe detalhes de um chamado específico com histórico de interações."""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -195,7 +197,7 @@ async def visualizar(request: Request, id: int, usuario_logado: Optional[Usuario
         chamado_repo.obter_por_id(id),
         request,
         "Chamado não encontrado",
-        "/chamados/listar"
+        "/chamados/listar",
     )
     if isinstance(chamado, RedirectResponse):
         return chamado
@@ -206,9 +208,11 @@ async def visualizar(request: Request, id: int, usuario_logado: Optional[Usuario
         usuario_logado.id,
         request,
         "Você não tem permissão para acessar este chamado",
-        "/chamados/listar"
+        "/chamados/listar",
     ):
-        return RedirectResponse("/chamados/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/chamados/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Marcar mensagens como lidas (apenas as de outros usuários)
     chamado_interacao_repo.marcar_como_lidas(id, usuario_logado.id)
@@ -218,7 +222,12 @@ async def visualizar(request: Request, id: int, usuario_logado: Optional[Usuario
 
     return templates.TemplateResponse(
         "chamados/visualizar.html",
-        {"request": request, "chamado": chamado, "interacoes": interacoes, "usuario_logado": usuario_logado}
+        {
+            "request": request,
+            "chamado": chamado,
+            "interacoes": interacoes,
+            "usuario_logado": usuario_logado,
+        },
     )
 
 
@@ -228,7 +237,7 @@ async def post_responder(
     request: Request,
     id: int,
     mensagem: str = Form(),
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Permite que o usuário adicione uma resposta/mensagem ao seu próprio chamado."""
     if not usuario_logado:
@@ -242,14 +251,16 @@ async def post_responder(
             "Muitas tentativas de resposta em chamados. Aguarde alguns minutos.",
         )
         logger.warning(f"Rate limit excedido para resposta em chamados - IP: {ip}")
-        return RedirectResponse(f"/chamados/{id}/visualizar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            f"/chamados/{id}/visualizar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Obter chamado ou retornar 404
     chamado = obter_ou_404(
         chamado_repo.obter_por_id(id),
         request,
         "Chamado não encontrado",
-        "/chamados/listar"
+        "/chamados/listar",
     )
     if isinstance(chamado, RedirectResponse):
         return chamado
@@ -260,16 +271,18 @@ async def post_responder(
         usuario_logado.id,
         request,
         "Você não tem permissão para responder a este chamado",
-        "/chamados/listar"
+        "/chamados/listar",
     ):
-        return RedirectResponse("/chamados/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/chamados/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Armazena os dados do formulário para reexibição em caso de erro
     interacoes = chamado_interacao_repo.obter_por_chamado(id)
     dados_formulario: dict = {
         "mensagem": mensagem,
         "chamado": chamado,
-        "interacoes": interacoes
+        "interacoes": interacoes,
     }
 
     try:
@@ -284,16 +297,16 @@ async def post_responder(
             mensagem=dto.mensagem,
             tipo=TipoInteracao.RESPOSTA_USUARIO,
             data_interacao=agora(),
-            status_resultante=chamado.status.value  # Mantém status atual
+            status_resultante=chamado.status.value,  # Mantém status atual
         )
         chamado_interacao_repo.inserir(interacao)
 
-        logger.info(
-            f"Usuário {usuario_logado.id} respondeu ao chamado {id}"
-        )
+        logger.info(f"Usuário {usuario_logado.id} respondeu ao chamado {id}")
 
         informar_sucesso(request, "Resposta adicionada com sucesso!")
-        return RedirectResponse(f"/chamados/{id}/visualizar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            f"/chamados/{id}/visualizar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     except ValidationError as e:
         raise ErroValidacaoFormulario(
@@ -306,7 +319,9 @@ async def post_responder(
 
 @router.post("/{id}/excluir")
 @requer_autenticacao()
-async def post_excluir(request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None):
+async def post_excluir(
+    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Exclui um chamado do usuário (apenas se aberto e sem respostas de admin)."""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -316,7 +331,7 @@ async def post_excluir(request: Request, id: int, usuario_logado: Optional[Usuar
         chamado_repo.obter_por_id(id),
         request,
         "Chamado não encontrado",
-        "/chamados/listar"
+        "/chamados/listar",
     )
     if isinstance(chamado, RedirectResponse):
         return chamado
@@ -327,9 +342,11 @@ async def post_excluir(request: Request, id: int, usuario_logado: Optional[Usuar
         usuario_logado.id,
         request,
         "Você não tem permissão para excluir este chamado",
-        "/chamados/listar"
+        "/chamados/listar",
     ):
-        return RedirectResponse("/chamados/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/chamados/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Verificar se chamado está aberto
     if chamado.status != StatusChamado.ABERTO:
@@ -337,15 +354,22 @@ async def post_excluir(request: Request, id: int, usuario_logado: Optional[Usuar
         logger.warning(
             f"Usuário {usuario_logado.id} tentou excluir chamado {id} com status {chamado.status.value}"
         )
-        return RedirectResponse("/chamados/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/chamados/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Verificar se há respostas de administrador
     if chamado_interacao_repo.tem_resposta_admin(id):
-        informar_erro(request, "Não é possível excluir chamados que já possuem resposta do administrador")
+        informar_erro(
+            request,
+            "Não é possível excluir chamados que já possuem resposta do administrador",
+        )
         logger.warning(
             f"Usuário {usuario_logado.id} tentou excluir chamado {id} que possui respostas de admin"
         )
-        return RedirectResponse("/chamados/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/chamados/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Tudo OK, pode excluir
     chamado_repo.excluir(id)

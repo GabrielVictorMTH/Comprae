@@ -3,6 +3,7 @@ Testes para o repositório de pedidos.
 
 Testa todas as operações do pedido_repo e validações do model/SQL.
 """
+
 import pytest
 import uuid
 from datetime import datetime
@@ -23,7 +24,7 @@ def comprador_teste():
         nome="Comprador Teste",
         email=f"comprador_{id(Usuario)}@test.com",
         senha=criar_hash_senha("senha123"),
-        perfil="Cliente"
+        perfil="Comprador",
     )
     return usuario_repo.inserir(usuario)
 
@@ -36,7 +37,7 @@ def vendedor_teste():
         nome="Vendedor Teste Pedido",
         email=f"vendedor_pedido_{id(Usuario)}@test.com",
         senha=criar_hash_senha("senha123"),
-        perfil="Vendedor"
+        perfil="Vendedor",
     )
     return usuario_repo.inserir(usuario)
 
@@ -47,7 +48,9 @@ def categoria_teste():
     Fixture que cria uma categoria de teste e retorna seu ID.
     """
     nome_unico = f"Categoria Pedido {uuid.uuid4().hex[:8]}"
-    categoria = categoria_repo.inserir(Categoria(nome=nome_unico, descricao="Descrição teste"))
+    categoria = categoria_repo.inserir(
+        Categoria(nome=nome_unico, descricao="Descrição teste")
+    )
     return categoria.id
 
 
@@ -64,7 +67,7 @@ def endereco_teste(comprador_teste):
         cidade="São Paulo",
         uf="SP",
         cep="01000-000",
-        usuario=None
+        usuario=None,
     )
     return endereco_repo.inserir(endereco)
 
@@ -95,14 +98,16 @@ class TestCriarTabela:
 
 
 class TestInserir:
-    def test_inserir_pedido_valido(self, comprador_teste, endereco_teste, anuncio_teste):
+    def test_inserir_pedido_valido(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
         pedido = Pedido(
             id=0,
             id_endereco=endereco_teste,
             id_comprador=comprador_teste,
             id_anuncio=anuncio_teste,
             preco=99.90,
-            status="Pendente"
+            status="Pendente",
         )
         resultado = pedido_repo.inserir(pedido)
         assert resultado is not None
@@ -115,7 +120,7 @@ class TestInserir:
             id_comprador=comprador_teste,
             id_anuncio=anuncio_teste,
             preco=50.0,
-            status="Pendente"
+            status="Pendente",
         )
         with pytest.raises(Exception):
             pedido_repo.inserir(pedido)
@@ -127,7 +132,7 @@ class TestInserir:
             id_comprador=99999,
             id_anuncio=anuncio_teste,
             preco=50.0,
-            status="Pendente"
+            status="Pendente",
         )
         with pytest.raises(Exception):
             pedido_repo.inserir(pedido)
@@ -139,12 +144,14 @@ class TestInserir:
             id_comprador=comprador_teste,
             id_anuncio=99999,
             preco=50.0,
-            status="Pendente"
+            status="Pendente",
         )
         with pytest.raises(Exception):
             pedido_repo.inserir(pedido)
 
-    def test_inserir_pedido_status_default(self, comprador_teste, endereco_teste, anuncio_teste):
+    def test_inserir_pedido_status_default(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
         """Testa que o status padrão é 'Pendente'"""
         pedido = Pedido(
             id=0,
@@ -152,7 +159,7 @@ class TestInserir:
             id_comprador=comprador_teste,
             id_anuncio=anuncio_teste,
             preco=75.0,
-            status="Pendente"
+            status="Pendente",
         )
         pedido_id = pedido_repo.inserir(pedido)
 
@@ -161,8 +168,12 @@ class TestInserir:
 
 
 class TestAtualizarStatus:
-    def test_atualizar_status_existente(self, comprador_teste, endereco_teste, anuncio_teste):
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+    def test_atualizar_status_existente(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         pedido_id = pedido_repo.inserir(pedido)
 
         assert pedido_repo.atualizar_status(pedido_id, "Pago") is True
@@ -175,8 +186,12 @@ class TestAtualizarStatus:
 
 
 class TestMarcarComoPago:
-    def test_marcar_como_pago_sucesso(self, comprador_teste, endereco_teste, anuncio_teste):
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+    def test_marcar_como_pago_sucesso(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         pedido_id = pedido_repo.inserir(pedido)
 
         assert pedido_repo.marcar_como_pago(pedido_id) is True
@@ -190,8 +205,12 @@ class TestMarcarComoPago:
 
 
 class TestMarcarComoEnviado:
-    def test_marcar_como_enviado_sucesso(self, comprador_teste, endereco_teste, anuncio_teste):
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+    def test_marcar_como_enviado_sucesso(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         pedido_id = pedido_repo.inserir(pedido)
 
         codigo = "BR123456789"
@@ -207,8 +226,12 @@ class TestMarcarComoEnviado:
 
 
 class TestCancelar:
-    def test_cancelar_pedido_existente(self, comprador_teste, endereco_teste, anuncio_teste):
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+    def test_cancelar_pedido_existente(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         pedido_id = pedido_repo.inserir(pedido)
 
         assert pedido_repo.cancelar(pedido_id) is True
@@ -221,8 +244,12 @@ class TestCancelar:
 
 
 class TestAvaliar:
-    def test_avaliar_pedido_valido(self, comprador_teste, endereco_teste, anuncio_teste):
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+    def test_avaliar_pedido_valido(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         pedido_id = pedido_repo.inserir(pedido)
 
         nota = 5
@@ -234,9 +261,13 @@ class TestAvaliar:
         assert recuperado.comentario_avaliacao == comentario
         assert recuperado.data_hora_avaliacao is not None
 
-    def test_avaliar_pedido_nota_minima(self, comprador_teste, endereco_teste, anuncio_teste):
+    def test_avaliar_pedido_nota_minima(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
         """Testa avaliação com nota mínima (1)"""
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         pedido_id = pedido_repo.inserir(pedido)
 
         assert pedido_repo.avaliar(pedido_id, 1, "Ruim") is True
@@ -244,9 +275,13 @@ class TestAvaliar:
         recuperado = pedido_repo.obter_por_id(pedido_id)
         assert recuperado.nota_avaliacao == 1
 
-    def test_avaliar_pedido_nota_maxima(self, comprador_teste, endereco_teste, anuncio_teste):
+    def test_avaliar_pedido_nota_maxima(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
         """Testa avaliação com nota máxima (5)"""
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         pedido_id = pedido_repo.inserir(pedido)
 
         assert pedido_repo.avaliar(pedido_id, 5, "Excelente!") is True
@@ -259,8 +294,12 @@ class TestAvaliar:
 
 
 class TestObterPorId:
-    def test_obter_pedido_existente(self, comprador_teste, endereco_teste, anuncio_teste):
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 150.0, "Pendente")
+    def test_obter_pedido_existente(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 150.0, "Pendente"
+        )
         pedido_id = pedido_repo.inserir(pedido)
 
         recuperado = pedido_repo.obter_por_id(pedido_id)
@@ -274,10 +313,14 @@ class TestObterPorId:
 
 
 class TestObterPorComprador:
-    def test_obter_pedidos_do_comprador(self, comprador_teste, endereco_teste, anuncio_teste):
+    def test_obter_pedidos_do_comprador(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
         # Criar múltiplos pedidos
         for i in range(3):
-            pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 50.0 + i, "Pendente")
+            pedido = Pedido(
+                0, endereco_teste, comprador_teste, anuncio_teste, 50.0 + i, "Pendente"
+            )
             pedido_repo.inserir(pedido)
 
         pedidos = pedido_repo.obter_por_comprador(comprador_teste)
@@ -285,14 +328,24 @@ class TestObterPorComprador:
         assert all(p.id_comprador == comprador_teste for p in pedidos)
 
     def test_obter_pedidos_comprador_sem_pedidos(self):
-        usuario = usuario_repo.inserir(Usuario(0, "Sem Pedidos", "sem@pedidos.com", criar_hash_senha("123"), "Cliente"))
+        usuario = usuario_repo.inserir(
+            Usuario(
+                0,
+                "Sem Pedidos",
+                "sem@pedidos.com",
+                criar_hash_senha("123"),
+                "Comprador",
+            )
+        )
         pedidos = pedido_repo.obter_por_comprador(usuario)
         assert isinstance(pedidos, list)
         assert len(pedidos) == 0
 
 
 class TestObterPorVendedor:
-    def test_obter_pedidos_do_vendedor(self, comprador_teste, endereco_teste, vendedor_teste, categoria_teste):
+    def test_obter_pedidos_do_vendedor(
+        self, comprador_teste, endereco_teste, vendedor_teste, categoria_teste
+    ):
         # Criar anúncio do vendedor
         anuncio = Anuncio(
             id=0,
@@ -312,26 +365,38 @@ class TestObterPorVendedor:
 
         # Criar pedidos
         for i in range(2):
-            pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_id, 100.0, "Pendente")
+            pedido = Pedido(
+                0, endereco_teste, comprador_teste, anuncio_id, 100.0, "Pendente"
+            )
             pedido_repo.inserir(pedido)
 
         pedidos = pedido_repo.obter_por_vendedor(vendedor_teste)
         assert len(pedidos) >= 2
 
     def test_obter_pedidos_vendedor_sem_vendas(self):
-        vendedor = usuario_repo.inserir(Usuario(0, "Sem Vendas", "semvendas@t.com", criar_hash_senha("123"), "Vendedor"))
+        vendedor = usuario_repo.inserir(
+            Usuario(
+                0, "Sem Vendas", "semvendas@t.com", criar_hash_senha("123"), "Vendedor"
+            )
+        )
         pedidos = pedido_repo.obter_por_vendedor(vendedor)
         assert isinstance(pedidos, list)
         assert len(pedidos) == 0
 
 
 class TestObterPorStatus:
-    def test_obter_pedidos_por_status(self, comprador_teste, endereco_teste, anuncio_teste):
+    def test_obter_pedidos_por_status(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
         # Criar pedidos com diferentes status
-        p1 = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+        p1 = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         p1_id = pedido_repo.inserir(p1)
 
-        p2 = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 200.0, "Pendente")
+        p2 = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 200.0, "Pendente"
+        )
         p2_id = pedido_repo.inserir(p2)
         pedido_repo.marcar_como_pago(p2_id)
 
@@ -353,7 +418,9 @@ class TestObterPorStatus:
 class TestObterTodos:
     def test_obter_todos_pedidos(self, comprador_teste, endereco_teste, anuncio_teste):
         for i in range(3):
-            pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 50.0 + i, "Pendente")
+            pedido = Pedido(
+                0, endereco_teste, comprador_teste, anuncio_teste, 50.0 + i, "Pendente"
+            )
             pedido_repo.inserir(pedido)
 
         pedidos = pedido_repo.obter_todos()
@@ -361,10 +428,14 @@ class TestObterTodos:
 
 
 class TestFluxoPedido:
-    def test_fluxo_completo_pedido(self, comprador_teste, endereco_teste, anuncio_teste):
+    def test_fluxo_completo_pedido(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
         """Testa fluxo: Pendente → Pago → Enviado → Avaliado"""
         # Criar pedido
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 250.0, "Pendente")
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 250.0, "Pendente"
+        )
         pedido_id = pedido_repo.inserir(pedido)
         assert pedido_id is not None
 
@@ -394,25 +465,37 @@ class TestFluxoPedido:
 
 
 class TestCascadeRestrict:
-    def test_excluir_comprador_com_pedidos_deve_falhar(self, comprador_teste, endereco_teste, anuncio_teste):
+    def test_excluir_comprador_com_pedidos_deve_falhar(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
         """Testa RESTRICT: não pode excluir comprador com pedidos"""
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         pedido_repo.inserir(pedido)
 
         with pytest.raises(Exception):
             usuario_repo.excluir(comprador_teste)
 
-    def test_excluir_anuncio_com_pedidos_deve_falhar(self, comprador_teste, endereco_teste, anuncio_teste):
+    def test_excluir_anuncio_com_pedidos_deve_falhar(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
         """Testa RESTRICT: não pode excluir anúncio com pedidos"""
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         pedido_repo.inserir(pedido)
 
         with pytest.raises(Exception):
             anuncio_repo.excluir(anuncio_teste)
 
-    def test_excluir_endereco_com_pedidos_deve_falhar(self, comprador_teste, endereco_teste, anuncio_teste):
+    def test_excluir_endereco_com_pedidos_deve_falhar(
+        self, comprador_teste, endereco_teste, anuncio_teste
+    ):
         """Testa RESTRICT: não pode excluir endereço com pedidos"""
-        pedido = Pedido(0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente")
+        pedido = Pedido(
+            0, endereco_teste, comprador_teste, anuncio_teste, 100.0, "Pendente"
+        )
         pedido_repo.inserir(pedido)
 
         with pytest.raises(Exception):
@@ -428,19 +511,19 @@ class TestModelValidation:
             id_comprador=1,
             id_anuncio=1,
             preco=100.0,
-            status="Pendente"
+            status="Pendente",
         )
 
-        assert hasattr(pedido, 'id')
-        assert hasattr(pedido, 'id_endereco')
-        assert hasattr(pedido, 'id_comprador')
-        assert hasattr(pedido, 'id_anuncio')
-        assert hasattr(pedido, 'preco')
-        assert hasattr(pedido, 'status')
-        assert hasattr(pedido, 'data_hora_pedido')
-        assert hasattr(pedido, 'data_hora_pagamento')
-        assert hasattr(pedido, 'data_hora_envio')
-        assert hasattr(pedido, 'codigo_rastreio')
-        assert hasattr(pedido, 'nota_avaliacao')
-        assert hasattr(pedido, 'comentario_avaliacao')
-        assert hasattr(pedido, 'data_hora_avaliacao')
+        assert hasattr(pedido, "id")
+        assert hasattr(pedido, "id_endereco")
+        assert hasattr(pedido, "id_comprador")
+        assert hasattr(pedido, "id_anuncio")
+        assert hasattr(pedido, "preco")
+        assert hasattr(pedido, "status")
+        assert hasattr(pedido, "data_hora_pedido")
+        assert hasattr(pedido, "data_hora_pagamento")
+        assert hasattr(pedido, "data_hora_envio")
+        assert hasattr(pedido, "codigo_rastreio")
+        assert hasattr(pedido, "nota_avaliacao")
+        assert hasattr(pedido, "comentario_avaliacao")
+        assert hasattr(pedido, "data_hora_avaliacao")

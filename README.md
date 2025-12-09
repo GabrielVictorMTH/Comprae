@@ -91,7 +91,7 @@ O sistema vem com usuários pré-cadastrados para facilitar os testes:
 | Perfil | E-mail | Senha | Descrição |
 |--------|--------|-------|-----------|
 | **Administrador** | administrador@email.com | 1234aA@# | Acesso administrativo completo |
-| **Cliente** | cliente@email.com | 1234aA@# | Usuário com perfil Cliente |
+| **Comprador** | comprador@email.com | 1234aA@# | Usuário com perfil Comprador |
 | **Vendedor** | vendedor@email.com | 1234aA@# | Usuário com perfil Vendedor |
 
 > **Importante**: Altere essas senhas em ambiente de produção!
@@ -103,7 +103,7 @@ O sistema vem com usuários pré-cadastrados para facilitar os testes:
 - **Login/Logout** com sessões seguras
 - **Cadastro de usuários** com validação de senha forte
 - **Recuperação de senha** por email
-- **Perfis de usuário** (Admin, Cliente, Vendedor - extensível)
+- **Perfis de usuário** (Admin, Comprador, Vendedor - extensível)
 - **Proteção de rotas** por perfil com decorator `@requer_autenticacao()`
 - **Verificação defensiva** - Todas as rotas autenticadas verificam `usuario_logado` antes de executar
 - **Gerenciamento de usuários** (CRUD completo para admins)

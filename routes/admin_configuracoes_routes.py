@@ -44,12 +44,37 @@ templates = criar_templates()
 # Whitelist de Temas (prevenção de Path Traversal)
 # =============================================================================
 
-TEMAS_VALIDOS = frozenset([
-    "brite", "cerulean", "cosmo", "cyborg", "darkly", "flatly", "journal",
-    "litera", "lumen", "lux", "materia", "minty", "morph", "original",
-    "pulse", "quartz", "sandstone", "simplex", "sketchy", "slate", "solar",
-    "spacelab", "superhero", "united", "vapor", "yeti", "zephyr"
-])
+TEMAS_VALIDOS = frozenset(
+    [
+        "brite",
+        "cerulean",
+        "cosmo",
+        "cyborg",
+        "darkly",
+        "flatly",
+        "journal",
+        "litera",
+        "lumen",
+        "lux",
+        "materia",
+        "minty",
+        "morph",
+        "original",
+        "pulse",
+        "quartz",
+        "sandstone",
+        "simplex",
+        "sketchy",
+        "slate",
+        "solar",
+        "spacelab",
+        "superhero",
+        "united",
+        "vapor",
+        "yeti",
+        "zephyr",
+    ]
+)
 
 # =============================================================================
 # Rate Limiters
@@ -66,9 +91,12 @@ admin_config_limiter = DynamicRateLimiter(
 
 # === CRUD de Configurações ===
 
+
 @router.get("/configuracoes")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def get_listar_configuracoes(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
+async def get_listar_configuracoes(
+    request: Request, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Lista todas as configurações agrupadas por categoria"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -86,7 +114,7 @@ async def get_listar_configuracoes(request: Request, usuario_logado: Optional[Us
                 "configs_por_categoria": configs_por_categoria,
                 "total_configs": total_configs,
                 "usuario_logado": usuario_logado,
-            }
+            },
         )
 
     except sqlite3.Error as e:
@@ -108,8 +136,7 @@ async def get_listar_configuracoes(request: Request, usuario_logado: Optional[Us
 @router.post("/configuracoes/salvar-lote")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def post_salvar_lote_configuracoes(
-    request: Request,
-    usuario_logado: Optional[UsuarioLogado] = None
+    request: Request, usuario_logado: Optional[UsuarioLogado] = None
 ):
     """
     Salva múltiplas configurações de uma vez (salvamento em lote).
@@ -126,8 +153,12 @@ async def post_salvar_lote_configuracoes(
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_config_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
+        return RedirectResponse(
+            "/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     try:
         # Obter dados do formulário
@@ -141,13 +172,17 @@ async def post_salvar_lote_configuracoes(
 
         if not configs:
             informar_aviso(request, "Nenhuma configuração para salvar.")
-            return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(
+                "/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER
+            )
 
         # Validar com DTO
         dto = SalvarConfiguracaoLoteDTO(configs=configs)
 
         # Atualizar configurações no banco
-        quantidade_atualizada, chaves_nao_encontradas = configuracao_repo.atualizar_multiplas(dto.configs)
+        quantidade_atualizada, chaves_nao_encontradas = (
+            configuracao_repo.atualizar_multiplas(dto.configs)
+        )
 
         # Limpar cache de configurações
         config.limpar()
@@ -164,18 +199,20 @@ async def post_salvar_lote_configuracoes(
                 informar_aviso(
                     request,
                     f"{quantidade_atualizada} configurações atualizadas com sucesso! "
-                    f"Algumas chaves não foram encontradas: {', '.join(chaves_nao_encontradas)}"
+                    f"Algumas chaves não foram encontradas: {', '.join(chaves_nao_encontradas)}",
                 )
             else:
                 informar_sucesso(
                     request,
                     f"{quantidade_atualizada} configurações atualizadas com sucesso! "
-                    "Alterações aplicadas imediatamente."
+                    "Alterações aplicadas imediatamente.",
                 )
         else:
             informar_erro(request, "Nenhuma configuração foi atualizada.")
 
-        return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     except ValidationError as e:
         # Processar erros de validação
@@ -197,15 +234,20 @@ async def post_salvar_lote_configuracoes(
         informar_erro(request, msg_erro)
 
         # Redirecionar de volta para a listagem
-        return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     except sqlite3.Error as e:
         logger.error(f"Erro de banco de dados ao salvar configurações em lote: {e}")
         informar_erro(request, f"Erro ao salvar configurações: {str(e)}")
-        return RedirectResponse("/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/configuracoes", status_code=status.HTTP_303_SEE_OTHER
+        )
 
 
 # === Tema Visual ===
+
 
 @router.get("/tema")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -227,12 +269,14 @@ async def get_tema(request: Request, usuario_logado: Optional[UsuarioLogado] = N
             # Verificar se existe o arquivo CSS correspondente
             css_file = Path(f"static/css/bootswatch/{tema_nome}.bootstrap.min.css")
             if css_file.exists():
-                temas_disponiveis.append({
-                    "nome": tema_nome,
-                    "nome_exibicao": tema_nome.capitalize(),
-                    "imagem": f"/static/img/bootswatch/{img_file.name}",
-                    "selecionado": tema_nome == tema_atual
-                })
+                temas_disponiveis.append(
+                    {
+                        "nome": tema_nome,
+                        "nome_exibicao": tema_nome.capitalize(),
+                        "imagem": f"/static/img/bootswatch/{img_file.name}",
+                        "selecionado": tema_nome == tema_atual,
+                    }
+                )
 
     return templates.TemplateResponse(
         "admin/tema.html",
@@ -241,7 +285,7 @@ async def get_tema(request: Request, usuario_logado: Optional[UsuarioLogado] = N
             "temas": temas_disponiveis,
             "tema_atual": tema_atual,
             "usuario_logado": usuario_logado,
-        }
+        },
     )
 
 
@@ -250,7 +294,7 @@ async def get_tema(request: Request, usuario_logado: Optional[UsuarioLogado] = N
 async def post_aplicar_tema(
     request: Request,
     tema: str = Form(...),
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """
     Aplica um tema visual selecionado
@@ -264,7 +308,9 @@ async def post_aplicar_tema(
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_config_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
         return RedirectResponse("/admin/tema", status_code=status.HTTP_303_SEE_OTHER)
 
     try:
@@ -278,15 +324,21 @@ async def post_aplicar_tema(
             logger.warning(
                 f"Tentativa de aplicar tema inválido por admin {usuario_logado.id}: {tema}"
             )
-            return RedirectResponse("/admin/tema", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(
+                "/admin/tema", status_code=status.HTTP_303_SEE_OTHER
+            )
 
         # Construir caminho seguro após validação da whitelist
         css_origem = Path(f"static/css/bootswatch/{tema_normalizado}.bootstrap.min.css")
 
         if not css_origem.exists():
-            informar_erro(request, f"Arquivo do tema '{tema_normalizado}' não encontrado")
+            informar_erro(
+                request, f"Arquivo do tema '{tema_normalizado}' não encontrado"
+            )
             logger.error(f"Arquivo de tema na whitelist não existe: {css_origem}")
-            return RedirectResponse("/admin/tema", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(
+                "/admin/tema", status_code=status.HTTP_303_SEE_OTHER
+            )
 
         # Copiar arquivo CSS do tema para bootstrap.min.css
         css_destino = Path("static/css/bootstrap.min.css")
@@ -296,7 +348,7 @@ async def post_aplicar_tema(
         sucesso = configuracao_repo.inserir_ou_atualizar(
             chave="theme",
             valor=tema_normalizado,
-            descricao="Tema visual da aplicação (Bootswatch)"
+            descricao="Tema visual da aplicação (Bootswatch)",
         )
 
         if sucesso:
@@ -309,10 +361,12 @@ async def post_aplicar_tema(
             )
             informar_sucesso(
                 request,
-                f"Tema '{tema_normalizado.capitalize()}' aplicado com sucesso! Recarregue a página para ver as mudanças."
+                f"Tema '{tema_normalizado.capitalize()}' aplicado com sucesso! Recarregue a página para ver as mudanças.",
             )
         else:
-            logger.error(f"Erro ao salvar configuração de tema '{tema_normalizado}' no banco de dados")
+            logger.error(
+                f"Erro ao salvar configuração de tema '{tema_normalizado}' no banco de dados"
+            )
             informar_erro(request, "Erro ao salvar configuração do tema")
 
     except (sqlite3.Error, OSError) as e:
@@ -336,7 +390,7 @@ def _ler_log_arquivo(data: str, nivel: str) -> tuple[str, int, Optional[str]]:
     """
     try:
         # Converter data para formato do arquivo (YYYY.MM.DD)
-        data_formatada = data.replace('-', '.')
+        data_formatada = data.replace("-", ".")
         arquivo_log = Path(f"logs/app.{data_formatada}.log")
 
         # Verificar se arquivo existe
@@ -346,24 +400,23 @@ def _ler_log_arquivo(data: str, nivel: str) -> tuple[str, int, Optional[str]]:
         # Verificar tamanho do arquivo (limite de 10MB para performance)
         tamanho_mb = arquivo_log.stat().st_size / (1024 * 1024)
         if tamanho_mb > 10:
-            logger.warning(f"Arquivo de log muito grande ({tamanho_mb:.2f} MB): {arquivo_log}")
+            logger.warning(
+                f"Arquivo de log muito grande ({tamanho_mb:.2f} MB): {arquivo_log}"
+            )
             msg = f"Arquivo de log muito grande ({tamanho_mb:.2f} MB). Use ferramentas externas."
             return "", 0, msg
 
         # Ler arquivo
-        with open(arquivo_log, 'r', encoding='utf-8') as f:
+        with open(arquivo_log, "r", encoding="utf-8") as f:
             linhas = f.readlines()
 
         # Filtrar por nível se não for "TODOS"
         if nivel != "TODOS":
-            linhas_filtradas = [
-                linha for linha in linhas
-                if f" - {nivel} - " in linha
-            ]
+            linhas_filtradas = [linha for linha in linhas if f" - {nivel} - " in linha]
         else:
             linhas_filtradas = linhas
 
-        conteudo = ''.join(linhas_filtradas)
+        conteudo = "".join(linhas_filtradas)
         total = len(linhas_filtradas)
 
         return conteudo, total, None
@@ -375,12 +428,14 @@ def _ler_log_arquivo(data: str, nivel: str) -> tuple[str, int, Optional[str]]:
 
 @router.get("/auditoria")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def get_auditoria(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
+async def get_auditoria(
+    request: Request, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Exibe página de auditoria de logs do sistema"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     # Data padrão: hoje
-    data_hoje = agora().strftime('%Y-%m-%d')
+    data_hoje = agora().strftime("%Y-%m-%d")
 
     return templates.TemplateResponse(
         "admin/auditoria.html",
@@ -389,7 +444,7 @@ async def get_auditoria(request: Request, usuario_logado: Optional[UsuarioLogado
             "data_selecionada": data_hoje,
             "nivel_selecionado": "TODOS",
             "usuario_logado": usuario_logado,
-        }
+        },
     )
 
 
@@ -399,7 +454,7 @@ async def post_filtrar_auditoria(
     request: Request,
     data: str = Form(...),
     nivel: str = Form(...),
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """
     Filtra logs do sistema por data e nível
@@ -414,8 +469,12 @@ async def post_filtrar_auditoria(
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_config_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/auditoria", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
+        return RedirectResponse(
+            "/admin/auditoria", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Ler e filtrar logs
     logs, total_linhas, mensagem_erro = _ler_log_arquivo(data, nivel)
@@ -436,5 +495,5 @@ async def post_filtrar_auditoria(
             "total_linhas": total_linhas,
             "mensagem_erro": mensagem_erro,
             "usuario_logado": usuario_logado,
-        }
+        },
     )

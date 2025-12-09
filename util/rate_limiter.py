@@ -212,9 +212,7 @@ class DynamicRateLimiter(RateLimiter):
         janela_minutos = config.obter_int(chave_minutos, padrao_minutos)
 
         super().__init__(
-            max_tentativas=max_tentativas,
-            janela_minutos=janela_minutos,
-            nome=nome
+            max_tentativas=max_tentativas, janela_minutos=janela_minutos, nome=nome
         )
 
     def _atualizar_valores(self) -> None:
@@ -302,7 +300,7 @@ class DynamicRateLimiter(RateLimiter):
 
 def obter_identificador_cliente(request) -> str:
     """
-    Extrai identificador único do cliente (geralmente IP).
+    Extrai identificador único do comprador (geralmente IP).
 
     Args:
         request: FastAPI Request object
@@ -318,6 +316,7 @@ def obter_identificador_cliente(request) -> str:
 # =============================================================================
 # Registry de Rate Limiters
 # =============================================================================
+
 
 class RegistroLimiters:
     """
@@ -371,17 +370,18 @@ class RegistroLimiters:
         Returns:
             Dict com total e detalhes de cada limiter
         """
-        stats = {
-            "total_limiters": len(self._limiters),
-            "limiters": {}
-        }
+        stats = {"total_limiters": len(self._limiters), "limiters": {}}
 
         for nome, limiter in self._limiters.items():
             stats["limiters"][nome] = {
                 "max_tentativas": limiter.max_tentativas,
                 "janela_minutos": limiter.janela_minutos,
                 "identificadores_ativos": len(limiter.tentativas),
-                "tipo": "dinamico" if isinstance(limiter, DynamicRateLimiter) else "estatico"
+                "tipo": (
+                    "dinamico"
+                    if isinstance(limiter, DynamicRateLimiter)
+                    else "estatico"
+                ),
             }
 
         return stats
@@ -405,16 +405,17 @@ registro_limiters = RegistroLimiters()
 # Decorator @com_rate_limit
 # =============================================================================
 
+
 def com_rate_limit(
     limiter: RateLimiter,
     mensagem_erro: str = "Muitas requisições. Aguarde alguns minutos.",
-    registrar: bool = True
+    registrar: bool = True,
 ):
     """
     Decorator que aplica rate limiting a uma rota FastAPI.
 
     Simplifica o código repetitivo de rate limiting, extraindo automaticamente
-    o IP do cliente e verificando o limiter. Se exceder o limite, levanta
+    o IP do comprador e verificando o limiter. Se exceder o limite, levanta
     HTTPException 429.
 
     Args:
@@ -436,12 +437,12 @@ def com_rate_limit(
         @wraps(func)
         async def wrapper(*args, **kwargs):
             # Encontrar o request nos argumentos
-            request = kwargs.get('request')
+            request = kwargs.get("request")
 
             # Se não encontrar em kwargs, procurar em args
             if request is None:
                 for arg in args:
-                    if hasattr(arg, 'client') and hasattr(arg, 'session'):
+                    if hasattr(arg, "client") and hasattr(arg, "session"):
                         request = arg
                         break
 
@@ -456,16 +457,15 @@ def com_rate_limit(
             # Verificar rate limit
             ip = obter_identificador_cliente(request)
             if not limiter.verificar(ip):
-                logger.warning(
-                    f"Rate limit excedido [{limiter.nome}] - IP: {ip}"
-                )
+                logger.warning(f"Rate limit excedido [{limiter.nome}] - IP: {ip}")
                 raise HTTPException(
                     status_code=429,
-                    detail=f"{mensagem_erro} (aguarde {limiter.janela_minutos} minuto(s))"
+                    detail=f"{mensagem_erro} (aguarde {limiter.janela_minutos} minuto(s))",
                 )
 
             # Continuar com a função original
             return await func(*args, **kwargs)
 
         return wrapper
+
     return decorator

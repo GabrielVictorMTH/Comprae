@@ -24,11 +24,15 @@ admin_produtos_limiter = RateLimiter(
     nome="admin_produtos",
 )
 
+
 @router.get("/")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def index(request: Request, usuario_logado: Optional[dict] = None):
     """Redireciona para lista de produtos"""
-    return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    return RedirectResponse(
+        "/admin/produtos/listar", status_code=status.HTTP_307_TEMPORARY_REDIRECT
+    )
+
 
 @router.get("/listar")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -38,9 +42,9 @@ async def listar(request: Request, usuario_logado: Optional[dict] = None):
     anuncios = anuncio_repo.obter_todos()
 
     return templates.TemplateResponse(
-        "admin/produtos/listar.html",
-        {"request": request, "anuncios": anuncios}
+        "admin/produtos/listar.html", {"request": request, "anuncios": anuncios}
     )
+
 
 @router.get("/moderar")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -52,8 +56,9 @@ async def moderar(request: Request, usuario_logado: Optional[dict] = None):
 
     return templates.TemplateResponse(
         "admin/produtos/moderar.html",
-        {"request": request, "anuncios": anuncios_pendentes}
+        {"request": request, "anuncios": anuncios_pendentes},
     )
+
 
 @router.post("/aprovar/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -64,23 +69,34 @@ async def aprovar(request: Request, id: int, usuario_logado: Optional[dict] = No
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_produtos_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
+        return RedirectResponse(
+            "/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     anuncio = anuncio_repo.obter_por_id(id)
 
     if not anuncio:
         informar_erro(request, "Produto não encontrado")
-        return RedirectResponse("/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Ativar produto
     anuncio.ativo = True
     anuncio_repo.alterar(anuncio)
 
-    logger.info(f"Produto {id} ({anuncio.nome}) aprovado por admin {usuario_logado['id']}")
+    logger.info(
+        f"Produto {id} ({anuncio.nome}) aprovado por admin {usuario_logado['id']}"
+    )
     informar_sucesso(request, f"Produto '{anuncio.nome}' aprovado com sucesso!")
 
-    return RedirectResponse("/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(
+        "/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER
+    )
+
 
 @router.post("/reprovar/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -88,7 +104,7 @@ async def reprovar(
     request: Request,
     id: int,
     motivo_reprovacao: str = Form(...),
-    usuario_logado: Optional[dict] = None
+    usuario_logado: Optional[dict] = None,
 ):
     """Reprova um produto com motivo"""
     assert usuario_logado is not None
@@ -96,21 +112,24 @@ async def reprovar(
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_produtos_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
+        return RedirectResponse(
+            "/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     anuncio = anuncio_repo.obter_por_id(id)
 
     if not anuncio:
         informar_erro(request, "Produto não encontrado")
-        return RedirectResponse("/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     try:
         # Validar motivo
-        dto = ModerarProdutoDTO(
-            id=id,
-            motivo_reprovacao=motivo_reprovacao
-        )
+        dto = ModerarProdutoDTO(id=id, motivo_reprovacao=motivo_reprovacao)
 
         # Manter produto inativo e registrar motivo no log
         logger.warning(
@@ -121,11 +140,16 @@ async def reprovar(
         # TODO: Em versão futura, enviar notificação ao vendedor com o motivo
 
         informar_sucesso(request, f"Produto '{anuncio.nome}' reprovado.")
-        return RedirectResponse("/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     except ValidationError as e:
         informar_erro(request, "Motivo de reprovação inválido (mínimo 10 caracteres)")
-        return RedirectResponse("/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/produtos/moderar", status_code=status.HTTP_303_SEE_OTHER
+        )
+
 
 @router.get("/editar/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -135,7 +159,9 @@ async def get_editar(request: Request, id: int, usuario_logado: Optional[dict] =
 
     if not anuncio:
         informar_erro(request, "Produto não encontrado")
-        return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Obter categorias para o select
     categorias = categoria_repo.obter_todos()
@@ -146,9 +172,10 @@ async def get_editar(request: Request, id: int, usuario_logado: Optional[dict] =
             "request": request,
             "anuncio": anuncio,
             "categorias": categorias,
-            "dados": anuncio.__dict__
-        }
+            "dados": anuncio.__dict__,
+        },
     )
+
 
 @router.post("/editar/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -162,7 +189,7 @@ async def post_editar(
     preco: float = Form(...),
     estoque: int = Form(...),
     ativo: Optional[str] = Form(None),
-    usuario_logado: Optional[dict] = None
+    usuario_logado: Optional[dict] = None,
 ):
     """Edita um produto (admin)"""
     assert usuario_logado is not None
@@ -170,14 +197,20 @@ async def post_editar(
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_produtos_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
+        return RedirectResponse(
+            "/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Verificar se anúncio existe
     anuncio_atual = anuncio_repo.obter_por_id(id)
     if not anuncio_atual:
         informar_erro(request, "Produto não encontrado")
-        return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Converter checkbox ativo
     ativo_bool = ativo == "true" if ativo else False
@@ -191,7 +224,7 @@ async def post_editar(
         "peso": peso,
         "preco": preco,
         "estoque": estoque,
-        "ativo": ativo_bool
+        "ativo": ativo_bool,
     }
 
     try:
@@ -204,7 +237,7 @@ async def post_editar(
             peso=peso,
             preco=preco,
             estoque=estoque,
-            ativo=ativo_bool
+            ativo=ativo_bool,
         )
 
         # Atualizar anúncio (mantém data_cadastro e ativo originais)
@@ -218,14 +251,16 @@ async def post_editar(
             preco=dto.preco,
             estoque=dto.estoque,
             ativo=dto.ativo,
-            data_cadastro=anuncio_atual.data_cadastro  # Mantém data original
+            data_cadastro=anuncio_atual.data_cadastro,  # Mantém data original
         )
 
         anuncio_repo.alterar(anuncio_atualizado)
         logger.info(f"Produto {id} editado por admin {usuario_logado['id']}")
 
         informar_sucesso(request, "Produto alterado com sucesso!")
-        return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     except ValidationError as e:
         # Adicionar dados necessários para renderizar o template
@@ -238,31 +273,47 @@ async def post_editar(
             campo_padrao="nome",
         )
 
+
 @router.post("/excluir/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def post_excluir(request: Request, id: int, usuario_logado: Optional[dict] = None):
+async def post_excluir(
+    request: Request, id: int, usuario_logado: Optional[dict] = None
+):
     """Exclui um produto"""
     assert usuario_logado is not None
 
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_produtos_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
+        return RedirectResponse(
+            "/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     anuncio = anuncio_repo.obter_por_id(id)
 
     if not anuncio:
         informar_erro(request, "Produto não encontrado")
-        return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     try:
         anuncio_repo.excluir(id)
-        logger.info(f"Produto {id} ({anuncio.nome}) excluído por admin {usuario_logado['id']}")
+        logger.info(
+            f"Produto {id} ({anuncio.nome}) excluído por admin {usuario_logado['id']}"
+        )
         informar_sucesso(request, "Produto excluído com sucesso!")
     except Exception as e:
         # Captura erro de FK constraint (produto com pedidos vinculados)
         logger.error(f"Erro ao excluir produto {id}: {str(e)}")
-        informar_erro(request, "Não é possível excluir este produto pois existem pedidos vinculados a ele.")
+        informar_erro(
+            request,
+            "Não é possível excluir este produto pois existem pedidos vinculados a ele.",
+        )
 
-    return RedirectResponse("/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(
+        "/admin/produtos/listar", status_code=status.HTTP_303_SEE_OTHER
+    )

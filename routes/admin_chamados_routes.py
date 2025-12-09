@@ -73,13 +73,15 @@ async def listar(request: Request, usuario_logado: Optional[UsuarioLogado] = Non
     chamados = chamado_repo.obter_todos(usuario_logado.id)
     return templates.TemplateResponse(
         "admin/chamados/listar.html",
-        {"request": request, "chamados": chamados, "usuario_logado": usuario_logado}
+        {"request": request, "chamados": chamados, "usuario_logado": usuario_logado},
     )
 
 
 @router.get("/{id}/responder")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def get_responder(request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None):
+async def get_responder(
+    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Exibe formulário para responder um chamado com histórico completo."""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -89,7 +91,7 @@ async def get_responder(request: Request, id: int, usuario_logado: Optional[Usua
         chamado_repo.obter_por_id(id),
         request,
         "Chamado não encontrado",
-        "/admin/chamados/listar"
+        "/admin/chamados/listar",
     )
     if isinstance(chamado, RedirectResponse):
         return chamado
@@ -102,7 +104,12 @@ async def get_responder(request: Request, id: int, usuario_logado: Optional[Usua
 
     return templates.TemplateResponse(
         "admin/chamados/responder.html",
-        {"request": request, "chamado": chamado, "interacoes": interacoes, "usuario_logado": usuario_logado}
+        {
+            "request": request,
+            "chamado": chamado,
+            "interacoes": interacoes,
+            "usuario_logado": usuario_logado,
+        },
     )
 
 
@@ -113,7 +120,7 @@ async def post_responder(
     id: int,
     mensagem: str = Form(),
     status_chamado: str = Form(),
-    usuario_logado: Optional[UsuarioLogado] = None
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Salva resposta do administrador ao chamado e atualiza status."""
     if not usuario_logado:
@@ -127,14 +134,16 @@ async def post_responder(
             "Muitas tentativas de resposta. Aguarde alguns minutos.",
         )
         logger.warning(f"Rate limit excedido para admin responder chamado - IP: {ip}")
-        return RedirectResponse(f"/admin/chamados/{id}/responder", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            f"/admin/chamados/{id}/responder", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Obter chamado ou retornar 404
     chamado = obter_ou_404(
         chamado_repo.obter_por_id(id),
         request,
         "Chamado não encontrado",
-        "/admin/chamados/listar"
+        "/admin/chamados/listar",
     )
     if isinstance(chamado, RedirectResponse):
         return chamado
@@ -147,7 +156,7 @@ async def post_responder(
         "mensagem": mensagem,
         "status_chamado": status_chamado,
         "chamado": chamado,
-        "interacoes": interacoes
+        "interacoes": interacoes,
     }
 
     try:
@@ -163,16 +172,14 @@ async def post_responder(
             mensagem=dto_mensagem.mensagem,
             tipo=TipoInteracao.RESPOSTA_ADMIN,
             data_interacao=agora(),
-            status_resultante=dto_status.status
+            status_resultante=dto_status.status,
         )
         chamado_interacao_repo.inserir(interacao)
 
         # Atualizar status do chamado
-        fechar = (dto_status.status == StatusChamado.FECHADO.value)
+        fechar = dto_status.status == StatusChamado.FECHADO.value
         sucesso = chamado_repo.atualizar_status(
-            id=id,
-            status=dto_status.status,
-            fechar=fechar
+            id=id, status=dto_status.status, fechar=fechar
         )
 
         if sucesso:
@@ -180,10 +187,14 @@ async def post_responder(
                 f"Chamado {id} respondido por admin {usuario_logado.id}, status: {dto_status.status}"
             )
             informar_sucesso(request, "Resposta salva com sucesso!")
-            return RedirectResponse("/admin/chamados/listar", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(
+                "/admin/chamados/listar", status_code=status.HTTP_303_SEE_OTHER
+            )
         else:
             informar_erro(request, "Erro ao salvar resposta")
-            return RedirectResponse(f"/admin/chamados/{id}/responder", status_code=status.HTTP_303_SEE_OTHER)
+            return RedirectResponse(
+                f"/admin/chamados/{id}/responder", status_code=status.HTTP_303_SEE_OTHER
+            )
 
     except ValidationError as e:
         raise ErroValidacaoFormulario(
@@ -196,7 +207,9 @@ async def post_responder(
 
 @router.post("/{id}/fechar")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def fechar(request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None):
+async def fechar(
+    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Fecha um chamado alterando apenas o status, sem adicionar mensagem."""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -206,15 +219,13 @@ async def fechar(request: Request, id: int, usuario_logado: Optional[UsuarioLoga
         chamado_repo.obter_por_id(id),
         request,
         "Chamado não encontrado",
-        "/admin/chamados/listar"
+        "/admin/chamados/listar",
     )
     if isinstance(chamado, RedirectResponse):
         return chamado
 
     sucesso = chamado_repo.atualizar_status(
-        id=id,
-        status=StatusChamado.FECHADO.value,
-        fechar=True
+        id=id, status=StatusChamado.FECHADO.value, fechar=True
     )
 
     if sucesso:
@@ -223,12 +234,16 @@ async def fechar(request: Request, id: int, usuario_logado: Optional[UsuarioLoga
     else:
         informar_erro(request, "Erro ao fechar chamado")
 
-    return RedirectResponse("/admin/chamados/listar", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(
+        "/admin/chamados/listar", status_code=status.HTTP_303_SEE_OTHER
+    )
 
 
 @router.post("/{id}/reabrir")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def reabrir(request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None):
+async def reabrir(
+    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+):
     """Reabre um chamado fechado, alterando status para 'Em Análise'."""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -238,7 +253,7 @@ async def reabrir(request: Request, id: int, usuario_logado: Optional[UsuarioLog
         chamado_repo.obter_por_id(id),
         request,
         "Chamado não encontrado",
-        "/admin/chamados/listar"
+        "/admin/chamados/listar",
     )
     if isinstance(chamado, RedirectResponse):
         return chamado
@@ -246,12 +261,12 @@ async def reabrir(request: Request, id: int, usuario_logado: Optional[UsuarioLog
     # Verificar se o chamado está fechado
     if chamado.status != StatusChamado.FECHADO:
         informar_erro(request, "Apenas chamados fechados podem ser reabertos")
-        return RedirectResponse("/admin/chamados/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/chamados/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     sucesso = chamado_repo.atualizar_status(
-        id=id,
-        status=StatusChamado.EM_ANALISE.value,
-        fechar=False
+        id=id, status=StatusChamado.EM_ANALISE.value, fechar=False
     )
 
     if sucesso:
@@ -260,4 +275,6 @@ async def reabrir(request: Request, id: int, usuario_logado: Optional[UsuarioLog
     else:
         informar_erro(request, "Erro ao reabrir chamado")
 
-    return RedirectResponse("/admin/chamados/listar", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(
+        "/admin/chamados/listar", status_code=status.HTTP_303_SEE_OTHER
+    )

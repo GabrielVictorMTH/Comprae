@@ -73,8 +73,8 @@
                 <h3 class="mt-5 mb-3">Radio Buttons (Button Group com Ícones)</h3>
                 {{ field(name='perfil_usuario', label='Escolha seu perfil', type='radio', radio_style='buttons',
                 required=true,
-                options={'Cliente': 'Comprador', 'Vendedor': 'Vendedor'},
-                radio_icons={'Cliente': 'bi-cart3', 'Vendedor': 'bi-shop'},
+                options={'Comprador': 'Comprador', 'Vendedor': 'Vendedor'},
+                radio_icons={'Comprador': 'bi-cart3', 'Vendedor': 'bi-shop'},
                 help_text='Selecione o tipo de conta que deseja criar') }}
 
                 <!-- MÁSCARAS DE DIGITAÇÃO -->
@@ -284,7 +284,7 @@
          append_icon='bi-eye', append_button_onclick="alternarVisibilidadeSenha('senha')") }}
 
 {{ field(name='perfil', label='Perfil', type='select',
-         options={'Admin': 'Administrador', 'Cliente': 'Cliente'}) }}
+         options={'Admin': 'Administrador', 'Comprador': 'Comprador'}) }}
 
 {{ field(name='ativo', label='Ativo', type='checkbox', checkbox_style='switch') }}
 
@@ -297,8 +297,8 @@
 
 {# Radio com ícones #}
 {{ field(name='perfil', label='Perfil', type='radio', radio_style='buttons',
-         options={'Cliente': 'Comprador', 'Vendedor': 'Vendedor'},
-         radio_icons={'Cliente': 'bi-cart3', 'Vendedor': 'bi-shop'}) }}
+         options={'Comprador': 'Comprador', 'Vendedor': 'Vendedor'},
+         radio_icons={'Comprador': 'bi-cart3', 'Vendedor': 'bi-shop'}) }}
 
 {# Máscaras de digitação #}
 {{ field(name='cpf', label='CPF', mask='000.000.000-00') }}

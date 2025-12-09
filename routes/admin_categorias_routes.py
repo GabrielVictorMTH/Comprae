@@ -21,9 +21,7 @@ templates = criar_templates()
 
 # Rate Limiter: máximo 10 operações por minuto
 admin_categorias_limiter = RateLimiter(
-    max_tentativas=10,
-    janela_minutos=1,
-    nome="admin_categorias"
+    max_tentativas=10, janela_minutos=1, nome="admin_categorias"
 )
 
 
@@ -32,8 +30,7 @@ admin_categorias_limiter = RateLimiter(
 async def index(request: Request, usuario_logado: Optional[dict] = None):
     """Redireciona a raiz para /listar"""
     return RedirectResponse(
-        url="/admin/categorias/listar",
-        status_code=status.HTTP_303_SEE_OTHER
+        url="/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER
     )
 
 
@@ -50,8 +47,8 @@ async def listar(request: Request, usuario_logado: Optional[dict] = None):
         {
             "request": request,
             "usuario_logado": usuario_logado,
-            "categorias": categorias
-        }
+            "categorias": categorias,
+        },
     )
 
 
@@ -60,7 +57,7 @@ async def listar(request: Request, usuario_logado: Optional[dict] = None):
 async def get_cadastrar(request: Request, usuario_logado: Optional[dict] = None):
     return templates.TemplateResponse(
         "admin/categorias/cadastro.html",
-        {"request": request, "usuario_logado": usuario_logado}
+        {"request": request, "usuario_logado": usuario_logado},
     )
 
 
@@ -70,17 +67,16 @@ async def post_cadastrar(
     request: Request,
     usuario_logado: Optional[dict] = None,
     nome: str = Form(""),
-    descricao: str = Form("")
+    descricao: str = Form(""),
 ):
     ip = obter_identificador_cliente(request)
     if not admin_categorias_limiter.verificar(ip):
         informar_erro(
             request,
-            "Muitas operações em pouco tempo. Aguarde um momento e tente novamente."
+            "Muitas operações em pouco tempo. Aguarde um momento e tente novamente.",
         )
         return RedirectResponse(
-            url="/admin/categorias/cadastrar",
-            status_code=status.HTTP_303_SEE_OTHER
+            url="/admin/categorias/cadastrar", status_code=status.HTTP_303_SEE_OTHER
         )
 
     try:
@@ -90,8 +86,7 @@ async def post_cadastrar(
         if categoria_existente:
             informar_erro(request, "Já existe uma categoria com este nome.")
             return RedirectResponse(
-                url="/admin/categorias/cadastrar",
-                status_code=status.HTTP_303_SEE_OTHER
+                url="/admin/categorias/cadastrar", status_code=status.HTTP_303_SEE_OTHER
             )
 
         nova_categoria = Categoria(nome=dto.nome, descricao=dto.descricao)
@@ -100,14 +95,12 @@ async def post_cadastrar(
         if categoria_inserida:
             informar_sucesso(request, "Categoria cadastrada com sucesso!")
             return RedirectResponse(
-                url="/admin/categorias/listar",
-                status_code=status.HTTP_303_SEE_OTHER
+                url="/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER
             )
         else:
             informar_erro(request, "Erro ao cadastrar categoria.")
             return RedirectResponse(
-                url="/admin/categorias/cadastrar",
-                status_code=status.HTTP_303_SEE_OTHER
+                url="/admin/categorias/cadastrar", status_code=status.HTTP_303_SEE_OTHER
             )
 
     except ValidationError as e:
@@ -115,7 +108,7 @@ async def post_cadastrar(
             validation_error=e,
             template_path="admin/categorias/cadastro.html",
             dados_formulario={"nome": nome, "descricao": descricao},
-            campo_padrao="nome"
+            campo_padrao="nome",
         )
 
 
@@ -127,13 +120,12 @@ async def get_editar(request: Request, id: int, usuario_logado: Optional[dict] =
     if not categoria:
         informar_erro(request, "Categoria não encontrada.")
         return RedirectResponse(
-            url="/admin/categorias/listar",
-            status_code=status.HTTP_303_SEE_OTHER
+            url="/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER
         )
 
     return templates.TemplateResponse(
         "admin/categorias/editar.html",
-        {"request": request, "usuario_logado": usuario_logado, "categoria": categoria}
+        {"request": request, "usuario_logado": usuario_logado, "categoria": categoria},
     )
 
 
@@ -144,25 +136,23 @@ async def post_editar(
     id: int,
     usuario_logado: Optional[dict] = None,
     nome: str = Form(""),
-    descricao: str = Form("")
+    descricao: str = Form(""),
 ):
     ip = obter_identificador_cliente(request)
     if not admin_categorias_limiter.verificar(ip):
         informar_erro(
             request,
-            "Muitas operações em pouco tempo. Aguarde um momento e tente novamente."
+            "Muitas operações em pouco tempo. Aguarde um momento e tente novamente.",
         )
         return RedirectResponse(
-            url=f"/admin/categorias/editar/{id}",
-            status_code=status.HTTP_303_SEE_OTHER
+            url=f"/admin/categorias/editar/{id}", status_code=status.HTTP_303_SEE_OTHER
         )
 
     categoria_atual = categoria_repo.obter_por_id(id)
     if not categoria_atual:
         informar_erro(request, "Categoria não encontrada.")
         return RedirectResponse(
-            url="/admin/categorias/listar",
-            status_code=status.HTTP_303_SEE_OTHER
+            url="/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER
         )
 
     try:
@@ -174,7 +164,7 @@ async def post_editar(
                 informar_erro(request, "Já existe uma categoria com este nome.")
                 return RedirectResponse(
                     url=f"/admin/categorias/editar/{id}",
-                    status_code=status.HTTP_303_SEE_OTHER
+                    status_code=status.HTTP_303_SEE_OTHER,
                 )
 
         categoria_atual.nome = dto.nome
@@ -183,14 +173,13 @@ async def post_editar(
         if categoria_repo.alterar(categoria_atual):
             informar_sucesso(request, "Categoria alterada com sucesso!")
             return RedirectResponse(
-                url="/admin/categorias/listar",
-                status_code=status.HTTP_303_SEE_OTHER
+                url="/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER
             )
         else:
             informar_erro(request, "Erro ao alterar categoria.")
             return RedirectResponse(
                 url=f"/admin/categorias/editar/{id}",
-                status_code=status.HTTP_303_SEE_OTHER
+                status_code=status.HTTP_303_SEE_OTHER,
             )
 
     except ValidationError as e:
@@ -198,30 +187,30 @@ async def post_editar(
             validation_error=e,
             template_path="admin/categorias/editar.html",
             dados_formulario={"nome": nome, "descricao": descricao, "id": id},
-            campo_padrao="nome"
+            campo_padrao="nome",
         )
 
 
 @router.post("/excluir/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def post_excluir(request: Request, id: int, usuario_logado: Optional[dict] = None):
+async def post_excluir(
+    request: Request, id: int, usuario_logado: Optional[dict] = None
+):
     ip = obter_identificador_cliente(request)
     if not admin_categorias_limiter.verificar(ip):
         informar_erro(
             request,
-            "Muitas operações em pouco tempo. Aguarde um momento e tente novamente."
+            "Muitas operações em pouco tempo. Aguarde um momento e tente novamente.",
         )
         return RedirectResponse(
-            url="/admin/categorias/listar",
-            status_code=status.HTTP_303_SEE_OTHER
+            url="/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER
         )
 
     categoria = categoria_repo.obter_por_id(id)
     if not categoria:
         informar_erro(request, "Categoria não encontrada.")
         return RedirectResponse(
-            url="/admin/categorias/listar",
-            status_code=status.HTTP_303_SEE_OTHER
+            url="/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER
         )
 
     if categoria_repo.excluir(id):
@@ -230,6 +219,5 @@ async def post_excluir(request: Request, id: int, usuario_logado: Optional[dict]
         informar_erro(request, "Erro ao excluir categoria.")
 
     return RedirectResponse(
-        url="/admin/categorias/listar",
-        status_code=status.HTTP_303_SEE_OTHER
+        url="/admin/categorias/listar", status_code=status.HTTP_303_SEE_OTHER
     )

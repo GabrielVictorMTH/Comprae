@@ -16,7 +16,7 @@ from util.rate_limiter import (
     RegistroLimiters,
     registro_limiters,
     obter_identificador_cliente,
-    com_rate_limit
+    com_rate_limit,
 )
 
 
@@ -85,7 +85,7 @@ class TestRateLimiter:
             limiter.verificar("192.168.1.1")
 
         # Quarta bloqueada
-        with patch('util.rate_limiter.logger'):
+        with patch("util.rate_limiter.logger"):
             resultado = limiter.verificar("192.168.1.1")
 
         assert resultado is False
@@ -97,7 +97,7 @@ class TestRateLimiter:
         limiter.verificar("192.168.1.1")
         limiter.verificar("192.168.1.1")
 
-        with patch('util.rate_limiter.logger') as mock_logger:
+        with patch("util.rate_limiter.logger") as mock_logger:
             limiter.verificar("192.168.1.1")
             mock_logger.warning.assert_called_once()
 
@@ -215,7 +215,7 @@ class TestDynamicRateLimiter:
 
     def test_inicializacao_com_valores_padrao(self):
         """Deve inicializar com valores padrão se config não existir"""
-        with patch('util.rate_limiter.config') as mock_config:
+        with patch("util.rate_limiter.config") as mock_config:
             mock_config.obter_int.side_effect = lambda k, d: d
 
             limiter = DynamicRateLimiter(
@@ -223,7 +223,7 @@ class TestDynamicRateLimiter:
                 chave_minutos="rate_limit_teste_minutos",
                 padrao_max=10,
                 padrao_minutos=5,
-                nome="teste_dynamic"
+                nome="teste_dynamic",
             )
 
             assert limiter.max_tentativas == 10
@@ -233,9 +233,7 @@ class TestDynamicRateLimiter:
         """Deve falhar se padrao_max for zero"""
         with pytest.raises(ValueError) as exc_info:
             DynamicRateLimiter(
-                chave_max="teste_max",
-                chave_minutos="teste_minutos",
-                padrao_max=0
+                chave_max="teste_max", chave_minutos="teste_minutos", padrao_max=0
             )
 
         assert "padrao_max deve ser positivo" in str(exc_info.value)
@@ -244,20 +242,18 @@ class TestDynamicRateLimiter:
         """Deve falhar se padrao_minutos for zero"""
         with pytest.raises(ValueError) as exc_info:
             DynamicRateLimiter(
-                chave_max="teste_max",
-                chave_minutos="teste_minutos",
-                padrao_minutos=0
+                chave_max="teste_max", chave_minutos="teste_minutos", padrao_minutos=0
             )
 
         assert "padrao_minutos deve ser positivo" in str(exc_info.value)
 
     def test_atualizar_valores_quando_mudou(self):
         """Deve atualizar valores quando config muda"""
-        with patch('util.rate_limiter.config') as mock_config:
+        with patch("util.rate_limiter.config") as mock_config:
             # Valores iniciais
             mock_config.obter_int.side_effect = lambda k, d: {
                 "rate_test_max": 5,
-                "rate_test_minutos": 3
+                "rate_test_minutos": 3,
             }.get(k, d)
 
             limiter = DynamicRateLimiter(
@@ -265,7 +261,7 @@ class TestDynamicRateLimiter:
                 chave_minutos="rate_test_minutos",
                 padrao_max=10,
                 padrao_minutos=5,
-                nome="teste"
+                nome="teste",
             )
 
             assert limiter.max_tentativas == 5
@@ -274,7 +270,7 @@ class TestDynamicRateLimiter:
             # Simular mudança de config
             mock_config.obter_int.side_effect = lambda k, d: {
                 "rate_test_max": 20,
-                "rate_test_minutos": 10
+                "rate_test_minutos": 10,
             }.get(k, d)
 
             # Forçar atualização
@@ -285,7 +281,7 @@ class TestDynamicRateLimiter:
 
     def test_verificar_atualiza_valores(self):
         """verificar() deve atualizar valores antes de verificar"""
-        with patch('util.rate_limiter.config') as mock_config:
+        with patch("util.rate_limiter.config") as mock_config:
             mock_config.obter_int.side_effect = lambda k, d: d
 
             limiter = DynamicRateLimiter(
@@ -293,16 +289,16 @@ class TestDynamicRateLimiter:
                 chave_minutos="teste_minutos",
                 padrao_max=5,
                 padrao_minutos=5,
-                nome="teste"
+                nome="teste",
             )
 
-            with patch.object(limiter, '_atualizar_valores') as mock_atualizar:
+            with patch.object(limiter, "_atualizar_valores") as mock_atualizar:
                 limiter.verificar("192.168.1.1")
                 mock_atualizar.assert_called_once()
 
     def test_obter_tentativas_restantes_atualiza_valores(self):
         """obter_tentativas_restantes() deve atualizar valores"""
-        with patch('util.rate_limiter.config') as mock_config:
+        with patch("util.rate_limiter.config") as mock_config:
             mock_config.obter_int.side_effect = lambda k, d: d
 
             limiter = DynamicRateLimiter(
@@ -310,16 +306,16 @@ class TestDynamicRateLimiter:
                 chave_minutos="teste_minutos",
                 padrao_max=5,
                 padrao_minutos=5,
-                nome="teste"
+                nome="teste",
             )
 
-            with patch.object(limiter, '_atualizar_valores') as mock_atualizar:
+            with patch.object(limiter, "_atualizar_valores") as mock_atualizar:
                 limiter.obter_tentativas_restantes("192.168.1.1")
                 mock_atualizar.assert_called_once()
 
     def test_obter_tempo_reset_atualiza_valores(self):
         """obter_tempo_reset() deve atualizar valores"""
-        with patch('util.rate_limiter.config') as mock_config:
+        with patch("util.rate_limiter.config") as mock_config:
             mock_config.obter_int.side_effect = lambda k, d: d
 
             limiter = DynamicRateLimiter(
@@ -327,16 +323,16 @@ class TestDynamicRateLimiter:
                 chave_minutos="teste_minutos",
                 padrao_max=5,
                 padrao_minutos=5,
-                nome="teste"
+                nome="teste",
             )
 
-            with patch.object(limiter, '_atualizar_valores') as mock_atualizar:
+            with patch.object(limiter, "_atualizar_valores") as mock_atualizar:
                 limiter.obter_tempo_reset("192.168.1.1")
                 mock_atualizar.assert_called_once()
 
     def test_repr(self):
         """Deve ter representação string correta"""
-        with patch('util.rate_limiter.config') as mock_config:
+        with patch("util.rate_limiter.config") as mock_config:
             mock_config.obter_int.side_effect = lambda k, d: d
 
             limiter = DynamicRateLimiter(
@@ -344,7 +340,7 @@ class TestDynamicRateLimiter:
                 chave_minutos="minha_chave_minutos",
                 padrao_max=10,
                 padrao_minutos=5,
-                nome="meu_dynamic"
+                nome="meu_dynamic",
             )
 
             repr_str = repr(limiter)
@@ -354,7 +350,7 @@ class TestDynamicRateLimiter:
             assert "minha_chave_max" in repr_str
 
 
-class TestObterIdentificadorCliente:
+class TestObterIdentificadorComprador:
     """Testes para a função obter_identificador_cliente"""
 
     def test_com_client_host(self):
@@ -418,8 +414,12 @@ class TestRegistroLimiters:
     def test_listar_limiters(self):
         """Deve listar todos os nomes de limiters"""
         registro = RegistroLimiters()
-        registro.registrar(RateLimiter(max_tentativas=5, janela_minutos=5, nome="limiter_a"))
-        registro.registrar(RateLimiter(max_tentativas=5, janela_minutos=5, nome="limiter_b"))
+        registro.registrar(
+            RateLimiter(max_tentativas=5, janela_minutos=5, nome="limiter_a")
+        )
+        registro.registrar(
+            RateLimiter(max_tentativas=5, janela_minutos=5, nome="limiter_b")
+        )
 
         nomes = registro.listar()
 
@@ -429,8 +429,12 @@ class TestRegistroLimiters:
     def test_obter_estatisticas(self):
         """Deve retornar estatísticas dos limiters"""
         registro = RegistroLimiters()
-        limiter1 = RateLimiter(max_tentativas=10, janela_minutos=5, nome="estatistica_a")
-        limiter2 = RateLimiter(max_tentativas=20, janela_minutos=10, nome="estatistica_b")
+        limiter1 = RateLimiter(
+            max_tentativas=10, janela_minutos=5, nome="estatistica_a"
+        )
+        limiter2 = RateLimiter(
+            max_tentativas=20, janela_minutos=10, nome="estatistica_b"
+        )
         registro.registrar(limiter1)
         registro.registrar(limiter2)
 
@@ -446,7 +450,7 @@ class TestRegistroLimiters:
 
     def test_obter_estatisticas_tipo_dinamico(self):
         """Deve identificar tipo 'dinamico' para DynamicRateLimiter"""
-        with patch('util.rate_limiter.config') as mock_config:
+        with patch("util.rate_limiter.config") as mock_config:
             mock_config.obter_int.side_effect = lambda k, d: d
 
             registro = RegistroLimiters()
@@ -455,7 +459,7 @@ class TestRegistroLimiters:
                 chave_minutos="teste_minutos",
                 padrao_max=5,
                 padrao_minutos=5,
-                nome="dinamico_test"
+                nome="dinamico_test",
             )
             registro.registrar(limiter)
 
@@ -548,7 +552,9 @@ class TestDecoratorComRateLimit:
 
     def test_decorator_registra_no_registry(self):
         """Deve registrar limiter no registry global"""
-        limiter = RateLimiter(max_tentativas=5, janela_minutos=5, nome="registrar_test_unique")
+        limiter = RateLimiter(
+            max_tentativas=5, janela_minutos=5, nome="registrar_test_unique"
+        )
 
         app = FastAPI()
 
@@ -562,7 +568,9 @@ class TestDecoratorComRateLimit:
 
     def test_decorator_sem_request_continua(self):
         """Deve continuar sem rate limiting se Request não for encontrado"""
-        limiter = RateLimiter(max_tentativas=1, janela_minutos=5, nome="sem_request_test")
+        limiter = RateLimiter(
+            max_tentativas=1, janela_minutos=5, nome="sem_request_test"
+        )
 
         app = FastAPI()
 
@@ -576,7 +584,7 @@ class TestDecoratorComRateLimit:
 
         # Deve funcionar mesmo excedendo o limite normal
         # porque não conseguiu encontrar o request
-        with patch('util.rate_limiter.logger'):
+        with patch("util.rate_limiter.logger"):
             for _ in range(5):
                 response = client.get("/test")
                 assert response.status_code == 200

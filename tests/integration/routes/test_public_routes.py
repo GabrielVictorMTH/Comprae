@@ -2,6 +2,7 @@
 Testes de rotas públicas
 Testa páginas acessíveis sem autenticação (landing page, sobre, etc.)
 """
+
 from fastapi import status
 from unittest.mock import patch
 import pytest
@@ -43,14 +44,14 @@ class TestRotasPublicas:
 class TestRotasPublicasComUsuarioLogado:
     """Testes de rotas públicas acessadas por usuário logado"""
 
-    def test_home_acessivel_usuario_logado(self, cliente_autenticado):
+    def test_home_acessivel_usuario_logado(self, comprador_autenticado):
         """Usuário logado também pode acessar landing page"""
-        response = cliente_autenticado.get("/")
+        response = comprador_autenticado.get("/")
         assert response.status_code == status.HTTP_200_OK
 
-    def test_sobre_acessivel_usuario_logado(self, cliente_autenticado):
+    def test_sobre_acessivel_usuario_logado(self, comprador_autenticado):
         """Usuário logado pode acessar página sobre"""
-        response = cliente_autenticado.get("/sobre")
+        response = comprador_autenticado.get("/sobre")
         assert response.status_code == status.HTTP_200_OK
 
     def test_home_acessivel_admin_logado(self, admin_autenticado):
@@ -160,7 +161,7 @@ class TestPublicRateLimiting:
     @pytest.fixture
     def mock_rate_limit_block(self):
         """Fixture para mockar rate limiter que bloqueia"""
-        with patch('routes.public_routes.public_limiter') as mock_limiter:
+        with patch("routes.public_routes.public_limiter") as mock_limiter:
             mock_limiter.verificar.return_value = False
             yield mock_limiter
 

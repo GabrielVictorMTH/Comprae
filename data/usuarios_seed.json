@@ -7,10 +7,10 @@
       "perfil": "Administrador"
     },
     {
-      "nome": "Cliente Padrão",
-      "email": "padrao@cliente.com",
+      "nome": "Comprador Padrão",
+      "email": "padrao@comprador.com",
       "senha": "1234aA@#",
-      "perfil": "Cliente"
+      "perfil": "Comprador"
     },
     {
       "nome": "Vendedor Padrão",

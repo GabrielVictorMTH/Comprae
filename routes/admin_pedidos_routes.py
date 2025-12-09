@@ -20,15 +20,23 @@ admin_pedidos_limiter = RateLimiter(
     nome="admin_pedidos",
 )
 
+
 @router.get("/")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def index(request: Request, usuario_logado: Optional[dict] = None):
     """Redireciona para lista de pedidos"""
-    return RedirectResponse("/admin/pedidos/listar", status_code=status.HTTP_307_TEMPORARY_REDIRECT)
+    return RedirectResponse(
+        "/admin/pedidos/listar", status_code=status.HTTP_307_TEMPORARY_REDIRECT
+    )
+
 
 @router.get("/listar")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def listar(request: Request, status_filtro: Optional[str] = None, usuario_logado: Optional[dict] = None):
+async def listar(
+    request: Request,
+    status_filtro: Optional[str] = None,
+    usuario_logado: Optional[dict] = None,
+):
     """Lista todos os pedidos do sistema com filtro opcional por status"""
     if status_filtro and status_filtro != "todos":
         pedidos = pedido_repo.obter_por_status(status_filtro)
@@ -46,9 +54,10 @@ async def listar(request: Request, status_filtro: Optional[str] = None, usuario_
         {
             "request": request,
             "pedidos": pedidos,
-            "status_filtro": status_filtro or "todos"
-        }
+            "status_filtro": status_filtro or "todos",
+        },
     )
+
 
 @router.get("/detalhes/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -58,7 +67,9 @@ async def detalhes(request: Request, id: int, usuario_logado: Optional[dict] = N
 
     if not pedido:
         informar_erro(request, "Pedido não encontrado")
-        return RedirectResponse("/admin/pedidos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/pedidos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     # Carregar dados relacionados
     pedido.anuncio = anuncio_repo.obter_por_id(pedido.id_anuncio)
@@ -69,12 +80,9 @@ async def detalhes(request: Request, id: int, usuario_logado: Optional[dict] = N
         pedido.anuncio.vendedor = usuario_repo.obter_por_id(pedido.anuncio.id_vendedor)
 
     return templates.TemplateResponse(
-        "admin/pedidos/detalhes.html",
-        {
-            "request": request,
-            "pedido": pedido
-        }
+        "admin/pedidos/detalhes.html", {"request": request, "pedido": pedido}
     )
+
 
 @router.post("/cancelar/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -85,28 +93,41 @@ async def cancelar(request: Request, id: int, usuario_logado: Optional[dict] = N
     # Rate limiting
     ip = obter_identificador_cliente(request)
     if not admin_pedidos_limiter.verificar(ip):
-        informar_erro(request, "Muitas operações. Aguarde um momento e tente novamente.")
-        return RedirectResponse("/admin/pedidos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        informar_erro(
+            request, "Muitas operações. Aguarde um momento e tente novamente."
+        )
+        return RedirectResponse(
+            "/admin/pedidos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     pedido = pedido_repo.obter_por_id(id)
 
     if not pedido:
         informar_erro(request, "Pedido não encontrado")
-        return RedirectResponse("/admin/pedidos/listar", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            "/admin/pedidos/listar", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     if pedido.status == "Cancelado":
         informar_erro(request, "Pedido já está cancelado")
-        return RedirectResponse(f"/admin/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER)
+        return RedirectResponse(
+            f"/admin/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER
+        )
 
     try:
         pedido_repo.cancelar(id)
-        logger.info(f"Pedido {id} cancelado por admin {usuario_logado['id']} (admin override)")
+        logger.info(
+            f"Pedido {id} cancelado por admin {usuario_logado['id']} (admin override)"
+        )
         informar_sucesso(request, "Pedido cancelado com sucesso!")
     except Exception as e:
         logger.error(f"Erro ao cancelar pedido {id}: {str(e)}")
         informar_erro(request, "Erro ao cancelar pedido. Tente novamente.")
 
-    return RedirectResponse(f"/admin/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER)
+    return RedirectResponse(
+        f"/admin/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER
+    )
+
 
 @router.get("/estatisticas")
 @requer_autenticacao([Perfil.ADMIN.value])
@@ -124,9 +145,5 @@ async def estatisticas(request: Request, usuario_logado: Optional[dict] = None):
     }
 
     return templates.TemplateResponse(
-        "admin/pedidos/estatisticas.html",
-        {
-            "request": request,
-            "stats": stats
-        }
+        "admin/pedidos/estatisticas.html", {"request": request, "stats": stats}
     )
