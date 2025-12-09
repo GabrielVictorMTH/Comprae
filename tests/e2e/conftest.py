@@ -21,7 +21,7 @@ from playwright.sync_api import Page
 
 # Configuracoes do servidor E2E
 E2E_SERVER_HOST = "127.0.0.1"
-E2E_SERVER_PORT = 8402
+E2E_SERVER_PORT = 8403
 E2E_BASE_URL = f"http://{E2E_SERVER_HOST}:{E2E_SERVER_PORT}"
 E2E_SERVER_STARTUP_TIMEOUT = 30
 
