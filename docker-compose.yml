@@ -1,9 +1,9 @@
 services:
   web:
-    container_name: dwa.cachoeiro.es
+    container_name: comprae.cachoeiro.es
     build: .
     ports:
-      - "8400:8000"
+      - "8403:8000"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
