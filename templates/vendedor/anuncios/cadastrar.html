@@ -64,15 +64,17 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label for="id_categoria" class="form-label">Categoria <span class="text-danger">*</span></label>
-                                    <select name="id_categoria" id="id_categoria" class="form-select" required>
-                                        <option value="">Selecione uma categoria...</option>
-                                        {% for categoria in categorias %}
-                                        <option value="{{ categoria.id }}" {% if dados.id_categoria == categoria.id %}selected{% endif %}>
-                                            {{ categoria.nome }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
+                                    <div class="form-floating">
+                                        <select name="id_categoria" id="id_categoria" class="form-select" required>
+                                            <option value="" disabled {% if not dados.id_categoria %}selected{% endif %}></option>
+                                            {% for categoria in categorias %}
+                                            <option value="{{ categoria.id }}" {% if dados.id_categoria == categoria.id %}selected{% endif %}>
+                                                {{ categoria.nome }}
+                                            </option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="id_categoria">Categoria <span class="text-danger">*</span></label>
+                                    </div>
                                     {% if erros and erros.id_categoria %}
                                     <div class="invalid-feedback d-block">{{ erros.id_categoria }}</div>
                                     {% endif %}
