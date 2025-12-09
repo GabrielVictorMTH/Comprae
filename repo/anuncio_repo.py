@@ -160,9 +160,73 @@ def atualizar_estoque(id: int, quantidade: int) -> bool:
         return cursor.rowcount > 0
 
 
+def obter_ativos_paginados(
+    pagina: int = 1,
+    por_pagina: int = 12,
+    termo: Optional[str] = None,
+    id_categoria: Optional[int] = None
+) -> tuple[list[Anuncio], int]:
+    """
+    Obtém anúncios ativos com paginação e filtros.
+
+    Returns:
+        Tupla com (lista de anúncios, total de registros)
+    """
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+
+        # Preparar parâmetros de busca
+        termo_like = f"%{termo}%" if termo else None
+        offset = (pagina - 1) * por_pagina
+
+        # Buscar anúncios paginados
+        cursor.execute(
+            OBTER_ATIVOS_PAGINADOS,
+            (
+                termo_like, termo_like, termo_like,  # termo para nome e descricao
+                id_categoria, id_categoria,           # categoria
+                por_pagina, offset                    # paginacao
+            )
+        )
+        rows = cursor.fetchall()
+        anuncios = [_row_to_anuncio(row) for row in rows]
+
+        # Contar total
+        cursor.execute(
+            CONTAR_ATIVOS,
+            (
+                termo_like, termo_like, termo_like,
+                id_categoria, id_categoria
+            )
+        )
+        total = cursor.fetchone()["total"]
+
+        return anuncios, total
+
+
+def obter_ultimos_ativos(limite: int = 12) -> list[Anuncio]:
+    """Obtém os últimos anúncios ativos (para home page)"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(OBTER_ULTIMOS_ATIVOS, (limite,))
+        rows = cursor.fetchall()
+        return [_row_to_anuncio(row) for row in rows]
+
+
+def obter_por_id_com_detalhes(id: int) -> Optional[Anuncio]:
+    """Obtém anúncio por ID com dados do vendedor e categoria"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(OBTER_POR_ID_COM_DETALHES, (id,))
+        row = cursor.fetchone()
+        if row:
+            return _row_to_anuncio(row)
+        return None
+
+
 def _row_to_anuncio(row) -> Anuncio:
     """Converte row do banco para objeto Anuncio"""
-    return Anuncio(
+    anuncio = Anuncio(
         id=row["id"],
         id_vendedor=row["id_vendedor"],
         id_categoria=row["id_categoria"],
@@ -176,3 +240,12 @@ def _row_to_anuncio(row) -> Anuncio:
         vendedor=None,
         categoria=None
     )
+    # Adicionar campos extras se presentes no resultado
+    keys = row.keys()
+    if "nome_categoria" in keys:
+        anuncio.nome_categoria = row["nome_categoria"]
+    if "nome_vendedor" in keys:
+        anuncio.nome_vendedor = row["nome_vendedor"]
+    if "email_vendedor" in keys:
+        anuncio.email_vendedor = row["email_vendedor"]
+    return anuncio

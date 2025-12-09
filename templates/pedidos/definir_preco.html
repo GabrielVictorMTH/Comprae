@@ -1,0 +1,90 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Definir Preco - Pedido #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <!-- Cabecalho -->
+        <div class="mb-4">
+            <h2><i class="bi bi-currency-dollar"></i> Definir Preco Final</h2>
+            <p class="text-muted">Pedido #{{ pedido.id }}</p>
+        </div>
+
+        {% include "components/alerta_erro.html" %}
+
+        <div class="row g-4">
+            <!-- Detalhes do Produto -->
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-box"></i> Produto</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center">
+                                <img src="{{ pedido.id_anuncio|foto_anuncio }}" alt="{{ pedido.nome_produto }}"
+                                    class="img-fluid rounded" style="max-height: 120px; object-fit: cover;">
+                            </div>
+                            <div class="col-md-9">
+                                <h4>{{ pedido.nome_produto }}</h4>
+                                <p class="mb-1">
+                                    <i class="bi bi-person"></i> Comprador: <strong>{{ pedido.nome_comprador }}</strong>
+                                </p>
+                                {% if anuncio %}
+                                <p class="text-muted mb-0">
+                                    Preco do anuncio: <strong>R$ {{ "%.2f"|format(anuncio.preco)|replace('.', ',') }}</strong>
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulario de Preco -->
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-calculator"></i> Preco Final</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/vendedor/pedidos/definir-preco/{{ pedido.id }}" method="post">
+                            {{ csrf_input() }}
+
+                            <div class="mb-4">
+                                <label for="preco" class="form-label">Preco Final (R$) *</label>
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text">R$</span>
+                                    <input type="number" class="form-control" id="preco" name="preco"
+                                           step="0.01" min="0.01"
+                                           value="{{ anuncio.preco if anuncio else '' }}"
+                                           placeholder="0,00" required>
+                                </div>
+                                <div class="form-text">
+                                    Defina o preco final considerando frete e negociacao com o comprador.
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                Apos definir o preco, o status do pedido mudara para <strong>Pendente</strong>
+                                e o comprador podera efetuar o pagamento.
+                            </div>
+
+                            <div class="d-flex gap-3">
+                                <a href="/vendedor/pedidos" class="btn btn-outline-secondary btn-lg">
+                                    <i class="bi bi-arrow-left"></i> Voltar
+                                </a>
+                                <button type="submit" class="btn btn-warning btn-lg flex-grow-1">
+                                    <i class="bi bi-check-circle"></i> Confirmar Preco
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

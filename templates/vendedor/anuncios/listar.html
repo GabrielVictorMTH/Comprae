@@ -1,0 +1,142 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Meus Anuncios{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Cabecalho -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-megaphone"></i> Meus Anuncios</h2>
+            <a href="/vendedor/anuncios/cadastrar" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Novo Anuncio
+            </a>
+        </div>
+
+        {% include "components/alerta_erro.html" %}
+
+        {% if anuncios %}
+        <!-- Tabela de Anuncios -->
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 80px;">Foto</th>
+                            <th>Nome</th>
+                            <th>Categoria</th>
+                            <th class="text-end">Preco</th>
+                            <th class="text-center">Estoque</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center" style="width: 150px;">Acoes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for anuncio in anuncios %}
+                        <tr>
+                            <td>
+                                <img src="{{ anuncio.id|foto_anuncio }}" alt="{{ anuncio.nome }}"
+                                    class="rounded" width="60" height="60" style="object-fit: cover;">
+                            </td>
+                            <td>
+                                <strong>{{ anuncio.nome }}</strong>
+                                {% if anuncio.descricao %}
+                                <br><small class="text-muted">{{ anuncio.descricao[:50] }}{% if anuncio.descricao|length > 50 %}...{% endif %}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ anuncio.nome_categoria or 'Sem categoria' }}</span>
+                            </td>
+                            <td class="text-end">
+                                <strong class="text-success">R$ {{ "%.2f"|format(anuncio.preco)|replace('.', ',') }}</strong>
+                            </td>
+                            <td class="text-center">
+                                {% if anuncio.estoque > 0 %}
+                                <span class="badge bg-info">{{ anuncio.estoque }}</span>
+                                {% else %}
+                                <span class="badge bg-danger">Esgotado</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                {% if anuncio.ativo %}
+                                <span class="badge bg-success">Ativo</span>
+                                {% else %}
+                                <span class="badge bg-warning text-dark">Inativo</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    <a href="/vendedor/anuncios/editar/{{ anuncio.id }}"
+                                       class="btn btn-outline-primary" title="Editar">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form action="/vendedor/anuncios/ativar/{{ anuncio.id }}" method="post" class="d-inline">
+                                        {{ csrf_input() }}
+                                        <button type="submit"
+                                                class="btn btn-outline-{% if anuncio.ativo %}warning{% else %}success{% endif %}"
+                                                title="{% if anuncio.ativo %}Desativar{% else %}Ativar{% endif %}">
+                                            <i class="bi bi-{% if anuncio.ativo %}pause{% else %}play{% endif %}-circle"></i>
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-outline-danger" title="Excluir"
+                                            data-bs-toggle="modal" data-bs-target="#modalExcluir{{ anuncio.id }}">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Modal de Confirmacao de Exclusao -->
+                                <div class="modal fade" id="modalExcluir{{ anuncio.id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Confirmar Exclusao</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Deseja realmente excluir o anuncio <strong>{{ anuncio.nome }}</strong>?</p>
+                                                <p class="text-danger small">
+                                                    <i class="bi bi-exclamation-triangle"></i>
+                                                    Esta acao nao podera ser desfeita. Anuncios com pedidos vinculados nao podem ser excluidos.
+                                                </p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                <form action="/vendedor/anuncios/excluir/{{ anuncio.id }}" method="post">
+                                                    {{ csrf_input() }}
+                                                    <button type="submit" class="btn btn-danger">
+                                                        <i class="bi bi-trash"></i> Excluir
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Resumo -->
+        <div class="mt-3 text-muted">
+            <small>Total: {{ anuncios|length }} anuncio(s)</small>
+        </div>
+
+        {% else %}
+        <!-- Estado Vazio -->
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="bi bi-megaphone text-muted display-1"></i>
+                <h4 class="mt-3">Nenhum anuncio cadastrado</h4>
+                <p class="text-muted">Comece a vender criando seu primeiro anuncio!</p>
+                <a href="/vendedor/anuncios/cadastrar" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle"></i> Criar Primeiro Anuncio
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

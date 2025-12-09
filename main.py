@@ -51,6 +51,11 @@ from routes.admin_pedidos_routes import router as admin_pedidos_router
 from routes.admin_enderecos_routes import router as admin_enderecos_router
 from routes.admin_categorias_routes import router as admin_categorias_router
 from routes.admin_curtidas_routes import router as admin_curtidas_router
+from routes.endereco_routes import router as endereco_router
+from routes.anuncio_routes import router as anuncio_router
+from routes.anuncios_publicos_routes import router as anuncios_publicos_router
+from routes.pedido_routes import router as pedido_router
+from routes.vendedor_pedidos_routes import router as vendedor_pedidos_router
 
 # Seeds
 from util.seed_data import inicializar_dados
@@ -142,6 +147,11 @@ ROUTERS = [
     (admin_enderecos_router, ["Admin - Endereços"], "admin de endereços"),
     (admin_categorias_router, ["Admin - Categorias"], "admin de categorias"),
     (admin_curtidas_router, ["Admin - Curtidas"], "admin de curtidas"),
+    (endereco_router, ["Endereço do Usuário"], "endereço do usuário"),
+    (anuncio_router, ["Anúncios do Vendedor"], "anúncios do vendedor"),
+    (anuncios_publicos_router, ["Anúncios Públicos"], "anúncios públicos"),
+    (pedido_router, ["Pedidos do Comprador"], "pedidos do comprador"),
+    (vendedor_pedidos_router, ["Pedidos do Vendedor"], "pedidos do vendedor"),
     (usuario_router, ["Usuário"], "usuário"),
     (chat_router, ["Chat"], "chat"),
     (public_router, ["Público"], "público"),

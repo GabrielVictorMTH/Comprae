@@ -1,0 +1,35 @@
+{# Card de Anuncio Reutilizavel #}
+{# Espera variavel 'anuncio' no contexto #}
+
+<div class="card h-100 shadow-sm shadow-hover">
+    <a href="/anuncios/{{ anuncio.id }}" class="text-decoration-none">
+        <img src="{{ anuncio.id|foto_anuncio }}" class="card-img-top"
+             alt="{{ anuncio.nome }}" style="height: 180px; object-fit: cover;">
+    </a>
+    <div class="card-body d-flex flex-column">
+        <span class="badge bg-secondary mb-2 align-self-start">{{ anuncio.nome_categoria or 'Sem categoria' }}</span>
+        <h6 class="card-title">
+            <a href="/anuncios/{{ anuncio.id }}" class="text-decoration-none text-dark">
+                {{ anuncio.nome[:40] }}{% if anuncio.nome|length > 40 %}...{% endif %}
+            </a>
+        </h6>
+        <p class="card-text text-muted small flex-grow-1">
+            {{ anuncio.descricao[:60] }}{% if anuncio.descricao|length > 60 %}...{% endif %}
+        </p>
+        <div class="mt-auto">
+            <p class="h5 text-success mb-2">
+                R$ {{ "%.2f"|format(anuncio.preco)|replace('.', ',') }}
+            </p>
+            {% if anuncio.estoque > 0 %}
+            <small class="text-muted">{{ anuncio.estoque }} em estoque</small>
+            {% else %}
+            <small class="text-danger">Esgotado</small>
+            {% endif %}
+        </div>
+    </div>
+    <div class="card-footer bg-transparent border-top-0 pt-0">
+        <a href="/anuncios/{{ anuncio.id }}" class="btn btn-outline-primary w-100 btn-sm">
+            <i class="bi bi-eye"></i> Ver Detalhes
+        </a>
+    </div>
+</div>

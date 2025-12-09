@@ -40,7 +40,11 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if request.path == '/' or request.path == '/index' else '' }}"
-                            href="/">Início</a>
+                            href="/">Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ 'active' if '/anuncios' in request.path else '' }}"
+                            href="/anuncios">Anuncios</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link {{ 'active' if request.path == '/sobre' else '' }}"

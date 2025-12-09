@@ -42,7 +42,24 @@ ON pedido(status)
 
 INSERIR = """
 INSERT INTO pedido (id_endereco, id_comprador, id_anuncio, preco, status)
-VALUES (?, ?, ?, ?, 'Pendente')
+VALUES (?, ?, ?, ?, 'Negociando')
+"""
+
+INSERIR_NEGOCIANDO = """
+INSERT INTO pedido (id_endereco, id_comprador, id_anuncio, preco, status)
+VALUES (?, ?, ?, 0, 'Negociando')
+"""
+
+DEFINIR_PRECO_FINAL = """
+UPDATE pedido
+SET preco = ?, status = 'Pendente'
+WHERE id = ? AND status = 'Negociando'
+"""
+
+ATUALIZAR_PARA_ENTREGUE = """
+UPDATE pedido
+SET status = 'Entregue'
+WHERE id = ? AND status = 'Enviado'
 """
 
 ATUALIZAR_STATUS = """
@@ -109,12 +126,41 @@ SELECT
     p.*,
     a.nome as nome_produto,
     a.id_vendedor,
+    a.preco as preco_anuncio,
     u_comprador.nome as nome_comprador,
     u_comprador.email as email_comprador,
-    e.logradouro, e.numero, e.cidade, e.uf
+    u_vendedor.nome as nome_vendedor,
+    e.logradouro, e.numero, e.complemento, e.bairro, e.cidade, e.uf, e.cep
 FROM pedido p
 INNER JOIN anuncio a ON p.id_anuncio = a.id
 INNER JOIN usuario u_comprador ON p.id_comprador = u_comprador.id
+INNER JOIN usuario u_vendedor ON a.id_vendedor = u_vendedor.id
 INNER JOIN endereco e ON p.id_endereco = e.id
 WHERE p.id = ?
+"""
+
+OBTER_POR_COMPRADOR_COM_DETALHES = """
+SELECT
+    p.*,
+    a.nome as nome_produto,
+    a.id_vendedor,
+    u_vendedor.nome as nome_vendedor
+FROM pedido p
+INNER JOIN anuncio a ON p.id_anuncio = a.id
+INNER JOIN usuario u_vendedor ON a.id_vendedor = u_vendedor.id
+WHERE p.id_comprador = ?
+ORDER BY p.data_hora_pedido DESC
+"""
+
+OBTER_POR_VENDEDOR_COM_DETALHES = """
+SELECT
+    p.*,
+    a.nome as nome_produto,
+    a.id_vendedor,
+    u_comprador.nome as nome_comprador
+FROM pedido p
+INNER JOIN anuncio a ON p.id_anuncio = a.id
+INNER JOIN usuario u_comprador ON p.id_comprador = u_comprador.id
+WHERE a.id_vendedor = ?
+ORDER BY p.data_hora_pedido DESC
 """

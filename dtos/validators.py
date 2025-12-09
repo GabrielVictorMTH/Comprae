@@ -411,6 +411,37 @@ def validar_cep(formatar: bool = True) -> Callable[[Any, Any], Any]:
     return validator
 
 
+def validar_uf() -> Callable[[Any, Any], Any]:
+    """
+    Valida UF (Estado) brasileiro.
+
+    Returns:
+        Função validadora para uso com field_validator
+        Retorna UF em uppercase
+    """
+    UFS_VALIDAS = {
+        "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO",
+        "MA", "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI",
+        "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO"
+    }
+
+    def validator(cls: Any, v: Any) -> Any:
+        if not v or not v.strip():
+            raise ValueError("UF é obrigatória.")
+
+        valor = v.strip().upper()
+
+        if len(valor) != 2:
+            raise ValueError("UF deve ter exatamente 2 caracteres.")
+
+        if valor not in UFS_VALIDAS:
+            raise ValueError("UF inválida.")
+
+        return valor
+
+    return validator
+
+
 # ===== VALIDAÇÕES DE SEGURANÇA =====
 
 

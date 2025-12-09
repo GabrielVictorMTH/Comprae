@@ -1,0 +1,281 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Pedido #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Cabecalho -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="bi bi-receipt"></i> Pedido #{{ pedido.id }}</h2>
+                <p class="text-muted mb-0">
+                    Criado em {{ pedido.data_hora_pedido.strftime('%d/%m/%Y as %H:%M') if pedido.data_hora_pedido else '' }}
+                </p>
+            </div>
+            <span class="badge fs-5
+                {% if pedido.status == 'Negociando' %}bg-info
+                {% elif pedido.status == 'Pendente' %}bg-warning text-dark
+                {% elif pedido.status == 'Pago' %}bg-primary
+                {% elif pedido.status == 'Enviado' %}bg-info
+                {% elif pedido.status == 'Entregue' %}bg-success
+                {% elif pedido.status == 'Cancelado' %}bg-danger
+                {% else %}bg-secondary{% endif %}">
+                {{ pedido.status }}
+            </span>
+        </div>
+
+        {% include "components/alerta_erro.html" %}
+
+        <div class="row g-4">
+            <!-- Informacoes do Produto -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-box"></i> Produto</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center">
+                                <img src="{{ pedido.id_anuncio|foto_anuncio }}" alt="{{ pedido.nome_produto }}"
+                                    class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">
+                            </div>
+                            <div class="col-md-9">
+                                <h4>{{ pedido.nome_produto }}</h4>
+                                {% if is_comprador %}
+                                <p class="text-muted mb-2">
+                                    <i class="bi bi-shop"></i> Vendedor: <strong>{{ pedido.nome_vendedor }}</strong>
+                                </p>
+                                {% else %}
+                                <p class="text-muted mb-2">
+                                    <i class="bi bi-person"></i> Comprador: <strong>{{ pedido.nome_comprador }}</strong>
+                                    {% if pedido.email_comprador %}
+                                    <br><small>{{ pedido.email_comprador }}</small>
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+                                <h3 class="text-success">
+                                    {% if pedido.preco > 0 %}
+                                    R$ {{ "%.2f"|format(pedido.preco)|replace('.', ',') }}
+                                    {% else %}
+                                    <span class="text-warning">Aguardando definicao de preco</span>
+                                    {% endif %}
+                                </h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Endereco de Entrega (apenas para vendedor ou quando pago) -->
+                {% if pedido.endereco_completo and (is_vendedor or pedido.status in ['Pago', 'Enviado', 'Entregue']) %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Endereco de Entrega</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">{{ pedido.endereco_completo }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Informacoes de Envio -->
+                {% if pedido.codigo_rastreio or pedido.data_hora_envio %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-truck"></i> Informacoes de Envio</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if pedido.data_hora_envio %}
+                        <p class="mb-2">
+                            <strong>Data de Envio:</strong>
+                            {{ pedido.data_hora_envio.strftime('%d/%m/%Y as %H:%M') }}
+                        </p>
+                        {% endif %}
+                        {% if pedido.codigo_rastreio %}
+                        <p class="mb-0">
+                            <strong>Codigo de Rastreio:</strong>
+                            <span class="badge bg-dark fs-6">{{ pedido.codigo_rastreio }}</span>
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Timeline do Pedido -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Historico</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-check-circle text-success"></i> Pedido criado</span>
+                                <small class="text-muted">{{ pedido.data_hora_pedido.strftime('%d/%m/%Y %H:%M') if pedido.data_hora_pedido else '-' }}</small>
+                            </li>
+                            {% if pedido.status not in ['Negociando', 'Cancelado'] %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-check-circle text-success"></i> Preco definido</span>
+                                <small class="text-muted">-</small>
+                            </li>
+                            {% endif %}
+                            {% if pedido.data_hora_pagamento %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-check-circle text-success"></i> Pagamento realizado</span>
+                                <small class="text-muted">{{ pedido.data_hora_pagamento.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </li>
+                            {% endif %}
+                            {% if pedido.data_hora_envio %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-check-circle text-success"></i> Produto enviado</span>
+                                <small class="text-muted">{{ pedido.data_hora_envio.strftime('%d/%m/%Y %H:%M') }}</small>
+                            </li>
+                            {% endif %}
+                            {% if pedido.status == 'Entregue' %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-check-circle text-success"></i> Entrega confirmada</span>
+                                <small class="text-muted">-</small>
+                            </li>
+                            {% endif %}
+                            {% if pedido.status == 'Cancelado' %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center text-danger">
+                                <span><i class="bi bi-x-circle"></i> Pedido cancelado</span>
+                                <small>-</small>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Acoes -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-gear"></i> Acoes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <!-- Acoes do Comprador -->
+                            {% if is_comprador %}
+                                {% if pedido.status == 'Pendente' %}
+                                <form action="/pedidos/pagar/{{ pedido.id }}" method="post">
+                                    {{ csrf_input() }}
+                                    <button type="submit" class="btn btn-success btn-lg w-100">
+                                        <i class="bi bi-credit-card"></i> Pagar Pedido
+                                    </button>
+                                </form>
+                                {% endif %}
+
+                                {% if pedido.status == 'Enviado' %}
+                                <form action="/pedidos/confirmar-entrega/{{ pedido.id }}" method="post">
+                                    {{ csrf_input() }}
+                                    <button type="submit" class="btn btn-success btn-lg w-100">
+                                        <i class="bi bi-check2-circle"></i> Confirmar Recebimento
+                                    </button>
+                                </form>
+                                {% endif %}
+                            {% endif %}
+
+                            <!-- Acoes do Vendedor -->
+                            {% if is_vendedor %}
+                                {% if pedido.status == 'Negociando' %}
+                                <a href="/vendedor/pedidos/definir-preco/{{ pedido.id }}" class="btn btn-warning btn-lg">
+                                    <i class="bi bi-currency-dollar"></i> Definir Preco Final
+                                </a>
+                                {% endif %}
+
+                                {% if pedido.status == 'Pago' %}
+                                <a href="/vendedor/pedidos/enviar/{{ pedido.id }}" class="btn btn-success btn-lg">
+                                    <i class="bi bi-truck"></i> Informar Envio
+                                </a>
+                                {% endif %}
+                            {% endif %}
+
+                            <!-- Cancelar (comprador ou vendedor, se permitido) -->
+                            {% if pode_cancelar %}
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalCancelar">
+                                <i class="bi bi-x-circle"></i> Cancelar Pedido
+                            </button>
+                            {% endif %}
+
+                            <hr>
+
+                            <!-- Voltar -->
+                            {% if is_comprador %}
+                            <a href="/pedidos" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Voltar para Meus Pedidos
+                            </a>
+                            {% else %}
+                            <a href="/vendedor/pedidos" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Voltar para Pedidos Recebidos
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avaliacao (se entregue e for comprador) -->
+                {% if pedido.status == 'Entregue' and is_comprador and not pedido.nota_avaliacao %}
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-star"></i> Avaliar Pedido</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted small">A funcionalidade de avaliacao sera implementada em breve.</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if pedido.nota_avaliacao %}
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-star-fill text-warning"></i> Avaliacao</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            {% for i in range(1, 6) %}
+                            <i class="bi bi-star{% if i <= pedido.nota_avaliacao %}-fill{% endif %} text-warning"></i>
+                            {% endfor %}
+                            <span class="ms-2">({{ pedido.nota_avaliacao }}/5)</span>
+                        </div>
+                        {% if pedido.comentario_avaliacao %}
+                        <p class="mb-0 text-muted">{{ pedido.comentario_avaliacao }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Cancelamento -->
+{% if pode_cancelar %}
+<div class="modal fade" id="modalCancelar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancelar Pedido</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja cancelar este pedido?</p>
+                <p class="text-warning small">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Esta acao nao pode ser desfeita.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Voltar</button>
+                <form action="/pedidos/cancelar/{{ pedido.id }}" method="post">
+                    {{ csrf_input() }}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-x-circle"></i> Confirmar Cancelamento
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

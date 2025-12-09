@@ -65,6 +65,33 @@ def cancelar(id: int) -> bool:
         return cursor.rowcount > 0
 
 
+def inserir_negociando(id_endereco: int, id_comprador: int, id_anuncio: int) -> Optional[int]:
+    """Insere um novo pedido com status Negociando e preço zero"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            INSERIR_NEGOCIANDO,
+            (id_endereco, id_comprador, id_anuncio)
+        )
+        return cursor.lastrowid
+
+
+def definir_preco_final(id: int, preco: float) -> bool:
+    """Define o preço final e muda status para Pendente (aguardando pagamento)"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(DEFINIR_PRECO_FINAL, (preco, id))
+        return cursor.rowcount > 0
+
+
+def marcar_como_entregue(id: int) -> bool:
+    """Marca pedido como entregue (confirmação do comprador)"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(ATUALIZAR_PARA_ENTREGUE, (id,))
+        return cursor.rowcount > 0
+
+
 def avaliar(id: int, nota: int, comentario: str) -> bool:
     """Registra avaliação de um pedido"""
     with obter_conexao() as conn:
@@ -120,6 +147,35 @@ def obter_todos() -> list[Pedido]:
         return [_row_to_pedido(row) for row in rows]
 
 
+def obter_por_id_com_detalhes(id: int) -> Optional[Pedido]:
+    """Obtém pedido por ID com detalhes (produto, comprador, vendedor, endereço)"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(OBTER_COM_DETALHES, (id,))
+        row = cursor.fetchone()
+        if row:
+            return _row_to_pedido(row)
+        return None
+
+
+def obter_por_comprador_com_detalhes(id_comprador: int) -> list[Pedido]:
+    """Obtém pedidos de um comprador com detalhes do produto e vendedor"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(OBTER_POR_COMPRADOR_COM_DETALHES, (id_comprador,))
+        rows = cursor.fetchall()
+        return [_row_to_pedido(row) for row in rows]
+
+
+def obter_por_vendedor_com_detalhes(id_vendedor: int) -> list[Pedido]:
+    """Obtém pedidos de um vendedor com detalhes do produto e comprador"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(OBTER_POR_VENDEDOR_COM_DETALHES, (id_vendedor,))
+        rows = cursor.fetchall()
+        return [_row_to_pedido(row) for row in rows]
+
+
 def _converter_data(data_str: Optional[str]) -> Optional[datetime]:
     """Converte string de data do banco em objeto datetime"""
     if not data_str:
@@ -132,21 +188,39 @@ def _converter_data(data_str: Optional[str]) -> Optional[datetime]:
 
 def _row_to_pedido(row) -> Pedido:
     """Converte row do banco para objeto Pedido"""
-    return Pedido(
+    keys = row.keys()
+    pedido = Pedido(
         id=row["id"],
         id_endereco=row["id_endereco"],
         id_comprador=row["id_comprador"],
         id_anuncio=row["id_anuncio"],
         preco=row["preco"],
         status=row["status"],
-        data_hora_pedido=_converter_data(row["data_hora_pedido"] if "data_hora_pedido" in row.keys() else None),
-        data_hora_pagamento=_converter_data(row["data_hora_pagamento"] if "data_hora_pagamento" in row.keys() else None),
-        data_hora_envio=_converter_data(row["data_hora_envio"] if "data_hora_envio" in row.keys() else None),
-        codigo_rastreio=row["codigo_rastreio"] if "codigo_rastreio" in row.keys() else None,
-        nota_avaliacao=row["nota_avaliacao"] if "nota_avaliacao" in row.keys() else None,
-        comentario_avaliacao=row["comentario_avaliacao"] if "comentario_avaliacao" in row.keys() else None,
-        data_hora_avaliacao=_converter_data(row["data_hora_avaliacao"] if "data_hora_avaliacao" in row.keys() else None),
+        data_hora_pedido=_converter_data(row["data_hora_pedido"] if "data_hora_pedido" in keys else None),
+        data_hora_pagamento=_converter_data(row["data_hora_pagamento"] if "data_hora_pagamento" in keys else None),
+        data_hora_envio=_converter_data(row["data_hora_envio"] if "data_hora_envio" in keys else None),
+        codigo_rastreio=row["codigo_rastreio"] if "codigo_rastreio" in keys else None,
+        nota_avaliacao=row["nota_avaliacao"] if "nota_avaliacao" in keys else None,
+        comentario_avaliacao=row["comentario_avaliacao"] if "comentario_avaliacao" in keys else None,
+        data_hora_avaliacao=_converter_data(row["data_hora_avaliacao"] if "data_hora_avaliacao" in keys else None),
         endereco=None,
         comprador=None,
         anuncio=None
     )
+    # Adicionar campos extras se presentes (de JOINs)
+    if "nome_produto" in keys:
+        pedido.nome_produto = row["nome_produto"]
+    if "id_vendedor" in keys:
+        pedido.id_vendedor = row["id_vendedor"]
+    if "nome_vendedor" in keys:
+        pedido.nome_vendedor = row["nome_vendedor"]
+    if "nome_comprador" in keys:
+        pedido.nome_comprador = row["nome_comprador"]
+    if "email_comprador" in keys:
+        pedido.email_comprador = row["email_comprador"]
+    if "logradouro" in keys:
+        pedido.endereco_completo = f"{row['logradouro']}, {row['numero']}"
+        if row.get('complemento'):
+            pedido.endereco_completo += f" - {row['complemento']}"
+        pedido.endereco_completo += f", {row['bairro']} - {row['cidade']}/{row['uf']} - CEP: {row['cep']}"
+    return pedido

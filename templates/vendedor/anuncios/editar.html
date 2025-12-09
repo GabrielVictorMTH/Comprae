@@ -1,0 +1,323 @@
+{% extends "base_privada.html" %}
+{% from "macros/form_fields.html" import field with context %}
+
+{% block titulo %}Editar Anuncio{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <!-- Cabecalho -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-pencil-square"></i> Editar Anuncio</h2>
+            <a href="/vendedor/anuncios" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+
+        <!-- Formulario de Edicao -->
+        <div class="card shadow-sm">
+            <form action="/vendedor/anuncios/editar/{{ anuncio.id }}" method="post" id="form-anuncio">
+                {{ csrf_input() }}
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-12">
+                            {% include "components/alerta_erro.html" %}
+                        </div>
+
+                        <!-- Foto do Anuncio -->
+                        <div class="col-md-4 mb-4">
+                            <label class="form-label">Foto do Produto</label>
+                            <div class="text-center">
+                                <div class="mb-3 position-relative d-inline-block">
+                                    <img src="{{ anuncio.id|foto_anuncio }}" alt="Foto do produto"
+                                         id="preview-foto" class="rounded border"
+                                         style="width: 200px; height: 200px; object-fit: cover; cursor: pointer;"
+                                         title="Clique para alterar a foto">
+                                    <div class="position-absolute bottom-0 end-0 p-2">
+                                        <span class="badge bg-primary">
+                                            <i class="bi bi-camera"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <input type="file" id="input-foto" accept=".jpg,.jpeg,.png,.gif,.webp" class="d-none">
+                                <input type="hidden" name="foto_base64" id="foto-base64">
+                                <div class="form-text">
+                                    Clique na imagem para alterar.<br>
+                                    Formatos: JPG, PNG, GIF, WEBP. Max: 5MB
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dados do Anuncio -->
+                        <div class="col-md-8">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    {{ field(name='nome', label='Nome do Produto', type='text', required=true,
+                                    value=dados.nome, placeholder='Ex: Smartphone Samsung Galaxy',
+                                    attributes={'minlength': 3, 'maxlength': 100}) }}
+                                </div>
+
+                                <div class="col-12 mb-3">
+                                    {{ field(name='descricao', label='Descricao', type='textarea', required=true,
+                                    value=dados.descricao, placeholder='Descreva o produto em detalhes...',
+                                    attributes={'rows': 4, 'minlength': 10, 'maxlength': 1000}) }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="id_categoria" class="form-label">Categoria <span class="text-danger">*</span></label>
+                                    <select name="id_categoria" id="id_categoria" class="form-select" required>
+                                        <option value="">Selecione uma categoria...</option>
+                                        {% for categoria in categorias %}
+                                        <option value="{{ categoria.id }}" {% if dados.id_categoria == categoria.id %}selected{% endif %}>
+                                            {{ categoria.nome }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if erros and erros.id_categoria %}
+                                    <div class="invalid-feedback d-block">{{ erros.id_categoria }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    {{ field(name='peso', label='Peso (kg)', type='number', required=true,
+                                    value=dados.peso, placeholder='0.5',
+                                    attributes={'step': '0.01', 'min': '0.01', 'max': '1000'}) }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    {{ field(name='preco', label='Preco (R$)', type='number', required=true,
+                                    value=dados.preco, placeholder='99.90',
+                                    attributes={'step': '0.01', 'min': '0.01', 'max': '999999.99'}) }}
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    {{ field(name='estoque', label='Quantidade em Estoque', type='number', required=true,
+                                    value=dados.estoque, placeholder='10',
+                                    attributes={'min': '0', 'max': '99999'}) }}
+                                </div>
+
+                                <div class="col-12 mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               id="ativo" name="ativo" value="true"
+                                               {% if dados.ativo %}checked{% endif %}>
+                                        <label class="form-check-label" for="ativo">
+                                            <strong>Anuncio Ativo</strong>
+                                            <br><small class="text-muted">Anuncios inativos nao aparecem para compradores</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer p-4">
+                    <div class="d-flex justify-content-between">
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Salvar Alteracoes
+                            </button>
+                            <a href="/vendedor/anuncios" class="btn btn-outline-secondary">
+                                Cancelar
+                            </a>
+                        </div>
+                        <button type="button" class="btn btn-outline-danger"
+                                data-bs-toggle="modal" data-bs-target="#modalExcluir">
+                            <i class="bi bi-trash"></i> Excluir
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Info do Anuncio -->
+        <div class="card mt-4 shadow-sm">
+            <div class="card-header bg-light">
+                <h6 class="mb-0"><i class="bi bi-info-circle"></i> Informacoes do Anuncio</h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-muted small">
+                    <div class="col-md-4">
+                        <strong>ID:</strong> #{{ anuncio.id }}
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Cadastrado em:</strong> {{ anuncio.data_cadastro|data_br if anuncio.data_cadastro else 'N/A' }}
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Status:</strong>
+                        {% if anuncio.ativo %}
+                        <span class="badge bg-success">Ativo</span>
+                        {% else %}
+                        <span class="badge bg-warning text-dark">Inativo</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmacao de Exclusao -->
+<div class="modal fade" id="modalExcluir" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusao</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja realmente excluir o anuncio <strong>{{ anuncio.nome }}</strong>?</p>
+                <p class="text-danger small">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    Esta acao nao podera ser desfeita. Anuncios com pedidos vinculados nao podem ser excluidos.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="/vendedor/anuncios/excluir/{{ anuncio.id }}" method="post">
+                    {{ csrf_input() }}
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash"></i> Excluir
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Crop de Foto -->
+{% set modal_id = "modalFotoAnuncio" %}
+{% set modal_title = "Foto do Produto" %}
+{% set form_action = "" %}
+{% set aspect_ratio = 1.0 %}
+{% set max_file_size_mb = 5 %}
+{% set show_upload_section = false %}
+{% include 'components/modal_corte_imagem.html' %}
+{% endblock %}
+
+{% block scripts %}
+<!-- Cropper.js CSS e JS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+<!-- Componente de Corte de Imagem -->
+<script src="/static/js/cortador-imagem.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputFoto = document.getElementById('input-foto');
+    const previewFoto = document.getElementById('preview-foto');
+    const fotoBase64 = document.getElementById('foto-base64');
+    const modal = document.getElementById('modalFotoAnuncio');
+    const cropperImage = document.getElementById('cropper-image-modalFotoAnuncio');
+    const cropperContainer = document.getElementById('cropper-container-modalFotoAnuncio');
+    const previewCrop = document.getElementById('preview-modalFotoAnuncio');
+    const btnSubmit = document.getElementById('btn-submit-modalFotoAnuncio');
+
+    let cropper = null;
+
+    // Clicar na imagem abre o seletor de arquivo
+    previewFoto.addEventListener('click', function() {
+        inputFoto.click();
+    });
+
+    // Quando seleciona um arquivo
+    inputFoto.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validar tamanho
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Arquivo muito grande. Tamanho maximo: 5MB');
+            return;
+        }
+
+        // Validar tipo
+        if (!file.type.match(/^image\/(jpeg|jpg|png|gif|webp)$/)) {
+            alert('Formato invalido. Use: JPG, PNG, GIF ou WEBP');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            // Mostrar no modal
+            cropperImage.src = event.target.result;
+            cropperContainer.classList.remove('d-none');
+
+            // Abrir modal
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+
+            // Inicializar cropper quando modal abrir
+            modal.addEventListener('shown.bs.modal', function initCropper() {
+                if (cropper) {
+                    cropper.destroy();
+                }
+                cropper = new Cropper(cropperImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.9,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    crop: function() {
+                        // Atualizar preview
+                        const canvas = cropper.getCroppedCanvas({
+                            width: 400,
+                            height: 400
+                        });
+                        if (canvas) {
+                            previewCrop.src = canvas.toDataURL('image/jpeg', 0.9);
+                            btnSubmit.disabled = false;
+                        }
+                    }
+                });
+                modal.removeEventListener('shown.bs.modal', initCropper);
+            }, {once: true});
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Salvar foto cropada
+    btnSubmit.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (!cropper) return;
+
+        const canvas = cropper.getCroppedCanvas({
+            width: 800,
+            height: 800
+        });
+
+        if (canvas) {
+            const base64 = canvas.toDataURL('image/jpeg', 0.9);
+            fotoBase64.value = base64;
+            previewFoto.src = base64;
+
+            // Fechar modal
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            bsModal.hide();
+
+            // Destruir cropper
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        }
+    });
+
+    // Limpar ao fechar modal
+    modal.addEventListener('hidden.bs.modal', function() {
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
+        }
+        inputFoto.value = '';
+    });
+});
+</script>
+{% endblock %}

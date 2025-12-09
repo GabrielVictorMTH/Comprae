@@ -1,0 +1,122 @@
+{% extends "base_privada.html" %}
+{% from "macros/form_fields.html" import field with context %}
+
+{% block titulo %}Cadastrar Endereço{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <!-- Cabeçalho -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-geo-alt-fill"></i> Cadastrar Endereço</h2>
+            <a href="/usuario/perfil/visualizar" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar ao Perfil
+            </a>
+        </div>
+
+        <!-- Formulário de Cadastro -->
+        <div class="card shadow-sm">
+            <form action="/usuario/endereco/cadastrar" method="post">
+                {{ csrf_input() }}
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-12">
+                            {% include "components/alerta_erro.html" %}
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            {{ field(name='titulo', label='Título do Endereço', type='text', required=true,
+                            value=dados.titulo, placeholder='Ex: Casa, Trabalho, etc.',
+                            attributes={'minlength': 1, 'maxlength': 50}) }}
+                        </div>
+
+                        <div class="col-md-8 mb-3">
+                            {{ field(name='logradouro', label='Logradouro', type='text', required=true,
+                            value=dados.logradouro, placeholder='Rua, Avenida, etc.',
+                            attributes={'minlength': 3, 'maxlength': 100}) }}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ field(name='numero', label='Número', type='text', required=true,
+                            value=dados.numero, placeholder='123',
+                            attributes={'maxlength': 10}) }}
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            {{ field(name='complemento', label='Complemento', type='text',
+                            value=dados.complemento, placeholder='Apto, Bloco, etc. (opcional)') }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ field(name='bairro', label='Bairro', type='text', required=true,
+                            value=dados.bairro, placeholder='Nome do bairro',
+                            attributes={'minlength': 2, 'maxlength': 50}) }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            {{ field(name='cidade', label='Cidade', type='text', required=true,
+                            value=dados.cidade, placeholder='Nome da cidade',
+                            attributes={'minlength': 2, 'maxlength': 50}) }}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            {{ field(name='uf', label='UF', type='select', required=true,
+                            value=dados.uf, options=[
+                                {'value': '', 'label': 'Selecione...'},
+                                {'value': 'AC', 'label': 'AC'},
+                                {'value': 'AL', 'label': 'AL'},
+                                {'value': 'AP', 'label': 'AP'},
+                                {'value': 'AM', 'label': 'AM'},
+                                {'value': 'BA', 'label': 'BA'},
+                                {'value': 'CE', 'label': 'CE'},
+                                {'value': 'DF', 'label': 'DF'},
+                                {'value': 'ES', 'label': 'ES'},
+                                {'value': 'GO', 'label': 'GO'},
+                                {'value': 'MA', 'label': 'MA'},
+                                {'value': 'MT', 'label': 'MT'},
+                                {'value': 'MS', 'label': 'MS'},
+                                {'value': 'MG', 'label': 'MG'},
+                                {'value': 'PA', 'label': 'PA'},
+                                {'value': 'PB', 'label': 'PB'},
+                                {'value': 'PR', 'label': 'PR'},
+                                {'value': 'PE', 'label': 'PE'},
+                                {'value': 'PI', 'label': 'PI'},
+                                {'value': 'RJ', 'label': 'RJ'},
+                                {'value': 'RN', 'label': 'RN'},
+                                {'value': 'RS', 'label': 'RS'},
+                                {'value': 'RO', 'label': 'RO'},
+                                {'value': 'RR', 'label': 'RR'},
+                                {'value': 'SC', 'label': 'SC'},
+                                {'value': 'SP', 'label': 'SP'},
+                                {'value': 'SE', 'label': 'SE'},
+                                {'value': 'TO', 'label': 'TO'}
+                            ]) }}
+                        </div>
+
+                        <div class="col-md-8 mb-3">
+                            {{ field(name='cep', label='CEP', type='text', required=true,
+                            value=dados.cep, placeholder='00000-000', mask='00000-000') }}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer p-4">
+                    <div class="d-flex gap-3">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Cadastrar Endereço
+                        </button>
+                        <a href="/usuario/perfil/visualizar" class="btn btn-outline-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Aviso -->
+        <div class="alert alert-info mt-4" role="alert">
+            <i class="bi bi-info-circle"></i>
+            <strong>Dica:</strong> Você pode cadastrar apenas um endereço, que será usado como endereço de entrega.
+        </div>
+    </div>
+</div>
+{% endblock %}

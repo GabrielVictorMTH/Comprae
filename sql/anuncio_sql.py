@@ -68,9 +68,11 @@ ORDER BY data_cadastro DESC
 """
 
 OBTER_POR_VENDEDOR = """
-SELECT * FROM anuncio
-WHERE id_vendedor = ?
-ORDER BY data_cadastro DESC
+SELECT a.*, c.nome as nome_categoria
+FROM anuncio a
+LEFT JOIN categoria c ON a.id_categoria = c.id
+WHERE a.id_vendedor = ?
+ORDER BY a.data_cadastro DESC
 """
 
 OBTER_POR_CATEGORIA = """
@@ -99,4 +101,43 @@ ATUALIZAR_ESTOQUE = """
 UPDATE anuncio
 SET estoque = estoque - ?
 WHERE id = ? AND estoque >= ?
+"""
+
+# Queries para página pública de anúncios
+OBTER_ATIVOS_PAGINADOS = """
+SELECT a.*, c.nome as nome_categoria, u.nome as nome_vendedor
+FROM anuncio a
+LEFT JOIN categoria c ON a.id_categoria = c.id
+LEFT JOIN usuario u ON a.id_vendedor = u.id
+WHERE a.ativo = 1 AND a.estoque > 0
+  AND (? IS NULL OR a.nome LIKE ? OR a.descricao LIKE ?)
+  AND (? IS NULL OR a.id_categoria = ?)
+ORDER BY a.data_cadastro DESC
+LIMIT ? OFFSET ?
+"""
+
+CONTAR_ATIVOS = """
+SELECT COUNT(*) as total
+FROM anuncio a
+WHERE a.ativo = 1 AND a.estoque > 0
+  AND (? IS NULL OR a.nome LIKE ? OR a.descricao LIKE ?)
+  AND (? IS NULL OR a.id_categoria = ?)
+"""
+
+OBTER_ULTIMOS_ATIVOS = """
+SELECT a.*, c.nome as nome_categoria, u.nome as nome_vendedor
+FROM anuncio a
+LEFT JOIN categoria c ON a.id_categoria = c.id
+LEFT JOIN usuario u ON a.id_vendedor = u.id
+WHERE a.ativo = 1 AND a.estoque > 0
+ORDER BY a.data_cadastro DESC
+LIMIT ?
+"""
+
+OBTER_POR_ID_COM_DETALHES = """
+SELECT a.*, c.nome as nome_categoria, u.nome as nome_vendedor, u.email as email_vendedor
+FROM anuncio a
+LEFT JOIN categoria c ON a.id_categoria = c.id
+LEFT JOIN usuario u ON a.id_vendedor = u.id
+WHERE a.id = ?
 """

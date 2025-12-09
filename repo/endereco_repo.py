@@ -106,6 +106,17 @@ def obter_por_usuario(id_usuario: int) -> list[Endereco]:
         ]
 
 
+def obter_endereco_usuario(id_usuario: int) -> Optional[Endereco]:
+    """Obtém o endereço único de um usuário (cada usuário pode ter apenas 1 endereço)"""
+    enderecos = obter_por_usuario(id_usuario)
+    return enderecos[0] if enderecos else None
+
+
+def usuario_tem_endereco(id_usuario: int) -> bool:
+    """Verifica se o usuário já possui um endereço cadastrado"""
+    return obter_endereco_usuario(id_usuario) is not None
+
+
 def obter_todos() -> list[Endereco]:
     """Obtém todos os endereços"""
     with obter_conexao() as conn:

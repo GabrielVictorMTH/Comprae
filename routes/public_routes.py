@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, status
 
+from repo import anuncio_repo
 from util.template_util import criar_templates
 from util.rate_limiter import DynamicRateLimiter, obter_identificador_cliente
 from util.flash_messages import informar_erro
@@ -34,27 +35,39 @@ async def home(request: Request):
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         )
 
-    return templates_public.TemplateResponse("index.html", {"request": request})
+    # Obter ultimos anuncios para exibir na home
+    ultimos_anuncios = anuncio_repo.obter_ultimos_ativos(limite=12)
+
+    return templates_public.TemplateResponse(
+        "index.html",
+        {"request": request, "ultimos_anuncios": ultimos_anuncios}
+    )
 
 
 @router.get("/index")
 async def index(request: Request):
     """
-    Página pública inicial (Landing Page)
-    Sempre exibe a página pública, independentemente de autenticação
+    Pagina publica inicial (Landing Page)
+    Sempre exibe a pagina publica, independentemente de autenticacao
     """
     # Rate limiting por IP
     ip = obter_identificador_cliente(request)
     if not public_limiter.verificar(ip):
-        informar_erro(request, "Muitas requisições. Aguarde alguns minutos.")
-        logger.warning(f"Rate limit excedido para página pública - IP: {ip}")
+        informar_erro(request, "Muitas requisicoes. Aguarde alguns minutos.")
+        logger.warning(f"Rate limit excedido para pagina publica - IP: {ip}")
         return templates_public.TemplateResponse(
             "errors/429.html",
             {"request": request},
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
         )
 
-    return templates_public.TemplateResponse("index.html", {"request": request})
+    # Obter ultimos anuncios para exibir na home
+    ultimos_anuncios = anuncio_repo.obter_ultimos_ativos(limite=12)
+
+    return templates_public.TemplateResponse(
+        "index.html",
+        {"request": request, "ultimos_anuncios": ultimos_anuncios}
+    )
 
 
 @router.get("/sobre")

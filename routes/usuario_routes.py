@@ -17,7 +17,7 @@ from dtos.perfil_dto import EditarPerfilDTO, AlterarSenhaDTO
 from model.usuario_logado_model import UsuarioLogado
 
 # Repositories
-from repo import usuario_repo, chamado_repo
+from repo import usuario_repo, chamado_repo, endereco_repo
 
 # Utilities
 from util.auth_decorator import requer_autenticacao
@@ -110,9 +110,17 @@ async def get_visualizar_perfil(
     if isinstance(usuario, RedirectResponse):
         return usuario
 
+    # Obter endereço do usuário (pode ser None)
+    endereco = endereco_repo.obter_endereco_usuario(usuario_logado.id)
+
     return templates_usuario.TemplateResponse(
         "perfil/visualizar.html",
-        {"request": request, "usuario": usuario, "usuario_logado": usuario_logado},
+        {
+            "request": request,
+            "usuario": usuario,
+            "usuario_logado": usuario_logado,
+            "endereco": endereco,
+        },
     )
 
 

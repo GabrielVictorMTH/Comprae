@@ -1,0 +1,109 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Iniciar Negociacao{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <!-- Cabecalho -->
+        <div class="mb-4">
+            <h2><i class="bi bi-cart-plus"></i> Iniciar Negociacao</h2>
+            <p class="text-muted">Confirme os dados para iniciar a negociacao com o vendedor</p>
+        </div>
+
+        {% include "components/alerta_erro.html" %}
+
+        <div class="row g-4">
+            <!-- Detalhes do Produto -->
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-box"></i> Produto Selecionado</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-3 text-center">
+                                <img src="{{ anuncio.id|foto_anuncio }}" alt="{{ anuncio.nome }}"
+                                    class="img-fluid rounded" style="max-height: 150px; object-fit: cover;">
+                            </div>
+                            <div class="col-md-9">
+                                <h4>{{ anuncio.nome }}</h4>
+                                {% if anuncio.descricao %}
+                                <p class="text-muted">{{ anuncio.descricao[:200] }}{% if anuncio.descricao|length > 200 %}...{% endif %}</p>
+                                {% endif %}
+                                <p class="mb-1">
+                                    <i class="bi bi-shop"></i> Vendedor: <strong>{{ anuncio.nome_vendedor }}</strong>
+                                </p>
+                                <h3 class="text-success mb-0">
+                                    Preco sugerido: R$ {{ "%.2f"|format(anuncio.preco)|replace('.', ',') }}
+                                </h3>
+                                <small class="text-muted">O vendedor definira o preco final apos a negociacao</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Endereco de Entrega -->
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Endereco de Entrega</h5>
+                        <a href="/usuario/endereco/editar" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Alterar
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        {% if endereco %}
+                        <p class="mb-0">
+                            {{ endereco.logradouro }}, {{ endereco.numero }}
+                            {% if endereco.complemento %} - {{ endereco.complemento }}{% endif %}<br>
+                            {{ endereco.bairro }} - {{ endereco.cidade }}/{{ endereco.uf }}<br>
+                            CEP: {{ endereco.cep }}
+                        </p>
+                        {% else %}
+                        <p class="text-danger mb-0">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Voce precisa cadastrar um endereco antes de fazer um pedido.
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informacoes -->
+            <div class="col-12">
+                <div class="card shadow-sm bg-light">
+                    <div class="card-body">
+                        <h6><i class="bi bi-info-circle"></i> Como funciona?</h6>
+                        <ol class="mb-0">
+                            <li>Voce inicia a negociacao com o vendedor</li>
+                            <li>O vendedor definira o preco final do produto</li>
+                            <li>Voce recebera uma notificacao para efetuar o pagamento</li>
+                            <li>Apos o pagamento, o vendedor enviara o produto</li>
+                            <li>Confirme o recebimento quando o produto chegar</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botoes -->
+            <div class="col-12">
+                <form action="/pedidos/criar" method="post">
+                    {{ csrf_input() }}
+                    <input type="hidden" name="id_anuncio" value="{{ anuncio.id }}">
+
+                    <div class="d-flex gap-3">
+                        <a href="/anuncios/{{ anuncio.id }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left"></i> Voltar
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                            <i class="bi bi-cart-check"></i> Confirmar e Iniciar Negociacao
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

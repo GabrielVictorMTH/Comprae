@@ -143,6 +143,20 @@ def foto_usuario(id: int) -> str:
     return f"/static/img/usuarios/{id:06d}.jpg"
 
 
+def foto_anuncio(id: int) -> str:
+    """
+    Retorna o caminho da foto do anúncio para uso em templates.
+
+    Args:
+        id: ID do anúncio
+
+    Returns:
+        String com caminho da foto ou imagem padrão se não existir
+    """
+    from util.foto_anuncio_util import obter_caminho_foto_anuncio
+    return obter_caminho_foto_anuncio(id)
+
+
 def csrf_input(request: Optional[Request] = None) -> str:
     """
     Gera input HTML hidden com token CSRF.
@@ -201,6 +215,7 @@ def criar_templates() -> Jinja2Templates:
     # Adicionar filtros customizados
     env.filters['data_br'] = formatar_data_br
     env.filters['foto_usuario'] = foto_usuario
+    env.filters['foto_anuncio'] = foto_anuncio
 
     # Filtros de formatação de data/hora (em português)
     env.filters['formatar_data'] = formatar_data

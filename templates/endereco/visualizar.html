@@ -1,0 +1,91 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Meu Endereço{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <!-- Cabeçalho -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-geo-alt"></i> Meu Endereço</h2>
+            <a href="/usuario/perfil/visualizar" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Voltar ao Perfil
+            </a>
+        </div>
+
+        <!-- Card do Endereço -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-house-door"></i> {{ endereco.titulo }}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <p class="mb-2">
+                            <strong><i class="bi bi-signpost"></i> Logradouro:</strong><br>
+                            {{ endereco.logradouro }}, {{ endereco.numero }}
+                            {% if endereco.complemento %} - {{ endereco.complemento }}{% endif %}
+                        </p>
+                        <p class="mb-2">
+                            <strong><i class="bi bi-building"></i> Bairro:</strong><br>
+                            {{ endereco.bairro }}
+                        </p>
+                        <p class="mb-2">
+                            <strong><i class="bi bi-pin-map"></i> Cidade/UF:</strong><br>
+                            {{ endereco.cidade }} - {{ endereco.uf }}
+                        </p>
+                        <p class="mb-0">
+                            <strong><i class="bi bi-mailbox"></i> CEP:</strong><br>
+                            {{ endereco.cep }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="/usuario/endereco/editar" class="btn btn-primary">
+                        <i class="bi bi-pencil"></i> Editar Endereço
+                    </a>
+                    <button type="button" class="btn btn-outline-danger"
+                            onclick="confirmarExclusao()">
+                        <i class="bi bi-trash"></i> Excluir Endereço
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aviso -->
+        <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle"></i>
+            <strong>Importante:</strong> Este endereço será utilizado como endereço de entrega para seus pedidos.
+        </div>
+    </div>
+</div>
+
+<!-- Form oculto para exclusão -->
+<form id="form-excluir" action="/usuario/endereco/excluir" method="POST" class="d-none">
+    {{ csrf_input() }}
+</form>
+
+<!-- Modal de Confirmação -->
+{% include 'components/modal_confirmacao.html' %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function confirmarExclusao() {
+    abrirModalConfirmacao({
+        titulo: 'Confirmar Exclusão',
+        mensagem: 'Tem certeza que deseja excluir este endereço? Esta ação não pode ser desfeita.',
+        textoBotaoConfirmar: 'Sim, Excluir',
+        corBotaoConfirmar: 'danger',
+        icone: 'bi-exclamation-triangle',
+        onConfirm: function() {
+            document.getElementById('form-excluir').submit();
+        }
+    });
+}
+</script>
+{% endblock %}

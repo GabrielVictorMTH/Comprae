@@ -115,20 +115,44 @@
     </div>
 </div>
 
+<!-- Ultimos Anuncios -->
+{% if ultimos_anuncios and ultimos_anuncios|length > 0 %}
+<div class="mb-5" id="anuncios">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">Ultimos Anuncios</h2>
+        <p class="text-muted">Confira os produtos mais recentes</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-4">
+        {% for anuncio in ultimos_anuncios %}
+        <div class="col">
+            {% include "components/card_anuncio.html" %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="text-center">
+        <a href="/anuncios" class="btn btn-outline-primary btn-lg">
+            <i class="bi bi-shop"></i> Ver Todos os Anuncios
+        </a>
+    </div>
+</div>
+{% endif %}
+
 <!-- CTA Section -->
 <div class="mb-5">
     <div class="card bg-primary text-white shadow-lg shadow-hover">
         <div class="card-body text-center p-5">
-            <h2 class="fw-bold mb-4">Pronto para começar?</h2>
+            <h2 class="fw-bold mb-4">Pronto para comecar?</h2>
             <p class="lead mb-4">
                 Crie sua conta gratuitamente e comece a usar agora mesmo!
             </p>
             <div class="d-flex justify-content-center gap-3 flex-column flex-sm-row">
                 <a href="/cadastrar" class="btn btn-light btn-lg">
-                    <i class="bi bi-person-plus"></i> Criar Conta Grátis
+                    <i class="bi bi-person-plus"></i> Criar Conta Gratis
                 </a>
                 <a href="/login" class="btn btn-outline-light btn-lg">
-                    <i class="bi bi-box-arrow-in-right"></i> Já tenho conta
+                    <i class="bi bi-box-arrow-in-right"></i> Ja tenho conta
                 </a>
             </div>
         </div>
