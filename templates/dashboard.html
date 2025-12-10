@@ -61,6 +61,23 @@
         <div class="card h-100 shadow-sm shadow-hover">
             <div class="card-body text-center">
                 <div class="mb-3">
+                    <i class="bi bi-gear text-secondary display-3"></i>
+                </div>
+                <h5 class="card-title">Configurações</h5>
+                <p class="card-text text-muted">
+                    Configure as definições gerais do sistema
+                </p>
+                <a href="/admin/configuracoes" class="btn btn-secondary">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
                     <i class="bi bi-palette text-danger display-3"></i>
                 </div>
                 <h5 class="card-title">Personalizar Tema</h5>
@@ -166,6 +183,24 @@
         </div>
     </div>
 
+    <!-- Explorar Anúncios (vendedor que quer comprar) -->
+    <div class="col">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-search text-primary display-3"></i>
+                </div>
+                <h5 class="card-title">Explorar Anúncios</h5>
+                <p class="card-text text-muted">
+                    Navegue e compre produtos de outros vendedores
+                </p>
+                <a href="/anuncios" class="btn btn-primary">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+
     <!-- Pedidos Recebidos (vendedor) -->
     <div class="col">
         <div class="card h-100 shadow-sm shadow-hover">
@@ -183,9 +218,8 @@
             </div>
         </div>
     </div>
-    {% endif %}
 
-    <!-- Meus Pedidos (para qualquer usuário logado, exceto admin) -->
+    <!-- Meus Pedidos (comprador) -->
     <div class="col">
         <div class="card h-100 shadow-sm shadow-hover">
             <div class="card-body text-center">
@@ -202,6 +236,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Explorar Anúncios (comprador) -->
+    <div class="col">
+        <div class="card h-100 shadow-sm shadow-hover">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="bi bi-search text-primary display-3"></i>
+                </div>
+                <h5 class="card-title">Explorar Anúncios</h5>
+                <p class="card-text text-muted">
+                    Navegue e encontre produtos para comprar
+                </p>
+                <a href="/anuncios" class="btn btn-primary">
+                    <i class="bi bi-arrow-right-circle"></i> Acessar
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Chamados para usuários comuns -->
     <div class="col">

@@ -564,7 +564,7 @@ const chatWidget = (() => {
      */
     async function atualizarContadorNaoLidas() {
         try {
-            const response = await fetch('/chat/mensagens/nao-lidas/total');
+            const response = await fetch('/chat/mensagens/não-lidas/total');
             const data = await response.json();
 
             const total = data.total;

@@ -320,7 +320,10 @@ async def post_responder(
 @router.post("/{id}/excluir")
 @requer_autenticacao()
 async def post_excluir(
-    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Exclui um chamado do usuário (apenas se aberto e sem respostas de admin)."""
     if not usuario_logado:

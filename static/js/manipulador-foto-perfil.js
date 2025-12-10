@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const modalConfig = window.config_modalFotoPerfil;
 
     if (!photoInput || !modalConfig) {
-        console.warn('Elementos necessarios para photo handler nao encontrados');
+        console.warn('Elementos necessários para photo handler não encontrados');
         return;
     }
 
@@ -53,12 +53,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 modalConfig.maxFileSizeMB
             );
 
-            // 2. AGORA abrir o modal (imagem ja esta carregada e container ja esta dimensionado)
+            // 2. AGORA abrir o modal (imagem já está carregada e container já está dimensionado)
             const modalElement = document.getElementById(modalConfig.modalId);
             const modal = new bootstrap.Modal(modalElement);
             modal.show();
 
-            // 3. Quando o modal estiver completamente visivel, INICIALIZAR o Cropper
+            // 3. Quando o modal estiver completamente visível, INICIALIZAR o Cropper
             modalElement.addEventListener('shown.bs.modal', function() {
                 inicializarCortadorNoModal(
                     modalConfig.modalId,
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }, { once: true });
 
         } catch (error) {
-            // Se houver erro (arquivo invalido, muito grande, etc.), exibir mensagem
+            // Se houver erro (arquivo inválido, muito grande, etc.), exibir mensagem
             window.App.Modal.showError(error.message || error, 'Erro ao Processar Imagem');
             photoInput.value = '';
         }
@@ -86,8 +86,8 @@ window.App = window.App || {};
 window.App.FotoPerfil = window.App.FotoPerfil || {};
 
 /**
- * Expor funcao abrirSeletorArquivo para uso externo se necessario
- * Note: A funcao real e definida dentro do DOMContentLoaded
+ * Expor função abrirSeletorArquivo para uso externo se necessário
+ * Note: A função real é definida dentro do DOMContentLoaded
  */
 window.App.FotoPerfil.abrirSeletor = function() {
     const photoInput = document.getElementById('hidden-photo-input');

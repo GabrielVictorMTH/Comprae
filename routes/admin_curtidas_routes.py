@@ -182,6 +182,7 @@ async def post_excluir(
     request: Request,
     id_usuario: int,
     id_anuncio: int,
+    csrf_token: str = Form(default=""),
     usuario_logado: Optional[dict] = None,
 ):
     """Exclui um registro"""

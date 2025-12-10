@@ -86,7 +86,7 @@ async def detalhes_anuncio(request: Request, id: int):
     anuncio = anuncio_repo.obter_por_id_com_detalhes(id)
 
     if not anuncio:
-        informar_erro(request, "Anuncio nao encontrado.")
+        informar_erro(request, "Anúncio não encontrado.")
         return templates_anuncios.TemplateResponse(
             "anuncios/listar.html",
             {
@@ -102,9 +102,9 @@ async def detalhes_anuncio(request: Request, id: int):
             },
         )
 
-    # Verificar se anuncio esta ativo e com estoque
+    # Verificar se anúncio está ativo e com estoque
     if not anuncio.ativo or anuncio.estoque <= 0:
-        informar_erro(request, "Este anuncio nao esta mais disponivel.")
+        informar_erro(request, "Este anúncio não está mais disponível.")
 
     return templates_anuncios.TemplateResponse(
         "anuncios/detalhes.html",

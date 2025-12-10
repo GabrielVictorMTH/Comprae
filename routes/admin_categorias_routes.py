@@ -194,7 +194,10 @@ async def post_editar(
 @router.post("/excluir/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def post_excluir(
-    request: Request, id: int, usuario_logado: Optional[dict] = None
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[dict] = None,
 ):
     ip = obter_identificador_cliente(request)
     if not admin_categorias_limiter.verificar(ip):

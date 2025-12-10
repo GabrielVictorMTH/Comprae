@@ -5,7 +5,7 @@ Permite ao administrador criar, listar, restaurar e excluir backups do banco SQL
 """
 
 from typing import Optional
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse, FileResponse
 
 from model.usuario_logado_model import UsuarioLogado
@@ -70,7 +70,11 @@ async def get_listar(request: Request, usuario_logado: Optional[UsuarioLogado] =
 
 @router.post("/criar")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def post_criar(request: Request, usuario_logado: Optional[UsuarioLogado] = None):
+async def post_criar(
+    request: Request,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
+):
     """
     Cria um novo backup do banco de dados
 
@@ -108,7 +112,10 @@ async def post_criar(request: Request, usuario_logado: Optional[UsuarioLogado] =
 @router.post("/restaurar/{nome_arquivo}")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def post_restaurar(
-    request: Request, nome_arquivo: str, usuario_logado: Optional[UsuarioLogado] = None
+    request: Request,
+    nome_arquivo: str,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """
     Restaura um backup do banco de dados
@@ -174,7 +181,10 @@ async def post_restaurar(
 @router.post("/excluir/{nome_arquivo}")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def post_excluir(
-    request: Request, nome_arquivo: str, usuario_logado: Optional[UsuarioLogado] = None
+    request: Request,
+    nome_arquivo: str,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """
     Exclui um arquivo de backup

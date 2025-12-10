@@ -300,7 +300,9 @@ async def post_editar_endereco(
 @router.post("/excluir")
 @requer_autenticacao()
 async def post_excluir_endereco(
-    request: Request, usuario_logado: Optional[UsuarioLogado] = None
+    request: Request,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Excluir endereço do usuário"""
     if not usuario_logado:

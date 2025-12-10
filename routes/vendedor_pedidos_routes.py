@@ -64,17 +64,17 @@ async def get_definir_preco(request: Request, id: int, usuario_logado: Optional[
     pedido = pedido_repo.obter_por_id_com_detalhes(id)
 
     if not pedido:
-        informar_erro(request, "Pedido nao encontrado.")
+        informar_erro(request, "Pedido não encontrado.")
         return RedirectResponse(url="/vendedor/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se e o vendedor do anuncio
+    # Verificar se é o vendedor do anúncio
     if not hasattr(pedido, 'id_vendedor') or pedido.id_vendedor != usuario_logado.id:
-        informar_erro(request, "Voce nao tem permissao para definir preco deste pedido.")
+        informar_erro(request, "Você não tem permissão para definir preco deste pedido.")
         return RedirectResponse(url="/vendedor/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se o status permite definicao de preco
+    # Verificar se o status permite definição de preço
     if pedido.status != StatusPedido.NEGOCIANDO.value:
-        informar_erro(request, "O preco so pode ser definido quando o pedido esta em negociacao.")
+        informar_erro(request, "O preço só pode ser definido quando o pedido está em negociação.")
         return RedirectResponse(url=f"/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER)
 
     # Buscar anuncio para preco sugerido
@@ -99,37 +99,37 @@ async def post_definir_preco(
     preco: float = Form(),
     usuario_logado: Optional[UsuarioLogado] = None,
 ):
-    """Define o preco final e muda status para Pendente"""
+    """Define o preço final e muda status para Pendente"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
 
     pedido = pedido_repo.obter_por_id_com_detalhes(id)
 
     if not pedido:
-        informar_erro(request, "Pedido nao encontrado.")
+        informar_erro(request, "Pedido não encontrado.")
         return RedirectResponse(url="/vendedor/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se e o vendedor do anuncio
+    # Verificar se é o vendedor do anúncio
     if not hasattr(pedido, 'id_vendedor') or pedido.id_vendedor != usuario_logado.id:
-        informar_erro(request, "Voce nao tem permissao para definir preco deste pedido.")
+        informar_erro(request, "Você não tem permissão para definir preço deste pedido.")
         return RedirectResponse(url="/vendedor/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se o status permite definicao de preco
+    # Verificar se o status permite definição de preço
     if pedido.status != StatusPedido.NEGOCIANDO.value:
-        informar_erro(request, "O preco so pode ser definido quando o pedido esta em negociacao.")
+        informar_erro(request, "O preço só pode ser definido quando o pedido está em negociação.")
         return RedirectResponse(url=f"/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Validar preco
+    # Validar preço
     if preco <= 0:
-        informar_erro(request, "O preco deve ser maior que zero.")
+        informar_erro(request, "O preço deve ser maior que zero.")
         return RedirectResponse(url=f"/vendedor/pedidos/definir-preco/{id}", status_code=status.HTTP_303_SEE_OTHER)
 
     if pedido_repo.definir_preco_final(id, preco):
-        logger.info(f"Preco definido para pedido ID: {id} - Vendedor: {usuario_logado.id} - Preco: {preco}")
-        informar_sucesso(request, f"Preco definido! Aguardando pagamento do comprador.")
+        logger.info(f"Preço definido para pedido ID: {id} - Vendedor: {usuario_logado.id} - Preço: {preco}")
+        informar_sucesso(request, f"Preço definido! Aguardando pagamento do comprador.")
         return RedirectResponse(url=f"/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER)
     else:
-        informar_erro(request, "Erro ao definir preco.")
+        informar_erro(request, "Erro ao definir preço.")
         return RedirectResponse(url=f"/vendedor/pedidos/definir-preco/{id}", status_code=status.HTTP_303_SEE_OTHER)
 
 
@@ -143,17 +143,17 @@ async def get_enviar_pedido(request: Request, id: int, usuario_logado: Optional[
     pedido = pedido_repo.obter_por_id_com_detalhes(id)
 
     if not pedido:
-        informar_erro(request, "Pedido nao encontrado.")
+        informar_erro(request, "Pedido não encontrado.")
         return RedirectResponse(url="/vendedor/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se e o vendedor do anuncio
+    # Verificar se é o vendedor do anúncio
     if not hasattr(pedido, 'id_vendedor') or pedido.id_vendedor != usuario_logado.id:
-        informar_erro(request, "Voce nao tem permissao para enviar este pedido.")
+        informar_erro(request, "Você não tem permissão para enviar este pedido.")
         return RedirectResponse(url="/vendedor/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar se o status permite envio
     if pedido.status != StatusPedido.PAGO.value:
-        informar_erro(request, "O pedido so pode ser enviado apos o pagamento.")
+        informar_erro(request, "O pedido só pode ser enviado após o pagamento.")
         return RedirectResponse(url=f"/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER)
 
     return templates_pedido.TemplateResponse(
@@ -181,17 +181,17 @@ async def post_enviar_pedido(
     pedido = pedido_repo.obter_por_id_com_detalhes(id)
 
     if not pedido:
-        informar_erro(request, "Pedido nao encontrado.")
+        informar_erro(request, "Pedido não encontrado.")
         return RedirectResponse(url="/vendedor/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se e o vendedor do anuncio
+    # Verificar se é o vendedor do anúncio
     if not hasattr(pedido, 'id_vendedor') or pedido.id_vendedor != usuario_logado.id:
-        informar_erro(request, "Voce nao tem permissao para enviar este pedido.")
+        informar_erro(request, "Você não tem permissão para enviar este pedido.")
         return RedirectResponse(url="/vendedor/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar se o status permite envio
     if pedido.status != StatusPedido.PAGO.value:
-        informar_erro(request, "O pedido so pode ser enviado apos o pagamento.")
+        informar_erro(request, "O pedido só pode ser enviado após o pagamento.")
         return RedirectResponse(url=f"/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER)
 
     if pedido_repo.marcar_como_enviado(id, codigo_rastreio or ""):

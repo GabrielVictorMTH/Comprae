@@ -1,5 +1,5 @@
 from typing import Optional
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Form, Request, status
 from fastapi.responses import RedirectResponse
 
 from repo import pedido_repo, anuncio_repo, endereco_repo, usuario_repo
@@ -86,7 +86,12 @@ async def detalhes(request: Request, id: int, usuario_logado: Optional[dict] = N
 
 @router.post("/cancelar/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def cancelar(request: Request, id: int, usuario_logado: Optional[dict] = None):
+async def cancelar(
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[dict] = None,
+):
     """Cancela um pedido (admin override)"""
     assert usuario_logado is not None
 

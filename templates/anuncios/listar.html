@@ -32,7 +32,7 @@
                             <i class="bi bi-search me-1 text-primary"></i>Buscar
                         </label>
                         <input type="text" class="form-control form-control-lg" id="busca" name="busca"
-                               placeholder="O que voce procura?" value="{{ busca }}">
+                               placeholder="O que você procura?" value="{{ busca }}">
                     </div>
                     <div class="col-md-4">
                         <label for="categoria" class="form-label fw-semibold">
@@ -82,9 +82,9 @@
         <p class="text-muted mb-0">
             {% if total_anuncios > 0 %}
             <i class="bi bi-grid me-1"></i>
-            Mostrando <strong>{{ anuncios|length }}</strong> de <strong>{{ total_anuncios }}</strong> anuncio{% if total_anuncios != 1 %}s{% endif %}
+            Mostrando <strong>{{ anuncios|length }}</strong> de <strong>{{ total_anuncios }}</strong> anúncio{% if total_anuncios != 1 %}s{% endif %}
             {% else %}
-            Nenhum anuncio encontrado
+            Nenhum anúncio encontrado
             {% endif %}
         </p>
     </div>
@@ -156,17 +156,17 @@
             <div class="animate-float mb-4">
                 <i class="bi bi-box-seam" style="font-size: 5rem; color: #667eea; opacity: 0.5;"></i>
             </div>
-            <h4 class="fw-bold mb-2">Nenhum anuncio encontrado</h4>
+            <h4 class="fw-bold mb-2">Nenhum anúncio encontrado</h4>
             <p class="text-muted mb-4">
                 {% if busca or categoria_selecionada %}
                 Tente ajustar os filtros de busca para encontrar o que procura.
                 {% else %}
-                Ainda nao ha anuncios cadastrados na plataforma.
+                Ainda não há anúncios cadastrados na plataforma.
                 {% endif %}
             </p>
             {% if busca or categoria_selecionada %}
             <a href="/anuncios" class="btn btn-gradient-primary px-4">
-                <i class="bi bi-arrow-counterclockwise me-2"></i>Ver todos os anuncios
+                <i class="bi bi-arrow-counterclockwise me-2"></i>Ver todos os anúncios
             </a>
             {% else %}
             <a href="/cadastrar" class="btn btn-gradient-primary px-4">

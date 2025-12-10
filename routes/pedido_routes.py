@@ -63,7 +63,7 @@ async def detalhes_pedido(request: Request, id: int, usuario_logado: Optional[Us
     pedido = pedido_repo.obter_por_id_com_detalhes(id)
 
     if not pedido:
-        informar_erro(request, "Pedido nao encontrado.")
+        informar_erro(request, "Pedido não encontrado.")
         return RedirectResponse(url="/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar se o usuario tem permissao (comprador ou vendedor do anuncio)
@@ -71,7 +71,7 @@ async def detalhes_pedido(request: Request, id: int, usuario_logado: Optional[Us
     is_vendedor = hasattr(pedido, 'id_vendedor') and pedido.id_vendedor == usuario_logado.id
 
     if not is_comprador and not is_vendedor:
-        informar_erro(request, "Voce nao tem permissao para ver este pedido.")
+        informar_erro(request, "Você não tem permissão para ver este pedido.")
         return RedirectResponse(url="/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
     return templates_pedido.TemplateResponse(
@@ -101,23 +101,23 @@ async def get_criar_pedido(
     # Buscar anuncio
     anuncio_obj = anuncio_repo.obter_por_id_com_detalhes(anuncio)
     if not anuncio_obj:
-        informar_erro(request, "Anuncio nao encontrado.")
+        informar_erro(request, "Anúncio não encontrado.")
         return RedirectResponse(url="/anuncios", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se nao e o proprio vendedor
+    # Verificar se não é o próprio vendedor
     if anuncio_obj.id_vendedor == usuario_logado.id:
-        informar_erro(request, "Voce nao pode comprar seu proprio anuncio.")
+        informar_erro(request, "Você não pode comprar seu próprio anúncio.")
         return RedirectResponse(url=f"/anuncios/{anuncio}", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se anuncio esta disponivel
+    # Verificar se anúncio está disponível
     if not anuncio_obj.ativo or anuncio_obj.estoque <= 0:
-        informar_erro(request, "Este anuncio nao esta mais disponivel.")
+        informar_erro(request, "Este anúncio não está mais disponível.")
         return RedirectResponse(url="/anuncios", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar se usuario tem endereco
     endereco = endereco_repo.obter_endereco_usuario(usuario_logado.id)
     if not endereco:
-        informar_erro(request, "Voce precisa cadastrar um endereco antes de fazer um pedido.")
+        informar_erro(request, "Você precisa cadastrar um endereço antes de fazer um pedido.")
         return RedirectResponse(url="/usuario/endereco/cadastrar", status_code=status.HTTP_303_SEE_OTHER)
 
     return templates_pedido.TemplateResponse(
@@ -145,18 +145,18 @@ async def post_criar_pedido(
     # Buscar anuncio
     anuncio = anuncio_repo.obter_por_id(id_anuncio)
     if not anuncio:
-        informar_erro(request, "Anuncio nao encontrado.")
+        informar_erro(request, "Anúncio não encontrado.")
         return RedirectResponse(url="/anuncios", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar se nao e o proprio vendedor
     if anuncio.id_vendedor == usuario_logado.id:
-        informar_erro(request, "Voce nao pode comprar seu proprio anuncio.")
+        informar_erro(request, "Você não pode comprar seu próprio anúncio.")
         return RedirectResponse(url=f"/anuncios/{id_anuncio}", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar se usuario tem endereco
     endereco = endereco_repo.obter_endereco_usuario(usuario_logado.id)
     if not endereco:
-        informar_erro(request, "Voce precisa cadastrar um endereco antes de fazer um pedido.")
+        informar_erro(request, "Você precisa cadastrar um endereço antes de fazer um pedido.")
         return RedirectResponse(url="/usuario/endereco/cadastrar", status_code=status.HTTP_303_SEE_OTHER)
 
     # Criar pedido com status Negociando
@@ -167,8 +167,8 @@ async def post_criar_pedido(
     )
 
     if pedido_id:
-        logger.info(f"Pedido criado ID: {pedido_id} - Comprador: {usuario_logado.id} - Anuncio: {id_anuncio}")
-        informar_sucesso(request, "Pedido criado! Aguarde o vendedor definir o preco final.")
+        logger.info(f"Pedido criado ID: {pedido_id} - Comprador: {usuario_logado.id} - Anúncio: {id_anuncio}")
+        informar_sucesso(request, "Pedido criado! Aguarde o vendedor definir o preço final.")
         return RedirectResponse(url=f"/pedidos/detalhes/{pedido_id}", status_code=status.HTTP_303_SEE_OTHER)
     else:
         informar_erro(request, "Erro ao criar pedido. Tente novamente.")
@@ -177,7 +177,12 @@ async def post_criar_pedido(
 
 @router.post("/pagar/{id}")
 @requer_autenticacao()
-async def post_pagar_pedido(request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None):
+async def post_pagar_pedido(
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
+):
     """Simula pagamento do pedido"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -185,17 +190,17 @@ async def post_pagar_pedido(request: Request, id: int, usuario_logado: Optional[
     pedido = pedido_repo.obter_por_id(id)
 
     if not pedido:
-        informar_erro(request, "Pedido nao encontrado.")
+        informar_erro(request, "Pedido não encontrado.")
         return RedirectResponse(url="/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se e o comprador
+    # Verificar se é o comprador
     if pedido.id_comprador != usuario_logado.id:
-        informar_erro(request, "Voce nao tem permissao para pagar este pedido.")
+        informar_erro(request, "Você não tem permissão para pagar este pedido.")
         return RedirectResponse(url="/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar se o status permite pagamento
     if pedido.status != StatusPedido.PENDENTE.value:
-        informar_erro(request, "Este pedido nao pode ser pago no status atual.")
+        informar_erro(request, "Este pedido não pode ser pago no status atual.")
         return RedirectResponse(url=f"/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER)
 
     if pedido_repo.marcar_como_pago(id):
@@ -209,7 +214,12 @@ async def post_pagar_pedido(request: Request, id: int, usuario_logado: Optional[
 
 @router.post("/cancelar/{id}")
 @requer_autenticacao()
-async def post_cancelar_pedido(request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None):
+async def post_cancelar_pedido(
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
+):
     """Cancela um pedido (se permitido pelo status)"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -217,20 +227,20 @@ async def post_cancelar_pedido(request: Request, id: int, usuario_logado: Option
     pedido = pedido_repo.obter_por_id_com_detalhes(id)
 
     if not pedido:
-        informar_erro(request, "Pedido nao encontrado.")
+        informar_erro(request, "Pedido não encontrado.")
         return RedirectResponse(url="/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se usuario tem permissao (comprador ou vendedor)
+    # Verificar se usuário tem permissão (comprador ou vendedor)
     is_comprador = pedido.id_comprador == usuario_logado.id
     is_vendedor = hasattr(pedido, 'id_vendedor') and pedido.id_vendedor == usuario_logado.id
 
     if not is_comprador and not is_vendedor:
-        informar_erro(request, "Voce nao tem permissao para cancelar este pedido.")
+        informar_erro(request, "Você não tem permissão para cancelar este pedido.")
         return RedirectResponse(url="/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
     # Verificar se pode cancelar
     if not StatusPedido.pode_cancelar(pedido.status):
-        informar_erro(request, "Este pedido nao pode mais ser cancelado.")
+        informar_erro(request, "Este pedido não pode mais ser cancelado.")
         return RedirectResponse(url=f"/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER)
 
     if pedido_repo.cancelar(id):
@@ -244,7 +254,12 @@ async def post_cancelar_pedido(request: Request, id: int, usuario_logado: Option
 
 @router.post("/confirmar-entrega/{id}")
 @requer_autenticacao()
-async def post_confirmar_entrega(request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None):
+async def post_confirmar_entrega(
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
+):
     """Confirma recebimento do pedido (comprador)"""
     if not usuario_logado:
         return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
@@ -252,17 +267,17 @@ async def post_confirmar_entrega(request: Request, id: int, usuario_logado: Opti
     pedido = pedido_repo.obter_por_id(id)
 
     if not pedido:
-        informar_erro(request, "Pedido nao encontrado.")
+        informar_erro(request, "Pedido não encontrado.")
         return RedirectResponse(url="/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se e o comprador
+    # Verificar se é o comprador
     if pedido.id_comprador != usuario_logado.id:
-        informar_erro(request, "Voce nao tem permissao para confirmar este pedido.")
+        informar_erro(request, "Você não tem permissão para confirmar este pedido.")
         return RedirectResponse(url="/pedidos", status_code=status.HTTP_303_SEE_OTHER)
 
-    # Verificar se o status permite confirmacao
+    # Verificar se o status permite confirmação
     if pedido.status != StatusPedido.ENVIADO.value:
-        informar_erro(request, "Este pedido ainda nao foi enviado.")
+        informar_erro(request, "Este pedido ainda não foi enviado.")
         return RedirectResponse(url=f"/pedidos/detalhes/{id}", status_code=status.HTTP_303_SEE_OTHER)
 
     if pedido_repo.marcar_como_entregue(id):

@@ -305,7 +305,10 @@ async def post_editar_anuncio(
 @router.post("/excluir/{id}")
 @requer_autenticacao(perfis_permitidos=[Perfil.VENDEDOR.value])
 async def post_excluir_anuncio(
-    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Excluir anúncio"""
     if not usuario_logado:
@@ -345,7 +348,10 @@ async def post_excluir_anuncio(
 @router.post("/ativar/{id}")
 @requer_autenticacao(perfis_permitidos=[Perfil.VENDEDOR.value])
 async def post_toggle_ativo(
-    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Toggle ativo/inativo do anúncio"""
     if not usuario_logado:

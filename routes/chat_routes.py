@@ -440,7 +440,10 @@ async def enviar_mensagem(
 @router.post("/mensagens/lidas/{sala_id}")
 @requer_autenticacao()
 async def marcar_como_lidas(
-    request: Request, sala_id: str, usuario_logado: Optional[UsuarioLogado] = None
+    request: Request,
+    sala_id: str,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """
     Marca todas as mensagens de uma sala como lidas para o usuário logado.
@@ -523,7 +526,7 @@ async def buscar_usuarios(
     return JSONResponse(status_code=status.HTTP_200_OK, content=usuarios_json)
 
 
-@router.get("/mensagens/nao-lidas/total")
+@router.get("/mensagens/não-lidas/total")
 @requer_autenticacao()
 async def contar_nao_lidas_total(
     request: Request, usuario_logado: Optional[UsuarioLogado] = None

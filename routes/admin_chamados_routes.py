@@ -208,7 +208,10 @@ async def post_responder(
 @router.post("/{id}/fechar")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def fechar(
-    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Fecha um chamado alterando apenas o status, sem adicionar mensagem."""
     if not usuario_logado:
@@ -242,7 +245,10 @@ async def fechar(
 @router.post("/{id}/reabrir")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def reabrir(
-    request: Request, id: int, usuario_logado: Optional[UsuarioLogado] = None
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[UsuarioLogado] = None,
 ):
     """Reabre um chamado fechado, alterando status para 'Em Análise'."""
     if not usuario_logado:

@@ -40,7 +40,7 @@ class ValidadorSenha {
             : null;
 
         if (!this.passwordField) {
-            console.error(`Campo de senha com ID "${this.config.passwordFieldId}" nao encontrado`);
+            console.error(`Campo de senha com ID "${this.config.passwordFieldId}" não encontrado`);
             return;
         }
 
@@ -104,7 +104,7 @@ class ValidadorSenha {
             text = 'Forte';
         } else if (strength >= 60) {
             color = 'info';
-            text = 'Media';
+            text = 'Média';
         } else if (strength >= 40) {
             color = 'warning';
             text = 'Fraca';
@@ -206,14 +206,14 @@ class ValidadorSenha {
             this.matchMessage.appendChild(span);
             return true;
         } else {
-            // Senhas nao coincidem - feedback negativo
+            // Senhas não coincidem - feedback negativo
             span.className = 'text-danger';
 
             const icon = document.createElement('i');
             icon.className = 'bi bi-x-circle';
             span.appendChild(icon);
 
-            span.appendChild(document.createTextNode(' As senhas nao coincidem'));
+            span.appendChild(document.createTextNode(' As senhas não coincidem'));
             this.matchMessage.appendChild(span);
             return false;
         }
@@ -253,8 +253,8 @@ class ValidadorSenha {
     }
 
     /**
-     * Retorna se as senhas coincidem (para uso programatico)
-     * @returns {boolean} True se senhas coincidem ou nao ha confirmacao
+     * Retorna se as senhas coincidem (para uso programático)
+     * @returns {boolean} True se senhas coincidem ou não há confirmação
      */
     senhasCoincidentes() {
         if (!this.confirmPasswordField) return true;
@@ -275,7 +275,7 @@ function alternarVisibilidadeSenha(fieldId) {
     const icon = document.getElementById('icon_' + fieldId);
 
     if (!field) {
-        console.error(`Campo com ID "${fieldId}" nao encontrado`);
+        console.error(`Campo com ID "${fieldId}" não encontrado`);
         return;
     }
 

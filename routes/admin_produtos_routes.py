@@ -62,7 +62,12 @@ async def moderar(request: Request, usuario_logado: Optional[dict] = None):
 
 @router.post("/aprovar/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
-async def aprovar(request: Request, id: int, usuario_logado: Optional[dict] = None):
+async def aprovar(
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[dict] = None,
+):
     """Aprova um produto (torna ativo)"""
     assert usuario_logado is not None
 
@@ -277,7 +282,10 @@ async def post_editar(
 @router.post("/excluir/{id}")
 @requer_autenticacao([Perfil.ADMIN.value])
 async def post_excluir(
-    request: Request, id: int, usuario_logado: Optional[dict] = None
+    request: Request,
+    id: int,
+    csrf_token: str = Form(default=""),
+    usuario_logado: Optional[dict] = None,
 ):
     """Exclui um produto"""
     assert usuario_logado is not None

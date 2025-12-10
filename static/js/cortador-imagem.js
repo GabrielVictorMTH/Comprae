@@ -54,7 +54,7 @@ function prepararImagemParaModal(modalId, file, maxFileSizeMB = 5) {
             cropperImage.src = event.target.result;
 
             // Pre-calcular e aplicar altura ideal ANTES do modal abrir
-            // Usar estimativa baseada em viewport ja que o modal ainda nao esta visivel
+            // Usar estimativa baseada em viewport já que o modal ainda não está visível
             const viewportHeight = window.innerHeight;
             const estimatedHeight = Math.max(200, Math.min(600, viewportHeight * 0.5));
             cropperImageArea.style.height = `${estimatedHeight}px`;
@@ -86,7 +86,7 @@ function inicializarCortadorNoModal(modalId, aspectRatio = 1.0, onReady = null) 
     const previewImage = document.getElementById(`preview-${modalId}`);
 
     if (!cropperImage || !cropperImage.src) {
-        console.error(`Imagem nao preparada para o modal ${modalId}`);
+        console.error(`Imagem não preparada para o modal ${modalId}`);
         return;
     }
 
@@ -148,7 +148,7 @@ function carregarImagemDeArquivo(modalId, file, aspectRatio = 1.0, maxFileSizeMB
     const maxBytes = maxFileSizeMB * 1024 * 1024;
     if (file.size > maxBytes) {
         window.App.Modal.showError(
-            `O arquivo selecionado e muito grande. Tamanho maximo permitido: ${maxFileSizeMB}MB.`,
+            `O arquivo selecionado é muito grande. Tamanho máximo permitido: ${maxFileSizeMB}MB.`,
             'Arquivo Muito Grande'
         );
         return;
@@ -157,8 +157,8 @@ function carregarImagemDeArquivo(modalId, file, aspectRatio = 1.0, maxFileSizeMB
     // Validar tipo
     if (!file.type.startsWith('image/')) {
         window.App.Modal.showError(
-            'Por favor, selecione um arquivo de imagem valido (JPG, PNG, GIF, etc.).',
-            'Tipo de Arquivo Invalido'
+            'Por favor, selecione um arquivo de imagem válido (JPG, PNG, GIF, etc.).',
+            'Tipo de Arquivo Inválido'
         );
         return;
     }
@@ -227,7 +227,7 @@ function inicializarCortadorImagem(modalId, aspectRatio = 1.0, maxFileSizeMB = 5
     const form = document.getElementById(`form-${modalId}`);
 
     if (!cropperContainer || !cropperImage) {
-        console.error(`Elementos do modal ${modalId} nao encontrados`);
+        console.error(`Elementos do modal ${modalId} não encontrados`);
         return;
     }
 
@@ -292,8 +292,8 @@ function calcularAlturaImagemCortador(modalId) {
     const controlsArea = document.getElementById(`cropper-controls-area-${modalId}`);
 
     if (!modalElement || !modalHeader || !modalBody || !controlsArea) {
-        console.warn(`Elementos do modal ${modalId} nao encontrados para calculo de altura`);
-        return 300; // Valor padrao de fallback
+        console.warn(`Elementos do modal ${modalId} não encontrados para cálculo de altura`);
+        return 300; // Valor padrão de fallback
     }
 
     // Medir alturas reais
