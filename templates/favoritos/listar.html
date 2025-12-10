@@ -1,0 +1,76 @@
+{% extends "base_privada.html" %}
+
+{% block titulo %}Meus Favoritos{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Cabecalho -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-heart-fill text-danger me-2"></i>
+                Meus Favoritos
+            </h2>
+            <p class="text-muted mb-0">
+                Voce tem {{ total }} anuncio{% if total != 1 %}s{% endif %} favoritado{% if total != 1 %}s{% endif %}
+            </p>
+        </div>
+        <a href="/anuncios" class="btn btn-outline-primary">
+            <i class="bi bi-search me-1"></i>Explorar anuncios
+        </a>
+    </div>
+
+    {% if favoritos %}
+    <!-- Grid de Favoritos -->
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for fav in favoritos %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <a href="/anuncios/{{ fav.id_anuncio }}">
+                    <img src="{{ fav.id_anuncio|foto_anuncio }}"
+                         class="card-img-top"
+                         alt="{{ fav.nome_anuncio }}"
+                         style="height: 180px; object-fit: cover;">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="/anuncios/{{ fav.id_anuncio }}" class="text-decoration-none text-dark">
+                            {{ fav.nome_anuncio }}
+                        </a>
+                    </h5>
+                    <p class="card-text text-muted small">
+                        {{ fav.descricao[:80] }}{% if fav.descricao|length > 80 %}...{% endif %}
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold text-primary fs-5">
+                            R$ {{ "%.2f"|format(fav.preco)|replace('.', ',') }}
+                        </span>
+                        <span class="badge bg-secondary">{{ fav.nome_categoria or 'Geral' }}</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-transparent">
+                    <small class="text-muted">
+                        <i class="bi bi-heart-fill text-danger me-1"></i>
+                        Favoritado em {{ fav.data_curtida|data_br }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Estado vazio -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="bi bi-heart display-1 text-muted"></i>
+        </div>
+        <h4 class="text-muted">Nenhum favorito ainda</h4>
+        <p class="text-muted">Explore os anuncios e clique no coracao para adicionar aos favoritos!</p>
+        <a href="/anuncios" class="btn btn-primary mt-3">
+            <i class="bi bi-search me-2"></i>Explorar anuncios
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

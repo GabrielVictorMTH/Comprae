@@ -3,6 +3,12 @@ from model.curtida_model import Curtida
 from sql.curtida_sql import *
 from util.db_util import obter_conexao
 
+from sql.curtida_sql import (
+    CRIAR_TABELA, INSERIR, EXCLUIR, OBTER_POR_ID,
+    OBTER_QUANTIDADE_POR_ANUNCIO, OBTER_TODOS,
+    OBTER_POR_USUARIO, CONTAR_POR_USUARIO
+)
+
 def criar_tabela() -> bool:
     with obter_conexao() as conn:
         cursor = conn.cursor()
@@ -53,3 +59,20 @@ def obter_todos() -> list[Curtida]:
             )
             for row in rows
         ]
+
+
+def obter_por_usuario(id_usuario: int) -> list[dict]:
+    """Retorna todos os anuncios curtidos por um usuario"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(OBTER_POR_USUARIO, (id_usuario,))
+        rows = cursor.fetchall()
+        return [dict(row) for row in rows]
+
+
+def contar_por_usuario(id_usuario: int) -> int:
+    """Conta quantos anuncios um usuario curtiu"""
+    with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(CONTAR_POR_USUARIO, (id_usuario,))
+        return cursor.fetchone()["quantidade"]

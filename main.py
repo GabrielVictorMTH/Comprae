@@ -45,6 +45,7 @@ from routes.usuario_routes import router as usuario_router
 from routes.chat_routes import router as chat_router
 from routes.public_routes import router as public_router
 from routes.examples_routes import router as examples_router
+from routes import favoritos_routes
 # Rotas específicas do Compraê
 from routes.admin_produtos_routes import router as admin_produtos_router
 from routes.admin_pedidos_routes import router as admin_pedidos_router
@@ -162,6 +163,8 @@ ROUTERS = [
 for router, tags, nome in ROUTERS:
     app.include_router(router, tags=tags)
     logger.info(f"Router de {nome} incluído")
+
+app.include_router(favoritos_routes.router)
 
 
 @app.get("/health")
