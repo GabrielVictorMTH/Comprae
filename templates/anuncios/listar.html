@@ -144,3 +144,15 @@
     {% endif %}
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+// Remove o campo categoria do formulário quando vazio para evitar erro 422
+document.querySelector('form[action="/anuncios"]').addEventListener('submit', function(e) {
+    const categoria = document.getElementById('categoria');
+    if (categoria.value === '') {
+        categoria.removeAttribute('name');
+    }
+});
+</script>
+{% endblock %}

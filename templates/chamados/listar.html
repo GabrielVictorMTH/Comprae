@@ -90,7 +90,7 @@
         confirmarExclusao({
             id: chamadoId,
             nome: `#${chamadoId}`,
-            urlBase: '/chamados',
+            urlExclusao: `/chamados/${chamadoId}/excluir`,
             entidade: 'chamado',
             camposDetalhes: {
                 'Titulo': escaparHtml(chamadoTitulo)
