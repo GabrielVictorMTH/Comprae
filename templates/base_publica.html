@@ -23,32 +23,39 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-    <!-- Navbar Pública -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!-- Navbar Pública - Animal Care Theme -->
+    <nav class="navbar navbar-expand-lg navbar-light" style="background: linear-gradient(135deg, rgba(230, 126, 74, 0.95) 0%, rgba(139, 115, 85, 0.95) 100%); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(230, 126, 74, 0.15);">
         <div class="container">
-            <a class="navbar-brand d-flex align-middle" href="/index">
-                <img src="/static/img/logo.svg" alt="Logo" height="30" class="d-inline-block align-text-top me-2"
-                    onerror="this.style.display='none'">
+            <a class="navbar-brand d-flex align-items-center fw-bold text-white" href="/index" style="font-size: 1.3rem;">
+                <span class="d-inline-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px;">
+                    <i class="bi bi-heart-fill" style="font-size: 1.3rem;"></i>
+                </span>
                 {{ APP_NAME }}
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" style="opacity: 0.8;">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if request.path == '/' or request.path == '/index' else '' }}"
-                            href="/">Inicio</a>
+                        <a class="nav-link text-white {{ 'active fw-bold' if request.path == '/' or request.path == '/index' else '' }}"
+                            href="/">
+                            <i class="bi bi-house-heart me-1"></i> Início
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if '/anuncios' in request.path else '' }}"
-                            href="/anuncios">Anuncios</a>
+                        <a class="nav-link text-white {{ 'active fw-bold' if '/anuncios' in request.path else '' }}"
+                            href="/anuncios">
+                            <i class="bi bi-tag-heart me-1"></i> Anúncios
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if request.path == '/sobre' else '' }}"
-                            href="/sobre">Sobre</a>
+                        <a class="nav-link text-white {{ 'active fw-bold' if request.path == '/sobre' else '' }}"
+                            href="/sobre">
+                            <i class="bi bi-info-circle me-1"></i> Sobre
+                        </a>
                     </li>
                 </ul>
 
@@ -58,13 +65,17 @@
                     {% include 'components/navbar_user_dropdown.html' %}
                     {% else %}
                     <!-- Botões de Login e Cadastro -->
-                    <li class="nav-item">
-                        <a class="nav-link {{ 'active' if request.path == '/login' else '' }}"
-                            href="/login">Login</a>
+                    <li class="nav-item me-2">
+                        <a class="nav-link text-white {{ 'active fw-bold' if request.path == '/login' else '' }}"
+                            href="/login">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {{ 'active' if request.path == '/cadastrar' else '' }}"
-                            href="/cadastrar">Cadastrar</a>
+                        <a class="nav-link btn btn-light text-white px-3 fw-600" style="background: rgba(255,255,255,0.25) !important; border-radius: 20px;"
+                            href="/cadastrar">
+                            <i class="bi bi-person-plus me-1"></i> Cadastrar
+                        </a>
                     </li>
                     {% endif %}
                 </ul>
@@ -91,10 +102,32 @@
     <!-- Modal de Alerta (componente genérico) -->
     {% include 'components/modal_alerta.html' %}
 
-    <!-- Footer -->
-    <footer class="bg-light text-center text-muted py-3 mt-auto">
-        <div class="container">
-            <p class="mb-0">&copy; 2025 {{ APP_NAME }}. Todos os direitos reservados.</p>
+    <!-- Footer - Animal Care Theme -->
+    <footer class="mt-auto" style="background: linear-gradient(135deg, #f5f1eb 0%, #faf8f5 100%); border-top: 1px solid rgba(230, 126, 74, 0.1);">
+        <div class="container py-4">
+            <div class="row mb-3">
+                <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
+                    <h6 class="fw-bold mb-2" style="color: #E67E4A;">
+                        <i class="bi bi-heart-fill me-2"></i> {{ APP_NAME }}
+                    </h6>
+                    <p class="small text-muted">Cuidando de quem você ama</p>
+                </div>
+                <div class="col-md-4 text-center mb-3 mb-md-0">
+                    <div class="small text-muted">
+                        <a href="/sobre" class="text-decoration-none text-muted me-3" style="color: #E67E4A !important;">Sobre</a>
+                        <a href="/" class="text-decoration-none text-muted" style="color: #E67E4A !important;">Contato</a>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center text-md-end">
+                    <div class="small text-muted">
+                        <a href="#" class="text-decoration-none text-muted me-2" style="color: #E67E4A !important;"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-decoration-none text-muted me-2" style="color: #E67E4A !important;"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-decoration-none text-muted" style="color: #E67E4A !important;"><i class="bi bi-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-2" style="border-color: rgba(230, 126, 74, 0.1);">
+            <p class="mb-0 text-center small text-muted">&copy; 2025 {{ APP_NAME }}. Todos os direitos reservados. | <a href="#" class="text-decoration-none text-muted" style="color: #E67E4A !important;">Política de Privacidade</a></p>
         </div>
     </footer>
 

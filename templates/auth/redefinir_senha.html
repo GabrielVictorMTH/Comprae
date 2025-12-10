@@ -4,21 +4,26 @@
 {% block titulo %}Redefinir Senha{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-fill justify-content-center">
+<div class="d-flex flex-column flex-fill justify-content-center py-5">
     <div class="row align-items-center justify-content-center">
         <div class="col-12 col-md-6 col-lg-5">
-            <div class="card shadow">
+            <!-- Header com icone -->
+            <div class="text-center mb-5">
+                <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(107, 163, 68, 0.2) 0%, rgba(143, 188, 79, 0.2) 100%); border-radius: 20px;">
+                    <i class="bi bi-shield-check" style="font-size: 2.5rem; color: #6BA344;"></i>
+                </div>
+                <h2 class="fw-bold" style="color: #3D3D3D;">Redefinir Senha</h2>
+                <p class="text-muted">Escolha uma nova senha segura</p>
+            </div>
+
+            <div class="card auth-card" style="border: 1px solid rgba(230, 126, 74, 0.1);">
                 <form method="POST" action="/redefinir-senha">
                     {{ csrf_input() }}
                     <div class="card-body p-4">
-                        <h3 class="card-title text-center mb-4">
-                            <i class="bi bi-shield-lock"></i> Redefinir Senha
-                        </h3>
-
                         <div class="row">
-                            <div class="col-12">
-                                <p class="text-muted text-center mb-4">
-                                    Digite sua nova senha abaixo.
+                            <div class="col-12 mb-4">
+                                <p class="text-muted text-center mb-0" style="font-size: 0.95rem;">
+                                    Digite uma nova senha segura e confirme para proteger sua conta.
                                 </p>
                             </div>
 
@@ -31,40 +36,52 @@
                             </div>
 
                             <div class="col-12 mb-3">
-                                {{ field(name='senha', label='Nova Senha', type='password', required=true,
+                                <label for="senha" class="form-label fw-semibold" style="color: #3D3D3D;">
+                                    <i class="bi bi-lock me-2" style="color: #E67E4A;"></i>Nova Senha
+                                </label>
+                                {{ field(name='senha', label='', type='password', required=true,
                                 autofocus=true,
+                                placeholder='Crie uma senha forte',
                                 attributes={'minlength': 8}) }}
                             </div>
 
                             <div class="col-12 mb-1">
-                                {{ field(name='confirmar_senha', label='Confirmar Nova Senha', type='password',
+                                <label for="confirmar_senha" class="form-label fw-semibold" style="color: #3D3D3D;">
+                                    <i class="bi bi-lock-fill me-2" style="color: #E67E4A;"></i>Confirmar Nova Senha
+                                </label>
+                                {{ field(name='confirmar_senha', label='', type='password',
                                 required=true,
+                                placeholder='Repita a nova senha',
                                 attributes={'minlength': 8}) }}
                             </div>
 
                             <!-- Indicador de força da senha -->
-                            <div class="mb-0">
+                            <div class="col-12 mb-0">
                                 {% set show_special = true %}
                                 {% include 'components/indicador_senha.html' %}
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer p-4">
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-shield-lock"></i> Redefinir Senha
+                    <div class="card-footer bg-transparent border-0 p-4">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-gradient-success btn-lg fw-semibold">
+                                <i class="bi bi-shield-check me-2"></i> Confirmar Nova Senha
                             </button>
-                        </div>
 
-                        <hr class="my-4">
-
-                        <p class="text-center mb-0">
-                            <a href="/login" class="text-decoration-none">
-                                <i class="bi bi-arrow-left"></i> Voltar ao Login
+                            <a href="/login" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i> Voltar ao Login
                             </a>
-                        </p>
+                        </div>
                     </div>
                 </form>
+            </div>
+
+            <!-- Info de segurança -->
+            <div style="margin-top: 2rem; padding: 1rem; background: rgba(107, 163, 68, 0.08); border: 1px solid rgba(107, 163, 68, 0.2); border-radius: 0.75rem; text-align: center;">
+                <p class="small text-muted mb-0">
+                    <i class="bi bi-check-circle me-1" style="color: #6BA344;"></i>
+                    Sua nova senha será aplicada imediatamente
+                </p>
             </div>
         </div>
     </div>

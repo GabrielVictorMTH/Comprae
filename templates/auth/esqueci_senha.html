@@ -4,22 +4,26 @@
 {% block titulo %}Recuperar Senha{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-fill justify-content-center">
+<div class="d-flex flex-column flex-fill justify-content-center py-5">
     <div class="row align-items-center justify-content-center">
         <div class="col-12 col-md-6 col-lg-5">
-            <div class="card shadow">
+            <!-- Header com icone -->
+            <div class="text-center mb-5">
+                <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(245, 169, 66, 0.2) 0%, rgba(212, 165, 116, 0.2) 100%); border-radius: 20px;">
+                    <i class="bi bi-key-fill" style="font-size: 2.5rem; color: #F5A942;"></i>
+                </div>
+                <h2 class="fw-bold" style="color: #3D3D3D;">Recuperar Senha</h2>
+                <p class="text-muted">Não se preocupe, ajudamos você a recuperar o acesso</p>
+            </div>
+
+            <div class="card auth-card" style="border: 1px solid rgba(230, 126, 74, 0.1);">
                 <form method="POST" action="/esqueci-senha">
                     {{ csrf_input() }}
                     <div class="card-body p-4">
-                        <h3 class="card-title text-center mb-4">
-                            <i class="bi bi-key"></i> Recuperar Senha
-                        </h3>
-
                         <div class="row">
-                            <div class="col-12 mb-3">
-                                <p class="text-muted text-center mb-0">
-                                    Não se preocupe! Basta informar seu e-mail cadastrado e enviaremos um link para
-                                    redefinição de senha.
+                            <div class="col-12 mb-4">
+                                <p class="text-muted text-center mb-0" style="font-size: 0.95rem;">
+                                    Informe seu e-mail cadastrado e enviaremos um link seguro para redefinição de senha.
                                 </p>
                             </div>
 
@@ -28,24 +32,33 @@
                             </div>
 
                             <div class="col-12">
-                                {{ field(name='email', label='E-mail', type='email', required=true, autofocus=true) }}
+                                <label for="email" class="form-label fw-semibold" style="color: #3D3D3D;">
+                                    <i class="bi bi-envelope me-2" style="color: #E67E4A;"></i>E-mail
+                                </label>
+                                {{ field(name='email', label='', type='email', required=true, autofocus=true, placeholder='seu@email.com') }}
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer p-4">
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-envelope"></i> Enviar Link de Recuperação
+                    <div class="card-footer bg-transparent border-0 p-4">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-gradient-primary btn-lg fw-semibold">
+                                <i class="bi bi-envelope me-2"></i> Enviar Link
                             </button>
 
-                            <hr class="my-4">
-
                             <a href="/login" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left"></i> Voltar ao Login
+                                <i class="bi bi-arrow-left me-2"></i> Voltar ao Login
                             </a>
                         </div>
                     </div>
                 </form>
+            </div>
+
+            <!-- Info de segurança -->
+            <div style="margin-top: 2rem; padding: 1rem; background: rgba(245, 169, 66, 0.08); border: 1px solid rgba(245, 169, 66, 0.2); border-radius: 0.75rem; text-align: center;">
+                <p class="small text-muted mb-0">
+                    <i class="bi bi-info-circle me-1" style="color: #F5A942;"></i>
+                    O link de recuperação expira em 24 horas por segurança
+                </p>
             </div>
         </div>
     </div>

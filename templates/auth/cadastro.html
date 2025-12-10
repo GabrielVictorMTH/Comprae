@@ -4,19 +4,19 @@
 {% block titulo %}Cadastro{% endblock %}
 
 {% block content %}
-<div class="d-flex flex-column flex-fill justify-content-center py-4">
+<div class="d-flex flex-column flex-fill justify-content-center py-5">
     <div class="row align-items-center justify-content-center">
         <div class="col-12 col-md-10 col-lg-8 col-xl-6">
             <!-- Header com icone -->
-            <div class="text-center mb-4">
-                <div class="feature-icon feature-icon-success mx-auto mb-3" style="width: 70px; height: 70px;">
-                    <i class="bi bi-person-plus"></i>
+            <div class="text-center mb-5">
+                <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(107, 163, 68, 0.2) 0%, rgba(143, 188, 79, 0.2) 100%); border-radius: 20px;">
+                    <i class="bi bi-person-check" style="font-size: 2.5rem; color: #6BA344;"></i>
                 </div>
-                <h2 class="fw-bold">Criar sua conta</h2>
-                <p class="text-muted">Junte-se a nossa comunidade de compradores e vendedores</p>
+                <h2 class="fw-bold" style="color: #3D3D3D;">Junte-se à comunidade!</h2>
+                <p class="text-muted">Crie sua conta e comece a cuidar melhor dos seus animais</p>
             </div>
 
-            <div class="card auth-card">
+            <div class="card auth-card" style="border: 1px solid rgba(230, 126, 74, 0.1);">
                 <form method="POST" action="/cadastrar">
                     {{ csrf_input() }}
                     <div class="card-body p-4">
@@ -27,49 +27,49 @@
 
                             <!-- Selecao de perfil -->
                             <div class="col-12 mb-4">
-                                <label class="form-label fw-semibold mb-3">
-                                    <i class="bi bi-person-badge me-1 text-primary"></i>Eu quero...
+                                <label class="form-label fw-semibold mb-3" style="color: #3D3D3D;">
+                                    <i class="bi bi-question-circle me-2" style="color: #E67E4A;"></i>Qual é seu interesse?
                                 </label>
                                 <div class="row g-3">
                                     <div class="col-6">
                                         <input type="radio" class="btn-check" name="perfil" id="perfil-comprador" value="Comprador" autocomplete="off"
                                             {% if dados.get('perfil') == 'Comprador' or not dados.get('perfil') %}checked{% endif %}>
-                                        <label class="btn btn-outline-primary w-100 py-3 d-flex flex-column align-items-center" for="perfil-comprador">
-                                            <i class="bi bi-cart3 fs-2 mb-2"></i>
-                                            <span class="fw-semibold">Comprar</span>
-                                            <small class="text-muted">Encontrar produtos</small>
+                                        <label class="btn w-100 py-3 d-flex flex-column align-items-center" style="border: 2px solid rgba(107, 163, 68, 0.3); background: rgba(107, 163, 68, 0.05); color: #6BA344; transition: all 0.3s;" for="perfil-comprador">
+                                            <i class="bi bi-bag-heart fs-2 mb-2"></i>
+                                            <span class="fw-semibold">Comprador</span>
+                                            <small class="text-muted" style="color: #666 !important;">Encontrar itens</small>
                                         </label>
                                     </div>
                                     <div class="col-6">
                                         <input type="radio" class="btn-check" name="perfil" id="perfil-vendedor" value="Vendedor" autocomplete="off"
                                             {% if dados.get('perfil') == 'Vendedor' %}checked{% endif %}>
-                                        <label class="btn btn-outline-success w-100 py-3 d-flex flex-column align-items-center" for="perfil-vendedor">
-                                            <i class="bi bi-shop fs-2 mb-2"></i>
-                                            <span class="fw-semibold">Vender</span>
-                                            <small class="text-muted">Anunciar produtos</small>
+                                        <label class="btn w-100 py-3 d-flex flex-column align-items-center" style="border: 2px solid rgba(230, 126, 74, 0.3); background: rgba(230, 126, 74, 0.05); color: #E67E4A; transition: all 0.3s;" for="perfil-vendedor">
+                                            <i class="bi bi-shop-window fs-2 mb-2"></i>
+                                            <span class="fw-semibold">Vendedor</span>
+                                            <small class="text-muted" style="color: #666 !important;">Vender produtos</small>
                                         </label>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="col-12 mb-3">
-                                <label for="nome" class="form-label fw-semibold">
-                                    <i class="bi bi-person me-1 text-primary"></i>Nome Completo
+                                <label for="nome" class="form-label fw-semibold" style="color: #3D3D3D;">
+                                    <i class="bi bi-person me-2" style="color: #E67E4A;"></i>Nome Completo
                                 </label>
                                 {{ field(name='nome', type='text', required=true, placeholder='Seu nome completo',
                                 attributes={'minlength': 3, 'maxlength': 100}) }}
                             </div>
 
                             <div class="col-12 mb-3">
-                                <label for="email" class="form-label fw-semibold">
-                                    <i class="bi bi-envelope me-1 text-primary"></i>E-mail
+                                <label for="email" class="form-label fw-semibold" style="color: #3D3D3D;">
+                                    <i class="bi bi-envelope me-2" style="color: #E67E4A;"></i>E-mail
                                 </label>
                                 {{ field(name='email', type='email', required=true, placeholder='seu@email.com') }}
                             </div>
 
                             <div class="col-12 col-lg-6 mb-3">
-                                <label for="senha" class="form-label fw-semibold">
-                                    <i class="bi bi-lock me-1 text-primary"></i>Senha
+                                <label for="senha" class="form-label fw-semibold" style="color: #3D3D3D;">
+                                    <i class="bi bi-lock me-2" style="color: #E67E4A;"></i>Senha
                                 </label>
                                 {{ field(name='senha', type='password', required=true, placeholder='Crie uma senha forte',
                                 append_icon='bi-eye', append_button_onclick="alternarVisibilidadeSenha('senha')",
@@ -77,8 +77,8 @@
                             </div>
 
                             <div class="col-12 col-lg-6 mb-3">
-                                <label for="confirmar_senha" class="form-label fw-semibold">
-                                    <i class="bi bi-lock-fill me-1 text-primary"></i>Confirmar Senha
+                                <label for="confirmar_senha" class="form-label fw-semibold" style="color: #3D3D3D;">
+                                    <i class="bi bi-lock-fill me-2" style="color: #E67E4A;"></i>Confirmar Senha
                                 </label>
                                 {{ field(name='confirmar_senha', type='password', required=true, placeholder='Repita a senha',
                                 append_icon='bi-eye', append_button_onclick="alternarVisibilidadeSenha('confirmar_senha')",
@@ -93,26 +93,34 @@
                     </div>
                     <div class="card-footer bg-transparent border-0 p-4 pt-0">
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-gradient-success btn-lg">
+                            <button type="submit" class="btn btn-gradient-success btn-lg fw-semibold">
                                 <i class="bi bi-person-plus me-2"></i>Criar Conta
                             </button>
                         </div>
 
                         <div class="position-relative my-4">
                             <hr class="text-muted">
-                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
+                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small" style="background: #fff !important;">
                                 ou
                             </span>
                         </div>
 
-                        <p class="text-center mb-0">
+                        <p class="text-center mb-0 text-muted">
                             Já tem uma conta?
-                            <a href="/login" class="text-decoration-none fw-semibold" style="color: #667eea;">
+                            <a href="/login" class="text-decoration-none fw-semibold" style="color: #E67E4A;">
                                 Faça login aqui <i class="bi bi-arrow-right"></i>
                             </a>
                         </p>
                     </div>
                 </form>
+            </div>
+
+            <!-- Aviso de dados -->
+            <div style="margin-top: 2rem; padding: 1rem; background: rgba(74, 159, 184, 0.08); border: 1px solid rgba(74, 159, 184, 0.2); border-radius: 0.75rem; text-align: center;">
+                <p class="small text-muted mb-0">
+                    <i class="bi bi-lock me-1" style="color: #4A9FB8;"></i>
+                    Seus dados estão seguros conosco
+                </p>
             </div>
         </div>
     </div>
