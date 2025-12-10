@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para gerar fotos fictícias para usuários usando Runware MCP.
+Script para gerar fotos fictícias para usuários usando Runware API.
 Cria imagens 256x256px baseadas no gênero e idade do usuário.
 """
 
@@ -9,7 +9,7 @@ import sys
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from random import randint, choice
+from random import choice
 import requests
 import json
 from io import BytesIO
@@ -19,7 +19,14 @@ from PIL import Image
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sql.usuario_sql import OBTER_TODOS
-from util.config import DB_PATH, FOTO_USUARIOS_DIR
+from util.config import DATABASE_PATH
+
+# Configuração de Diretórios
+FOTO_USUARIOS_DIR = Path(__file__).parent.parent / "static" / "img" / "usuarios"
+
+# Configuração da API Runware
+RUNWARE_API_KEY = os.getenv('RUNWARE_API_KEY', 'Q6SBxRqeiPTgCleUq2bjjjwvzE5vu1Az')
+RUNWARE_API_URL = "https://api.runwayml.com/v1/generate"
 
 # Cores personalizadas por gênero e idade
 DESCRICOES_POR_GENERO_IDADE = {
@@ -107,7 +114,7 @@ def obter_descricao_imagem(genero: str, data_nascimento: str) -> str:
 def obter_usuarios_do_bd() -> list:
     """Obtém lista de usuários do banco de dados."""
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(DATABASE_PATH)
         conn.row_factory = sqlite3.Row
         cursor = conn.cursor()
 
@@ -123,20 +130,59 @@ def obter_usuarios_do_bd() -> list:
 def gerar_foto_com_runware(prompt: str, usuario_id: int, nome_usuario: str) -> bool:
     """
     Gera foto usando Runware API.
-
-    Nota: Esta função assume que o Runware MCP está configurado.
-    Para usar, você precisa ter a chave de API do Runware configurada.
     """
     try:
-        # Aqui você usaria o Runware MCP
-        # Por enquanto, vamos simular com uma foto padrão colorida
-
         print(f"🎨 Gerando foto para {nome_usuario} (ID: {usuario_id:06d})")
         print(f"   Prompt: {prompt}")
 
-        # Criar uma imagem placeholder colorida
-        # Em produção, isso seria uma chamada real ao Runware
-        imagem = gerar_imagem_placeholder(usuario_id, nome_usuario)
+        # Preparar requisição para a API Runware
+        headers = {
+            'Authorization': f'Bearer {RUNWARE_API_KEY}',
+            'Content-Type': 'application/json'
+        }
+
+        payload = {
+            'prompt': prompt,
+            'width': 256,
+            'height': 256,
+            'num_inference_steps': 30,
+            'guidance_scale': 7.5,
+            'num_images': 1
+        }
+
+        # Fazer requisição à API
+        print(f"   Chamando API Runware...")
+        response = requests.post(RUNWARE_API_URL, headers=headers, json=payload, timeout=120)
+
+        if response.status_code != 200:
+            print(f"   ⚠️  Erro da API ({response.status_code}): {response.text}")
+            # Usar imagem placeholder em caso de erro
+            imagem = gerar_imagem_placeholder(usuario_id, nome_usuario)
+        else:
+            # Processar resposta
+            dados = response.json()
+
+            if 'images' in dados and len(dados['images']) > 0:
+                # Obter URL da imagem gerada
+                image_url = dados['images'][0]['url']
+
+                # Baixar a imagem
+                print(f"   Baixando imagem...")
+                img_response = requests.get(image_url, timeout=30)
+
+                if img_response.status_code == 200:
+                    # Converter para PIL Image
+                    imagem = Image.open(BytesIO(img_response.content))
+
+                    # Garantir que seja 256x256
+                    if imagem.size != (256, 256):
+                        imagem = imagem.resize((256, 256), Image.Resampling.LANCZOS)
+                else:
+                    print(f"   ⚠️  Erro ao baixar imagem: {img_response.status_code}")
+                    imagem = gerar_imagem_placeholder(usuario_id, nome_usuario)
+            else:
+                print(f"   ⚠️  Resposta da API sem imagens")
+                imagem = gerar_imagem_placeholder(usuario_id, nome_usuario)
 
         # Salvar a imagem
         caminho_foto = Path(FOTO_USUARIOS_DIR) / f"{usuario_id:06d}.jpg"
@@ -145,32 +191,75 @@ def gerar_foto_com_runware(prompt: str, usuario_id: int, nome_usuario: str) -> b
         print(f"✅ Foto salva em: {caminho_foto}")
         return True
 
+    except requests.exceptions.Timeout:
+        print(f"❌ Timeout ao gerar foto para {nome_usuario}")
+        return False
     except Exception as e:
         print(f"❌ Erro ao gerar foto para {nome_usuario}: {e}")
-        return False
+        # Criar imagem placeholder em caso de erro
+        try:
+            imagem = gerar_imagem_placeholder(usuario_id, nome_usuario)
+            caminho_foto = Path(FOTO_USUARIOS_DIR) / f"{usuario_id:06d}.jpg"
+            imagem.save(caminho_foto, 'JPEG', quality=90)
+            print(f"   (Usando imagem placeholder)")
+            return True
+        except:
+            return False
 
 def gerar_imagem_placeholder(usuario_id: int, nome_usuario: str) -> Image.Image:
     """
-    Gera uma imagem placeholder colorida como exemplo.
-    Em produção, esta seria a resposta da API Runware.
+    Gera uma imagem placeholder colorida como fallback.
+    Usado quando a API Runware não está disponível ou falha.
     """
-    # Cores baseadas no ID para variedade
-    cores = [
-        (100, 150, 200),  # Azul
-        (150, 100, 200),  # Roxo
-        (200, 100, 150),  # Rosa
-        (100, 200, 150),  # Verde
-        (200, 150, 100),  # Laranja
-        (150, 200, 100),  # Lima
+    from PIL import ImageDraw, ImageFont
+
+    # Cores gradientes baseadas no ID
+    cores_gradiente = [
+        [(100, 150, 200), (150, 100, 200)],  # Azul-Roxo
+        [(150, 100, 200), (200, 100, 150)],  # Roxo-Rosa
+        [(200, 100, 150), (100, 200, 150)],  # Rosa-Verde
+        [(100, 200, 150), (200, 150, 100)],  # Verde-Laranja
+        [(200, 150, 100), (150, 200, 100)],  # Laranja-Lima
+        [(150, 200, 100), (100, 150, 200)],  # Lima-Azul
     ]
 
-    cor = cores[usuario_id % len(cores)]
+    cores = cores_gradiente[usuario_id % len(cores_gradiente)]
 
-    # Criar imagem 256x256
-    img = Image.new('RGB', (256, 256), cor)
+    # Criar imagem com gradiente
+    img = Image.new('RGB', (256, 256), cores[0])
+    pixels = img.load()
 
-    # Você pode adicionar mais customizações aqui
-    # Por exemplo, desenhar iniciais do nome, etc.
+    # Desenhar gradiente simples
+    for y in range(256):
+        r = int(cores[0][0] + (cores[1][0] - cores[0][0]) * (y / 256))
+        g = int(cores[0][1] + (cores[1][1] - cores[0][1]) * (y / 256))
+        b = int(cores[0][2] + (cores[1][2] - cores[0][2]) * (y / 256))
+
+        for x in range(256):
+            pixels[x, y] = (r, g, b)
+
+    # Adicionar iniciais do nome
+    draw = ImageDraw.Draw(img)
+    iniciais = ''.join([palavra[0].upper() for palavra in nome_usuario.split() if palavra])
+
+    try:
+        # Tentar usar fonte grande
+        fonte = ImageFont.load_default()
+    except:
+        fonte = ImageFont.load_default()
+
+    # Desenhar iniciais no centro
+    text_bbox = draw.textbbox((0, 0), iniciais, font=fonte)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+
+    x = (256 - text_width) // 2
+    y = (256 - text_height) // 2
+
+    # Desenhar sombra
+    draw.text((x + 2, y + 2), iniciais, fill=(0, 0, 0, 128), font=fonte)
+    # Desenhar texto
+    draw.text((x, y), iniciais, fill=(255, 255, 255), font=fonte)
 
     return img
 
