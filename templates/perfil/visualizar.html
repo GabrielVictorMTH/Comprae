@@ -5,62 +5,62 @@
 {% block content %}
 <div class="row">
     <div class="col-md-8 mx-auto">
-        <!-- Cabeçalho do Perfil -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-body text-center py-5">
+        <!-- Cabeçalho do Perfil - Animal Care Theme -->
+        <div class="card shadow-sm mb-4" style="border: none; border-radius: 15px; overflow: hidden;">
+            <div style="background: linear-gradient(135deg, rgba(230, 126, 74, 0.1) 0%, rgba(107, 163, 68, 0.1) 100%); border-bottom: 1px solid rgba(230, 126, 74, 0.2);" class="card-body text-center py-5">
                 <div class="mb-4">
                     <img src="{{ usuario.id|foto_usuario }}" alt="Foto de Perfil" id="profile-photo"
-                        class="rounded-circle border border-3 border-primary object-fit-cover" width="150" height="150"
-                        title="Clique para alterar a foto">
+                        class="avatar-frame object-fit-cover" width="120" height="120"
+                        title="Clique para alterar a foto" style="cursor: pointer;">
                 </div>
 
-                <h2 class="mb-2">{{ usuario.nome }}</h2>
+                <h2 class="mb-2 fw-bold" style="color: #3D3D3D;">{{ usuario.nome }}</h2>
                 <p class="text-muted mb-3">
-                    <i class="bi bi-envelope"></i> {{ usuario.email }}
+                    <i class="bi bi-envelope" style="color: #E67E4A;"></i> {{ usuario.email }}
                 </p>
                 <p class="mb-3">
-                    <span
-                        class="badge bg-{% if usuario.perfil == 'Administrador' %}danger{% else %}info{% endif %} px-3 py-2">
-                        <i class="bi bi-person-badge"></i>
+                    <span class="badge" style="background: {% if usuario.perfil == 'Administrador' %}linear-gradient(135deg, #D64C5C 0%, #E67E4A 100%){% else %}linear-gradient(135deg, #4A9FB8 0%, #6BA344 100%){% endif %}; color: white; padding: 0.6rem 1rem; border-radius: 20px;">
+                        <i class="bi bi-person-badge me-1"></i>
                         {{ usuario.perfil }}
                     </span>
                 </p>
                 {% if usuario.data_cadastro %}
                 <p class="text-muted small">
-                    <i class="bi bi-calendar-check"></i> Membro desde {{ usuario.data_cadastro|data_br }}
+                    <i class="bi bi-calendar-heart" style="color: #E67E4A;"></i> Membro desde {{ usuario.data_cadastro|data_br }}
                 </p>
                 {% endif %}
             </div>
         </div>
+
         <!-- Ações do Perfil -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <a href="/usuario/perfil/editar" class="btn btn-primary w-100 btn-lg">
-                    <i class="bi bi-pencil-square"></i> Editar Dados
+                <a href="/usuario/perfil/editar" class="btn btn-gradient-primary w-100 btn-lg fw-semibold">
+                    <i class="bi bi-pencil-square me-2"></i>Editar Dados
                 </a>
             </div>
             <div class="col-md-4">
-                <a href="/usuario/perfil/alterar-senha" class="btn btn-warning w-100 btn-lg">
-                    <i class="bi bi-key-fill"></i> Alterar Senha
+                <a href="/usuario/perfil/alterar-senha" class="btn btn-gradient-warm w-100 btn-lg fw-semibold">
+                    <i class="bi bi-key-fill me-2"></i>Alterar Senha
                 </a>
             </div>
             <div class="col-md-4">
-                <button type="button" class="btn btn-info w-100 btn-lg" id="btn-change-photo">
-                    <i class="bi bi-camera-fill"></i> Alterar Foto
+                <button type="button" class="btn btn-gradient-success w-100 btn-lg fw-semibold" id="btn-change-photo">
+                    <i class="bi bi-camera-fill me-2"></i>Alterar Foto
                 </button>
             </div>
         </div>
 
         <!-- Seção de Endereço -->
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-light">
-                <h5 class="mb-0"><i class="bi bi-geo-alt"></i> Meu Endereço</h5>
+        <div class="card shadow-sm mb-4" style="border: 1px solid rgba(230, 126, 74, 0.2); border-radius: 15px;">
+            <div style="background: linear-gradient(135deg, #E67E4A 0%, #D64C5C 100%); color: white;" class="card-header">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-geo-alt-fill me-2"></i>Meu Endereço</h5>
             </div>
             <div class="card-body">
                 {% if endereco %}
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <p class="mb-1"><strong>{{ endereco.titulo }}</strong></p>
+                        <p class="mb-1 fw-bold" style="color: #3D3D3D;">{{ endereco.titulo }}</p>
                         <p class="text-muted mb-0">
                             {{ endereco.logradouro }}, {{ endereco.numero }}
                             {% if endereco.complemento %} - {{ endereco.complemento }}{% endif %}<br>
@@ -68,16 +68,18 @@
                             CEP: {{ endereco.cep }}
                         </p>
                     </div>
-                    <a href="/usuario/endereco" class="btn btn-outline-primary btn-sm">
-                        <i class="bi bi-pencil"></i> Gerenciar
+                    <a href="/usuario/endereco" class="btn btn-outline-primary btn-sm fw-semibold" style="color: #E67E4A; border-color: #E67E4A;">
+                        <i class="bi bi-pencil me-1"></i>Gerenciar
                     </a>
                 </div>
                 {% else %}
                 <div class="text-center py-3">
-                    <i class="bi bi-geo-alt text-muted display-4"></i>
-                    <p class="text-muted mt-2 mb-3">Você ainda não cadastrou um endereço.</p>
-                    <a href="/usuario/endereco/cadastrar" class="btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Cadastrar Endereço
+                    <div style="font-size: 3rem; color: rgba(230, 126, 74, 0.3); margin-bottom: 1rem;">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <p class="text-muted mt-2 mb-3">Você ainda não cadastrou um endereço de entrega.</p>
+                    <a href="/usuario/endereco/cadastrar" class="btn btn-gradient-primary fw-semibold">
+                        <i class="bi bi-plus-circle me-2"></i>Cadastrar Endereço
                     </a>
                 </div>
                 {% endif %}

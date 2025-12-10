@@ -389,6 +389,19 @@
     color: #fff;
 }
 
+.btn-gradient-warm {
+    background: var(--gradient-warm);
+    border: none;
+    color: #fff;
+    transition: all var(--transition-normal);
+}
+
+.btn-gradient-warm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(245, 169, 66, 0.4);
+    color: #fff;
+}
+
 /* ===== FORMULÁRIOS DE LOGIN/CADASTRO ===== */
 .auth-card {
     border: none;
