@@ -6,12 +6,14 @@
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col">
-            <h2>Gerenciar Pedidos</h2>
-            <p class="text-muted">Visualize e gerencie todos os pedidos do sistema</p>
+            <h2 class="fw-bold" style="color: #3D3D3D;">
+                <i class="bi bi-bag-check-fill me-2" style="color: #E67E4A;"></i>Gerenciar Pedidos
+            </h2>
+            <p class="text-muted mb-0">Visualize e gerencie todos os pedidos do sistema</p>
         </div>
         <div class="col-auto">
-            <a href="/admin/pedidos/estatisticas" class="btn btn-info">
-                <i class="bi bi-graph-up"></i> Estatísticas
+            <a href="/admin/pedidos/estatisticas" class="btn btn-gradient-primary fw-semibold">
+                <i class="bi bi-graph-up me-2"></i>Estatísticas
             </a>
         </div>
     </div>
@@ -19,20 +21,20 @@
     <!-- Filtro por Status -->
     <div class="row mb-3">
         <div class="col-md-6">
-            <div class="btn-group" role="group">
-                <a href="/admin/pedidos/listar" class="btn btn-sm {% if status_filtro == 'todos' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="/admin/pedidos/listar" class="btn btn-sm fw-semibold {% if status_filtro == 'todos' %}btn-gradient-primary{% else %}btn-outline-secondary{% endif %}" style="{% if status_filtro != 'todos' %}color: #666; border-color: #ddd;{% endif %}">
                     Todos
                 </a>
-                <a href="/admin/pedidos/listar?status_filtro=Pendente" class="btn btn-sm {% if status_filtro == 'Pendente' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                <a href="/admin/pedidos/listar?status_filtro=Pendente" class="btn btn-sm fw-semibold {% if status_filtro == 'Pendente' %}badge-pet-orange{% else %}btn-outline-secondary{% endif %}" style="{% if status_filtro == 'Pendente' %}background: rgba(245, 169, 66, 0.2); color: #F5A942; border: none;{% else %}color: #666; border-color: #ddd;{% endif %}">
                     Pendentes
                 </a>
-                <a href="/admin/pedidos/listar?status_filtro=Pago" class="btn btn-sm {% if status_filtro == 'Pago' %}btn-success{% else %}btn-outline-success{% endif %}">
+                <a href="/admin/pedidos/listar?status_filtro=Pago" class="btn btn-sm fw-semibold {% if status_filtro == 'Pago' %}badge-pet-green{% else %}btn-outline-secondary{% endif %}" style="{% if status_filtro == 'Pago' %}background: rgba(107, 163, 68, 0.2); color: #6BA344; border: none;{% else %}color: #666; border-color: #ddd;{% endif %}">
                     Pagos
                 </a>
-                <a href="/admin/pedidos/listar?status_filtro=Enviado" class="btn btn-sm {% if status_filtro == 'Enviado' %}btn-info{% else %}btn-outline-info{% endif %}">
+                <a href="/admin/pedidos/listar?status_filtro=Enviado" class="btn btn-sm fw-semibold {% if status_filtro == 'Enviado' %}badge-pet-teal{% else %}btn-outline-secondary{% endif %}" style="{% if status_filtro == 'Enviado' %}background: rgba(74, 159, 184, 0.2); color: #4A9FB8; border: none;{% else %}color: #666; border-color: #ddd;{% endif %}">
                     Enviados
                 </a>
-                <a href="/admin/pedidos/listar?status_filtro=Cancelado" class="btn btn-sm {% if status_filtro == 'Cancelado' %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                <a href="/admin/pedidos/listar?status_filtro=Cancelado" class="btn btn-sm fw-semibold btn-outline-secondary" style="{% if status_filtro == 'Cancelado' %}background: rgba(214, 76, 92, 0.2); color: #D64C5C; border: none;{% else %}color: #666; border-color: #ddd;{% endif %}">
                     Cancelados
                 </a>
             </div>
@@ -40,72 +42,73 @@
     </div>
 
     {% if pedidos %}
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Produto</th>
-                    <th>Comprador</th>
-                    <th>Valor</th>
-                    <th>Status</th>
-                    <th>Data</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for pedido in pedidos %}
-                <tr>
-                    <td>#{{ pedido.id }}</td>
-                    <td>
-                        {% if pedido.anuncio %}
-                            {{ pedido.anuncio.nome }}
-                        {% else %}
-                            <em>Produto removido</em>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if pedido.comprador %}
-                            {{ pedido.comprador.nome }}
-                        {% else %}
-                            <em>Usuário removido</em>
-                        {% endif %}
-                    </td>
-                    <td>R$ {{ "%.2f"|format(pedido.preco) }}</td>
-                    <td>
-                        {% if pedido.status == 'Pendente' %}
-                            <span class="badge bg-warning text-dark">{{ pedido.status }}</span>
-                        {% elif pedido.status == 'Pago' %}
-                            <span class="badge bg-success">{{ pedido.status }}</span>
-                        {% elif pedido.status == 'Enviado' %}
-                            <span class="badge bg-info">{{ pedido.status }}</span>
-                        {% elif pedido.status == 'Cancelado' %}
-                            <span class="badge bg-danger">{{ pedido.status }}</span>
-                        {% else %}
-                            <span class="badge bg-secondary">{{ pedido.status }}</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if pedido.data_hora_pedido %}
-                            {{ pedido.data_hora_pedido.strftime('%d/%m/%Y %H:%M') }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="/admin/pedidos/detalhes/{{ pedido.id }}" class="btn btn-sm btn-primary">
-                            <i class="bi bi-eye"></i> Detalhes
-                        </a>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <div class="card shadow-sm" style="border: 1px solid rgba(230, 126, 74, 0.2); border-radius: 15px;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="background: linear-gradient(135deg, rgba(230, 126, 74, 0.1) 0%, rgba(107, 163, 68, 0.1) 100%); border-bottom: 2px solid rgba(230, 126, 74, 0.2);">
+                    <tr>
+                        <th style="color: #3D3D3D; font-weight: 600;">ID</th>
+                        <th style="color: #3D3D3D; font-weight: 600;">Produto</th>
+                        <th style="color: #3D3D3D; font-weight: 600;">Comprador</th>
+                        <th style="color: #3D3D3D; font-weight: 600;">Valor</th>
+                        <th style="color: #3D3D3D; font-weight: 600;">Status</th>
+                        <th style="color: #3D3D3D; font-weight: 600;">Data</th>
+                        <th style="color: #3D3D3D; font-weight: 600;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in pedidos %}
+                    <tr style="border-bottom: 1px solid rgba(230, 126, 74, 0.1);">
+                        <td style="color: #3D3D3D; font-weight: 500;">#{{ pedido.id }}</td>
+                        <td style="color: #3D3D3D; font-weight: 500;">
+                            {% if pedido.anuncio %}
+                                {{ pedido.anuncio.nome }}
+                            {% else %}
+                                <em style="color: #999;">Produto removido</em>
+                            {% endif %}
+                        </td>
+                        <td style="color: #666;">
+                            {% if pedido.comprador %}
+                                {{ pedido.comprador.nome }}
+                            {% else %}
+                                <em style="color: #999;">Usuário removido</em>
+                            {% endif %}
+                        </td>
+                        <td style="color: #3D3D3D; font-weight: 500;">R$ {{ "%.2f"|format(pedido.preco) }}</td>
+                        <td>
+                            {% if pedido.status == 'Pendente' %}
+                                <span class="badge badge-pet-orange">{{ pedido.status }}</span>
+                            {% elif pedido.status == 'Pago' %}
+                                <span class="badge badge-pet-green">{{ pedido.status }}</span>
+                            {% elif pedido.status == 'Enviado' %}
+                                <span class="badge badge-pet-teal">{{ pedido.status }}</span>
+                            {% elif pedido.status == 'Cancelado' %}
+                                <span class="badge" style="background: rgba(214, 76, 92, 0.2); color: #D64C5C;">{{ pedido.status }}</span>
+                            {% else %}
+                                <span class="badge badge-pet-brown">{{ pedido.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td style="color: #666;">
+                            {% if pedido.data_hora_pedido %}
+                                {{ pedido.data_hora_pedido.strftime('%d/%m/%Y %H:%M') }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="/admin/pedidos/detalhes/{{ pedido.id }}" class="btn btn-sm btn-gradient-primary fw-semibold">
+                                <i class="bi bi-eye me-1"></i>Detalhes
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
     {% else %}
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i> Nenhum pedido encontrado
-        {% if status_filtro != 'todos' %} com status "{{ status_filtro }}"{% endif %}.
+    <div class="alert-care alert-care-info">
+        <i class="bi bi-info-circle me-2"></i>Nenhum pedido encontrado{% if status_filtro != 'todos' %} com status "{{ status_filtro }}"{% endif %}.
     </div>
     {% endif %}
 </div>

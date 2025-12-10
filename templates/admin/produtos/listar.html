@@ -6,53 +6,60 @@
 <div class="row">
     <div class="col-12">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-box-seam"></i> Gerenciar Produtos</h2>
-            <a href="/admin/produtos/moderar" class="btn btn-warning">
-                <i class="bi bi-shield-exclamation"></i> Produtos Pendentes
+            <div>
+                <h2 class="fw-bold" style="color: #3D3D3D;">
+                    <i class="bi bi-box-seam-fill me-2" style="color: #E67E4A;"></i>Gerenciar Produtos
+                </h2>
+                <p class="text-muted mb-0">Monitore e modere todos os produtos</p>
+            </div>
+            <a href="/admin/produtos/moderar" class="btn btn-gradient-warm fw-semibold">
+                <i class="bi bi-shield-exclamation me-2"></i>Pendentes
             </a>
         </div>
 
-        <div class="card shadow-sm">
+        <div class="card shadow-sm" style="border: 1px solid rgba(230, 126, 74, 0.2); border-radius: 15px;">
             <div class="card-body">
                 {% if anuncios %}
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
-                        <thead class="table-light">
+                        <thead style="background: linear-gradient(135deg, rgba(230, 126, 74, 0.1) 0%, rgba(107, 163, 68, 0.1) 100%); border-bottom: 2px solid rgba(230, 126, 74, 0.2);">
                             <tr>
-                                <th scope="col">ID</th>
-                                <th scope="col">Nome</th>
-                                <th scope="col">Categoria</th>
-                                <th scope="col">Vendedor</th>
-                                <th scope="col">Preço</th>
-                                <th scope="col">Estoque</th>
-                                <th scope="col">Status</th>
-                                <th scope="col" class="text-center">Ações</th>
+                                <th scope="col" style="color: #3D3D3D; font-weight: 600;">ID</th>
+                                <th scope="col" style="color: #3D3D3D; font-weight: 600;">Nome</th>
+                                <th scope="col" style="color: #3D3D3D; font-weight: 600;">Categoria</th>
+                                <th scope="col" style="color: #3D3D3D; font-weight: 600;">Vendedor</th>
+                                <th scope="col" style="color: #3D3D3D; font-weight: 600;">Preço</th>
+                                <th scope="col" style="color: #3D3D3D; font-weight: 600;">Estoque</th>
+                                <th scope="col" style="color: #3D3D3D; font-weight: 600;">Status</th>
+                                <th scope="col" class="text-center" style="color: #3D3D3D; font-weight: 600;">Ações</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for anuncio in anuncios %}
-                            <tr>
-                                <td>{{ anuncio.id }}</td>
-                                <td>{{ anuncio.nome }}</td>
-                                <td>{{ anuncio.categoria_nome if anuncio.categoria_nome else '-' }}</td>
-                                <td>{{ anuncio.vendedor_nome if anuncio.vendedor_nome else '-' }}</td>
-                                <td>R$ {{ "%.2f"|format(anuncio.preco) }}</td>
-                                <td>{{ anuncio.estoque }}</td>
+                            <tr style="border-bottom: 1px solid rgba(230, 126, 74, 0.1);">
+                                <td style="color: #3D3D3D; font-weight: 500;">{{ anuncio.id }}</td>
+                                <td style="color: #3D3D3D; font-weight: 500;">{{ anuncio.nome }}</td>
+                                <td style="color: #666;">{{ anuncio.categoria_nome if anuncio.categoria_nome else '-' }}</td>
+                                <td style="color: #666;">{{ anuncio.vendedor_nome if anuncio.vendedor_nome else '-' }}</td>
+                                <td style="color: #3D3D3D; font-weight: 500;">R$ {{ "%.2f"|format(anuncio.preco) }}</td>
+                                <td style="color: #666;">{{ anuncio.estoque }}</td>
                                 <td>
-                                    <span class="badge bg-{{ 'success' if anuncio.ativo else 'danger' }}">
-                                        {{ 'Ativo' if anuncio.ativo else 'Inativo' }}
+                                    <span class="badge {% if anuncio.ativo %}badge-pet-green{% else %}badge-pet-orange{% endif %}">
+                                        <i class="bi bi-{% if anuncio.ativo %}check-circle{% else %}pause-circle{% endif %} me-1"></i>{{ 'Ativo' if anuncio.ativo else 'Inativo' }}
                                     </span>
                                 </td>
                                 <td class="text-center">
                                     <div class="btn-group btn-group-sm" role="group">
                                         <a href="/admin/produtos/editar/{{ anuncio.id }}"
-                                            class="btn btn-outline-primary"
+                                            class="btn btn-outline-primary fw-semibold"
                                             title="Editar"
+                                            style="color: #E67E4A; border-color: #E67E4A;"
                                             aria-label="Editar produto {{ anuncio.nome }}">
                                             <i class="bi bi-pencil"></i>
                                         </a>
-                                        <button type="button" class="btn btn-outline-danger"
+                                        <button type="button" class="btn btn-outline-danger fw-semibold"
                                             title="Excluir"
+                                            style="color: #D64C5C; border-color: #D64C5C;"
                                             aria-label="Excluir produto {{ anuncio.nome }}"
                                             onclick="excluirProduto({{ anuncio.id }}, '{{ anuncio.nome|replace("'", "\\'") }}')">
                                             <i class="bi bi-trash"></i>
@@ -65,8 +72,8 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="alert alert-info text-center mb-0">
-                    <i class="bi bi-info-circle"></i> Nenhum produto cadastrado.
+                <div class="alert-care alert-care-info text-center mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Nenhum produto cadastrado.
                 </div>
                 {% endif %}
             </div>
