@@ -27,6 +27,7 @@
                     <i class="bi bi-x-circle"></i> Cancelar
                 </button>
                 <form id="formConfirmacaoExclusao" method="POST" action="" class="d-inline">
+                    {{ csrf_input() }}
                     <button type="submit" class="btn" id="modalConfirmacaoBtnAcao">
                         <i class="bi bi-check-circle" id="modalConfirmacaoBtnIcon"></i>
                         <span id="modalConfirmacaoBtnTexto">Confirmar</span>

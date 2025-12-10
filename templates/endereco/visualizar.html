@@ -63,28 +63,18 @@
         </div>
     </div>
 </div>
-
-<!-- Form oculto para exclusão -->
-<form id="form-excluir" action="/usuario/endereco/excluir" method="POST" class="d-none">
-    {{ csrf_input() }}
-</form>
-
-<!-- Modal de Confirmação -->
-{% include 'components/modal_confirmacao.html' %}
 {% endblock %}
 
 {% block scripts %}
 <script>
 function confirmarExclusao() {
     abrirModalConfirmacao({
+        url: '/usuario/endereco/excluir',
         titulo: 'Confirmar Exclusão',
         mensagem: 'Tem certeza que deseja excluir este endereço? Esta ação não pode ser desfeita.',
-        textoBotaoConfirmar: 'Sim, Excluir',
-        corBotaoConfirmar: 'danger',
-        icone: 'bi-exclamation-triangle',
-        onConfirm: function() {
-            document.getElementById('form-excluir').submit();
-        }
+        btnTexto: 'Sim, Excluir',
+        tipo: 'danger',
+        icone: 'bi-exclamation-triangle'
     });
 }
 </script>
