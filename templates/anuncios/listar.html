@@ -1,15 +1,15 @@
 {% extends "base_publica.html" %}
 
-{% block titulo %}Anuncios{% endblock %}
+{% block titulo %}Anúncios{% endblock %}
 
 {% block content %}
 <div class="py-2">
-    <!-- Cabecalho com gradiente -->
+    <!-- Cabeçalho com gradiente -->
     <div class="hero-gradient text-white rounded-4 shadow-lg p-4 mb-4">
         <div class="row align-items-center position-relative" style="z-index: 1;">
             <div class="col-lg-8">
                 <h1 class="fw-bold mb-2">
-                    <i class="bi bi-shop me-2"></i>Anuncios
+                    <i class="bi bi-shop me-2"></i>Anúncios
                 </h1>
                 <p class="mb-0 opacity-90">Encontre os melhores produtos dos nossos vendedores</p>
             </div>
@@ -90,7 +90,7 @@
     </div>
 
     {% if anuncios %}
-    <!-- Grid de Anuncios -->
+    <!-- Grid de Anúncios -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 mb-4">
         {% for anuncio in anuncios %}
         <div class="col animate-fade-in-up stagger-{{ loop.index % 4 + 1 }}">
