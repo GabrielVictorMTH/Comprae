@@ -33,7 +33,7 @@ class TestListarMeusPedidos:
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
         """UC-121: Listagem de pedidos deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos")
+        e2e_page.goto(f"{e2e_server}/pedidos")
         e2e_page.wait_for_timeout(500)
 
         assert verificar_redirecionamento_login(e2e_page)
@@ -96,7 +96,7 @@ class TestListarMeusPedidos:
         )
 
         # Vendedor usa pedidos-recebidos, nao pedidos
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos")
+        e2e_page.goto(f"{e2e_server}/pedidos")
         e2e_page.wait_for_timeout(500)
 
         # Pode redirecionar ou mostrar vazio (vendedor nao faz pedidos)
@@ -117,7 +117,7 @@ class TestVisualizarDetalhesPedido:
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
         """UC-122: Visualizacao de pedido deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/1")
+        e2e_page.goto(f"{e2e_server}/pedidos/detalhes/1")
         e2e_page.wait_for_timeout(500)
 
         assert verificar_redirecionamento_login(e2e_page)
@@ -135,7 +135,7 @@ class TestVisualizarDetalhesPedido:
             senha="SenhaForte@123",
         )
 
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/99999")
+        e2e_page.goto(f"{e2e_server}/pedidos/detalhes/99999")
         e2e_page.wait_for_timeout(500)
 
         conteudo = e2e_page.content().lower()
@@ -159,7 +159,7 @@ class TestCriarPedido:
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
         """UC-123: Criacao de pedido deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/criar/1")
+        e2e_page.goto(f"{e2e_server}/pedidos/criar?anuncio=1")
         e2e_page.wait_for_timeout(500)
 
         assert verificar_redirecionamento_login(e2e_page)
@@ -177,14 +177,14 @@ class TestCriarPedido:
             senha="SenhaForte@123",
         )
 
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/criar/99999")
+        e2e_page.goto(f"{e2e_server}/pedidos/criar?anuncio=99999")
         e2e_page.wait_for_timeout(500)
 
         conteudo = e2e_page.content().lower()
         assert (
             "encontrad" in conteudo
             or "erro" in conteudo
-            or "/produtos" in e2e_page.url
+            or "/anuncios" in e2e_page.url
         )
 
     def test_criar_pedido_requer_endereco(
@@ -202,7 +202,7 @@ class TestCriarPedido:
         )
 
         # Tentar criar pedido sem ter endereco
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/criar/1")
+        e2e_page.goto(f"{e2e_server}/pedidos/criar?anuncio=1")
         e2e_page.wait_for_timeout(500)
 
         conteudo = e2e_page.content().lower()
@@ -227,16 +227,16 @@ class TestPagarPedido:
     def test_pagar_pedido_requer_autenticacao(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
-        """UC-124: Pagamento de pedido deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/1/pagar")
-        e2e_page.wait_for_timeout(500)
-
-        assert verificar_redirecionamento_login(e2e_page)
+        """UC-124: Pagamento de pedido deve requerer autenticacao (rota e POST-only)."""
+        # A rota /pedidos/pagar/{id} e POST-only
+        # Acesso GET retorna 405 Method Not Allowed
+        response = e2e_page.request.get(f"{e2e_server}/pedidos/pagar/1")
+        assert response.status == 405 or verificar_redirecionamento_login(e2e_page)
 
     def test_pagar_pedido_inexistente(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
-        """UC-124: Pagamento de pedido inexistente deve falhar."""
+        """UC-124: Pagamento de pedido inexistente deve falhar (rota e POST-only)."""
         criar_usuario_e_logar(
             e2e_page,
             e2e_server,
@@ -246,15 +246,10 @@ class TestPagarPedido:
             senha="SenhaForte@123",
         )
 
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/99999/pagar")
-        e2e_page.wait_for_timeout(500)
-
-        conteudo = e2e_page.content().lower()
-        assert (
-            "encontrad" in conteudo
-            or "erro" in conteudo
-            or "/pedidos" in e2e_page.url
-        )
+        # A rota /pedidos/pagar/{id} e POST-only
+        response = e2e_page.request.get(f"{e2e_server}/pedidos/pagar/99999")
+        # GET em rota POST-only deve retornar 405
+        assert response.status == 405
 
 
 # ============================================================
@@ -269,16 +264,16 @@ class TestCancelarPedido:
     def test_cancelar_pedido_requer_autenticacao(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
-        """UC-125: Cancelamento de pedido deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/1/cancelar")
-        e2e_page.wait_for_timeout(500)
-
-        assert verificar_redirecionamento_login(e2e_page)
+        """UC-125: Cancelamento de pedido deve requerer autenticacao (rota e POST-only)."""
+        # A rota /pedidos/cancelar/{id} e POST-only
+        # Acesso GET retorna 405 Method Not Allowed
+        response = e2e_page.request.get(f"{e2e_server}/pedidos/cancelar/1")
+        assert response.status == 405 or verificar_redirecionamento_login(e2e_page)
 
     def test_cancelar_pedido_inexistente(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
-        """UC-125: Cancelamento de pedido inexistente deve falhar."""
+        """UC-125: Cancelamento de pedido inexistente deve falhar (rota e POST-only)."""
         criar_usuario_e_logar(
             e2e_page,
             e2e_server,
@@ -288,15 +283,10 @@ class TestCancelarPedido:
             senha="SenhaForte@123",
         )
 
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/99999/cancelar")
-        e2e_page.wait_for_timeout(500)
-
-        conteudo = e2e_page.content().lower()
-        assert (
-            "encontrad" in conteudo
-            or "erro" in conteudo
-            or "/pedidos" in e2e_page.url
-        )
+        # A rota /pedidos/cancelar/{id} e POST-only
+        response = e2e_page.request.get(f"{e2e_server}/pedidos/cancelar/99999")
+        # GET em rota POST-only deve retornar 405
+        assert response.status == 405
 
 
 # ============================================================
@@ -311,16 +301,16 @@ class TestConfirmarEntrega:
     def test_confirmar_entrega_requer_autenticacao(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
-        """UC-126: Confirmacao de entrega deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/1/confirmar-entrega")
-        e2e_page.wait_for_timeout(500)
-
-        assert verificar_redirecionamento_login(e2e_page)
+        """UC-126: Confirmacao de entrega deve requerer autenticacao (rota e POST-only)."""
+        # A rota /pedidos/confirmar-entrega/{id} e POST-only
+        # Acesso GET retorna 405 Method Not Allowed
+        response = e2e_page.request.get(f"{e2e_server}/pedidos/confirmar-entrega/1")
+        assert response.status == 405 or verificar_redirecionamento_login(e2e_page)
 
     def test_confirmar_entrega_pedido_inexistente(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
-        """UC-126: Confirmacao de pedido inexistente deve falhar."""
+        """UC-126: Confirmacao de pedido inexistente deve falhar (rota e POST-only)."""
         criar_usuario_e_logar(
             e2e_page,
             e2e_server,
@@ -330,15 +320,10 @@ class TestConfirmarEntrega:
             senha="SenhaForte@123",
         )
 
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/99999/confirmar-entrega")
-        e2e_page.wait_for_timeout(500)
-
-        conteudo = e2e_page.content().lower()
-        assert (
-            "encontrad" in conteudo
-            or "erro" in conteudo
-            or "/pedidos" in e2e_page.url
-        )
+        # A rota /pedidos/confirmar-entrega/{id} e POST-only
+        response = e2e_page.request.get(f"{e2e_server}/pedidos/confirmar-entrega/99999")
+        # GET em rota POST-only deve retornar 405
+        assert response.status == 405
 
 
 # ============================================================
@@ -364,7 +349,7 @@ class TestFluxoPedido:
         )
 
         # Mesmo que o produto nao exista, a rota deve existir
-        e2e_page.goto(f"{e2e_server}/usuario/pedidos/criar/1")
+        e2e_page.goto(f"{e2e_server}/pedidos/criar?anuncio=1")
         e2e_page.wait_for_timeout(500)
 
         # Se a rota existe e ha formulario

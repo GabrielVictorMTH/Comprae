@@ -327,7 +327,7 @@ class MeusPedidosPage:
     def __init__(self, page: Page, base_url: str):
         self.page = page
         self.base_url = base_url
-        self.url = f"{base_url}/usuario/pedidos"
+        self.url = f"{base_url}/pedidos"
 
     def navegar(self) -> None:
         """Navega para a pagina de pedidos."""
@@ -347,7 +347,7 @@ class CriarPedidoPage:
 
     def criar_pedido(self, anuncio_id: int, quantidade: int = 1) -> None:
         """Navega para criacao de pedido."""
-        self.page.goto(f"{self.base_url}/usuario/pedidos/criar/{anuncio_id}")
+        self.page.goto(f"{self.base_url}/pedidos/criar?anuncio={anuncio_id}")
         self.page.fill('input[name="quantidade"]', str(quantidade))
         self.page.locator('button[type="submit"]').first.click()
 
@@ -358,7 +358,7 @@ class ChamadosPage:
     def __init__(self, page: Page, base_url: str):
         self.page = page
         self.base_url = base_url
-        self.url = f"{base_url}/usuario/chamados"
+        self.url = f"{base_url}/chamados/listar"
 
     def navegar(self) -> None:
         """Navega para listagem de chamados."""
@@ -366,12 +366,12 @@ class ChamadosPage:
 
     def navegar_criar(self) -> None:
         """Navega para criacao de chamado."""
-        self.page.goto(f"{self.base_url}/usuario/chamados/criar")
+        self.page.goto(f"{self.base_url}/chamados/cadastrar")
 
-    def preencher_formulario(self, assunto: str, mensagem: str) -> None:
+    def preencher_formulario(self, titulo: str, descricao: str) -> None:
         """Preenche formulario de chamado."""
-        self.page.fill('input[name="assunto"]', assunto)
-        self.page.fill('textarea[name="mensagem"]', mensagem)
+        self.page.fill('input[name="titulo"]', titulo)
+        self.page.fill('textarea[name="descricao"]', descricao)
 
     def submeter(self) -> None:
         """Submete o formulario."""
@@ -393,7 +393,7 @@ class ChatPage:
     def __init__(self, page: Page, base_url: str):
         self.page = page
         self.base_url = base_url
-        self.url = f"{base_url}/usuario/chat"
+        self.url = f"{base_url}/chat/conversas"
 
     def navegar(self) -> None:
         """Navega para listagem de conversas."""
@@ -401,7 +401,7 @@ class ChatPage:
 
     def iniciar_chat(self, usuario_id: int) -> None:
         """Inicia chat com um usuario."""
-        self.page.goto(f"{self.base_url}/usuario/chat/{usuario_id}")
+        self.page.goto(f"{self.base_url}/chat/salas")
 
     def enviar_mensagem(self, mensagem: str) -> None:
         """Envia mensagem no chat."""
@@ -415,7 +415,7 @@ class MeusProdutosPage:
     def __init__(self, page: Page, base_url: str):
         self.page = page
         self.base_url = base_url
-        self.url = f"{base_url}/usuario/anuncios"
+        self.url = f"{base_url}/vendedor/anuncios"
 
     def navegar(self) -> None:
         """Navega para listagem de produtos."""
@@ -423,7 +423,7 @@ class MeusProdutosPage:
 
     def navegar_cadastrar(self) -> None:
         """Navega para cadastro de produto."""
-        self.page.goto(f"{self.base_url}/usuario/anuncios/cadastrar")
+        self.page.goto(f"{self.base_url}/vendedor/anuncios/cadastrar")
 
     def preencher_formulario(
         self,
@@ -451,7 +451,7 @@ class PedidosRecebidosPage:
     def __init__(self, page: Page, base_url: str):
         self.page = page
         self.base_url = base_url
-        self.url = f"{base_url}/usuario/pedidos-recebidos"
+        self.url = f"{base_url}/vendedor/pedidos"
 
     def navegar(self) -> None:
         """Navega para listagem de pedidos recebidos."""
@@ -485,7 +485,7 @@ class AdminProdutosPage:
     def __init__(self, page: Page, base_url: str):
         self.page = page
         self.base_url = base_url
-        self.url = f"{base_url}/admin/anuncios/listar"
+        self.url = f"{base_url}/admin/produtos/listar"
 
     def navegar(self) -> None:
         """Navega para listagem de produtos."""
@@ -493,7 +493,7 @@ class AdminProdutosPage:
 
     def navegar_moderar(self) -> None:
         """Navega para moderacao de produtos."""
-        self.page.goto(f"{self.base_url}/admin/anuncios/moderar")
+        self.page.goto(f"{self.base_url}/admin/produtos/moderar")
 
 
 class AdminPedidosPage:

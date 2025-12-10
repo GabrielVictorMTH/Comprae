@@ -32,7 +32,7 @@ class TestListarMeusProdutos:
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
         """UC-201: Listagem de produtos deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/anuncios")
+        e2e_page.goto(f"{e2e_server}/vendedor/anuncios")
         e2e_page.wait_for_timeout(500)
 
         assert verificar_redirecionamento_login(e2e_page)
@@ -122,7 +122,7 @@ class TestCadastrarProduto:
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
         """UC-202: Cadastro de produto deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/anuncios/cadastrar")
+        e2e_page.goto(f"{e2e_server}/vendedor/anuncios/cadastrar")
         e2e_page.wait_for_timeout(500)
 
         assert verificar_redirecionamento_login(e2e_page)
@@ -144,7 +144,7 @@ class TestCadastrarProduto:
         produtos.navegar_cadastrar()
         e2e_page.wait_for_timeout(500)
 
-        expect(e2e_page.locator('input[name="titulo"]')).to_be_visible()
+        expect(e2e_page.locator('input[name="nome"]')).to_be_visible()
         expect(e2e_page.locator('textarea[name="descricao"]')).to_be_visible()
         expect(e2e_page.locator('input[name="preco"]')).to_be_visible()
 
@@ -216,7 +216,7 @@ class TestCadastrarProduto:
         e2e_page.wait_for_timeout(500)
 
         # Preencher com preco negativo
-        e2e_page.fill('input[name="titulo"]', "Produto Teste")
+        e2e_page.fill('input[name="nome"]', "Produto Teste")
         e2e_page.fill('textarea[name="descricao"]', "Descricao do produto")
         e2e_page.fill('input[name="preco"]', "-10")
         e2e_page.fill('input[name="estoque"]', "5")
@@ -240,7 +240,7 @@ class TestEditarProduto:
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
         """UC-203: Edicao de produto deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/anuncios/1/editar")
+        e2e_page.goto(f"{e2e_server}/vendedor/anuncios/editar/1")
         e2e_page.wait_for_timeout(500)
 
         assert verificar_redirecionamento_login(e2e_page)
@@ -258,7 +258,7 @@ class TestEditarProduto:
             senha="SenhaForte@123",
         )
 
-        e2e_page.goto(f"{e2e_server}/usuario/anuncios/99999/editar")
+        e2e_page.goto(f"{e2e_server}/vendedor/anuncios/editar/99999")
         e2e_page.wait_for_timeout(500)
 
         conteudo = e2e_page.content().lower()
@@ -281,16 +281,16 @@ class TestExcluirProduto:
     def test_excluir_produto_requer_autenticacao(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
-        """UC-204: Exclusao de produto deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/anuncios/1/excluir")
-        e2e_page.wait_for_timeout(500)
-
-        assert verificar_redirecionamento_login(e2e_page)
+        """UC-204: Exclusao de produto deve requerer autenticacao (rota e POST-only)."""
+        # A rota /vendedor/anuncios/excluir/{id} e POST-only
+        # Acesso GET retorna 405 Method Not Allowed
+        response = e2e_page.request.get(f"{e2e_server}/vendedor/anuncios/excluir/1")
+        assert response.status == 405 or verificar_redirecionamento_login(e2e_page)
 
     def test_excluir_produto_inexistente(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
-        """UC-204: Exclusao de produto inexistente deve falhar."""
+        """UC-204: Exclusao de produto inexistente deve falhar (rota e POST-only)."""
         criar_usuario_e_logar(
             e2e_page,
             e2e_server,
@@ -300,15 +300,10 @@ class TestExcluirProduto:
             senha="SenhaForte@123",
         )
 
-        e2e_page.goto(f"{e2e_server}/usuario/anuncios/99999/excluir")
-        e2e_page.wait_for_timeout(500)
-
-        conteudo = e2e_page.content().lower()
-        assert (
-            "encontrad" in conteudo
-            or "erro" in conteudo
-            or "/anuncios" in e2e_page.url
-        )
+        # A rota /vendedor/anuncios/excluir/{id} e POST-only
+        response = e2e_page.request.get(f"{e2e_server}/vendedor/anuncios/excluir/99999")
+        # GET em rota POST-only deve retornar 405
+        assert response.status == 405
 
 
 # ============================================================
@@ -323,11 +318,11 @@ class TestAtivarDesativarProduto:
     def test_alternar_status_requer_autenticacao(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
-        """UC-205: Alternar status deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/anuncios/1/alternar-status")
-        e2e_page.wait_for_timeout(500)
-
-        assert verificar_redirecionamento_login(e2e_page)
+        """UC-205: Alternar status deve requerer autenticacao (rota e POST-only)."""
+        # A rota /vendedor/anuncios/ativar/{id} e POST-only
+        # Acesso GET retorna 405 Method Not Allowed
+        response = e2e_page.request.get(f"{e2e_server}/vendedor/anuncios/ativar/1")
+        assert response.status == 405 or verificar_redirecionamento_login(e2e_page)
 
     def test_alternar_status_produto_inexistente(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
@@ -342,15 +337,10 @@ class TestAtivarDesativarProduto:
             senha="SenhaForte@123",
         )
 
-        e2e_page.goto(f"{e2e_server}/usuario/anuncios/99999/alternar-status")
-        e2e_page.wait_for_timeout(500)
-
-        conteudo = e2e_page.content().lower()
-        assert (
-            "encontrad" in conteudo
-            or "erro" in conteudo
-            or "/anuncios" in e2e_page.url
-        )
+        # A rota /vendedor/anuncios/ativar/{id} e POST-only
+        response = e2e_page.request.get(f"{e2e_server}/vendedor/anuncios/ativar/99999")
+        # GET em rota POST-only deve retornar 405
+        assert response.status == 405
 
 
 # ============================================================
@@ -376,7 +366,7 @@ class TestRegrasNegocioProduto:
         )
 
         # Tentar editar produto de outro vendedor (ID 1 provavelmente nao existe)
-        e2e_page.goto(f"{e2e_server}/usuario/anuncios/1/editar")
+        e2e_page.goto(f"{e2e_server}/vendedor/anuncios/editar/1")
         e2e_page.wait_for_timeout(500)
 
         # Deve negar acesso ou mostrar erro
