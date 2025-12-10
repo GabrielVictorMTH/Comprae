@@ -23,12 +23,12 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-    <!-- Navbar Privada (Área Autenticada) - Animal Care Theme -->
-    <nav class="navbar navbar-expand-lg navbar-light" style="background: linear-gradient(135deg, rgba(230, 126, 74, 0.95) 0%, rgba(139, 115, 85, 0.95) 100%); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(230, 126, 74, 0.15);">
+    <!-- Navbar Privada (Área Autenticada) - Creative Marketplace Theme -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(124, 58, 237, 0.2);">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center fw-bold text-white" href="/usuario" style="font-size: 1.3rem;">
-                <span class="d-inline-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 10px;">
-                    <i class="bi bi-heart-fill" style="font-size: 1.3rem;"></i>
+                <span class="d-inline-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px; background: rgba(255,255,255,0.2); border-radius: 12px;">
+                    <i class="bi bi-palette-fill" style="font-size: 1.3rem;"></i>
                 </span>
                 {{ APP_NAME }}
             </a>
@@ -51,7 +51,7 @@
                         <a class="nav-link text-white {{ 'active fw-bold' if '/usuario/perfil/' in request.path else '' }}"
                             href="/usuario/perfil/visualizar"
                             {{ 'aria-current=page' if '/usuario/perfil/' in request.path else '' }}>
-                            <i class="bi bi-person-heart me-1"></i> Perfil
+                            <i class="bi bi-person-circle me-1"></i> Perfil
                         </a>
                     </li>
                     {% if usuario_logado and usuario_logado.perfil == 'Administrador' %}
@@ -72,7 +72,7 @@
                     <li class="nav-item">
                         <a class="nav-link text-white {{ 'active fw-bold' if '/admin/categorias/' in request.path else '' }}"
                            href="/admin/categorias/listar">
-                            <i class="bi bi-bookmark-heart me-1"></i> Categorias
+                            <i class="bi bi-collection me-1"></i> Categorias
                         </a>
                     </li>
                     <li class="nav-item dropdown">
@@ -125,32 +125,32 @@
     {% include 'components/chat_widget.html' %}
     {% endif %}
 
-    <!-- Footer - Animal Care Theme -->
-    <footer class="mt-auto" style="background: linear-gradient(135deg, #f5f1eb 0%, #faf8f5 100%); border-top: 1px solid rgba(230, 126, 74, 0.1);">
+    <!-- Footer - Creative Marketplace Theme -->
+    <footer class="mt-auto" style="background: linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%); border-top: 2px solid rgba(124, 58, 237, 0.1);">
         <div class="container py-4">
             <div class="row mb-3">
                 <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
-                    <h6 class="fw-bold mb-2" style="color: #E67E4A;">
-                        <i class="bi bi-heart-fill me-2"></i> {{ APP_NAME }}
+                    <h6 class="fw-bold mb-2" style="color: #7C3AED;">
+                        <i class="bi bi-palette-fill me-2"></i> {{ APP_NAME }}
                     </h6>
-                    <p class="small text-muted">Cuidando de quem você ama</p>
+                    <p class="small text-muted">Descubra arte original e única</p>
                 </div>
                 <div class="col-md-4 text-center mb-3 mb-md-0">
                     <div class="small text-muted">
-                        <a href="/sobre" class="text-decoration-none text-muted me-3" style="color: #E67E4A !important;">Sobre</a>
-                        <a href="/" class="text-decoration-none text-muted" style="color: #E67E4A !important;">Contato</a>
+                        <a href="/sobre" class="text-decoration-none text-muted me-3" style="color: #7C3AED !important;">Sobre</a>
+                        <a href="/" class="text-decoration-none text-muted" style="color: #7C3AED !important;">Contato</a>
                     </div>
                 </div>
                 <div class="col-md-4 text-center text-md-end">
                     <div class="small text-muted">
-                        <a href="#" class="text-decoration-none text-muted me-2" style="color: #E67E4A !important;"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="text-decoration-none text-muted me-2" style="color: #E67E4A !important;"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="text-decoration-none text-muted" style="color: #E67E4A !important;"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-decoration-none text-muted me-2" style="color: #7C3AED !important;"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-decoration-none text-muted me-2" style="color: #7C3AED !important;"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-decoration-none text-muted" style="color: #7C3AED !important;"><i class="bi bi-twitter"></i></a>
                     </div>
                 </div>
             </div>
-            <hr class="my-2" style="border-color: rgba(230, 126, 74, 0.1);">
-            <p class="mb-0 text-center small text-muted">&copy; 2025 {{ APP_NAME }}. Todos os direitos reservados. | <a href="#" class="text-decoration-none text-muted" style="color: #E67E4A !important;">Política de Privacidade</a></p>
+            <hr class="my-2" style="border-color: rgba(124, 58, 237, 0.1);">
+            <p class="mb-0 text-center small text-muted">&copy; 2025 {{ APP_NAME }}. Todos os direitos reservados. | <a href="#" class="text-decoration-none text-muted" style="color: #7C3AED !important;">Política de Privacidade</a></p>
         </div>
     </footer>
 

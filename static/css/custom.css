@@ -1,35 +1,37 @@
-/* ===== VARIÁVEIS DE CORES E DESIGN - ANIMAL CARE THEME ===== */
+/* ===== VARIÁVEIS DE CORES E DESIGN - CREATIVE MARKETPLACE THEME ===== */
 :root {
-    /* Paleta de cores - Warmth, Care & Nature */
-    --primary-color: #E67E4A;           /* Laranja caloroso - segurança e cuidado */
-    --secondary-color: #8B7355;         /* Marrom natural - estabilidade */
-    --success-color: #6BA344;           /* Verde natural - saúde e bem-estar */
-    --danger-color: #D64C5C;            /* Vermelho cuidadoso - atenção */
-    --warning-color: #F5A942;           /* Âmbar - alerta gentil */
-    --info-color: #4A9FB8;              /* Azul teal - confiança */
-    --light-color: #FAF8F5;             /* Branco quente - segurança */
-    --dark-color: #3D3D3D;              /* Cinza escuro - profissionalismo */
+    /* Paleta de cores - Criatividade, Sofisticação e Originalidade */
+    --primary-color: #7C3AED;           /* Púrpura vibrante - criatividade e inovação */
+    --secondary-color: #2D1B69;         /* Púrpura escuro - sofisticação */
+    --success-color: #10B981;           /* Verde esmeralda - crescimento e valor */
+    --danger-color: #DC2626;            /* Vermelho vibrante - atenção */
+    --warning-color: #F59E0B;           /* Âmbar quente - alerta */
+    --info-color: #0EA5E9;              /* Azul céu - inspiração */
+    --light-color: #F8FAFC;             /* Branco neutro - clareza */
+    --dark-color: #1E293B;              /* Cinza profundo - elegância */
 
-    /* Tons adicionais para tema animal */
-    --pet-orange: #E67E4A;              /* Laranja - energia positiva */
-    --pet-brown: #8B7355;               /* Marrom - natureza */
-    --pet-green: #6BA344;               /* Verde - saúde */
-    --pet-teal: #4A9FB8;                /* Teal - calma */
-    --pet-cream: #FFF5E6;               /* Creme - aconchego */
-    --pet-gold: #D4A574;                /* Ouro natural - valor */
+    /* Tons adicionais para criatividade */
+    --art-purple: #7C3AED;              /* Púrpura - criatividade */
+    --art-indigo: #4F46E5;              /* Índigo - profundidade */
+    --art-blue: #0EA5E9;                /* Azul - inspiração */
+    --art-pink: #EC4899;                /* Rosa - energia criativa */
+    --art-gold: #F59E0B;                /* Ouro - valor artístico */
+    --art-emerald: #10B981;             /* Esmeralda - exclusividade */
+    --art-slate: #64748B;               /* Slate - neutro elegante */
+    --art-cream: #FEF3C7;               /* Creme claro - sofisticação */
 
-    /* Gradientes modernos - Animal Care Theme */
-    --gradient-primary: linear-gradient(135deg, #E67E4A 0%, #D64C5C 100%);
-    --gradient-success: linear-gradient(135deg, #6BA344 0%, #8FBC4F 100%);
-    --gradient-warm: linear-gradient(135deg, #E67E4A 0%, #F5A942 100%);
-    --gradient-hero: linear-gradient(135deg, #E67E4A 0%, #D64C5C 50%, #8B7355 100%);
-    --gradient-calm: linear-gradient(135deg, #4A9FB8 0%, #6BA344 100%);
+    /* Gradientes modernos - Creative Theme */
+    --gradient-primary: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);
+    --gradient-success: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    --gradient-warm: linear-gradient(135deg, #F59E0B 0%, #EC4899 100%);
+    --gradient-hero: linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #0EA5E9 100%);
+    --gradient-cool: linear-gradient(135deg, #0EA5E9 0%, #7C3AED 100%);
 
-    /* Sombras - mais suave para sensação de cuidado */
-    --shadow-sm: 0 2px 8px rgba(230, 126, 74, 0.08);
-    --shadow-md: 0 4px 16px rgba(230, 126, 74, 0.12);
-    --shadow-lg: 0 8px 28px rgba(230, 126, 74, 0.15);
-    --shadow-xl: 0 12px 48px rgba(230, 126, 74, 0.18);
+    /* Sombras - elegantes e sofisticadas */
+    --shadow-sm: 0 2px 8px rgba(124, 58, 237, 0.08);
+    --shadow-md: 0 4px 16px rgba(124, 58, 237, 0.12);
+    --shadow-lg: 0 8px 28px rgba(124, 58, 237, 0.15);
+    --shadow-xl: 0 12px 48px rgba(124, 58, 237, 0.18);
 
     /* Transições */
     --transition-fast: 0.15s ease;
@@ -235,7 +237,7 @@
 .product-card .price-tag {
     font-size: 1.25rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -270,18 +272,18 @@
 }
 
 .feature-icon-primary {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
-    color: #667eea;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+    color: #7C3AED;
 }
 
 .feature-icon-success {
     background: linear-gradient(135deg, rgba(17, 153, 142, 0.15) 0%, rgba(56, 239, 125, 0.15) 100%);
-    color: #11998e;
+    color: #10B981;
 }
 
 .feature-icon-warning {
     background: linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 152, 0, 0.15) 100%);
-    color: #ff9800;
+    color: #F59E0B;
 }
 
 /* ===== SEÇÃO CTA MODERNIZADA ===== */
@@ -321,8 +323,8 @@
 }
 
 .advantage-card-seller {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
-    border: 1px solid rgba(102, 126, 234, 0.2);
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+    border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 /* ===== FAQ ACCORDION MODERNIZADO ===== */
@@ -342,8 +344,8 @@
 }
 
 .accordion-modern .accordion-button:not(.collapsed) {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-    color: #667eea;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    color: #7C3AED;
 }
 
 .accordion-modern .accordion-button:focus {
@@ -358,8 +360,8 @@
 /* ===== NAVBAR GLASS EFFECT ===== */
 .navbar-glass {
     backdrop-filter: blur(10px);
-    background: rgba(230, 126, 74, 0.95) !important;
-    box-shadow: 0 4px 20px rgba(230, 126, 74, 0.15);
+    background: rgba(124, 58, 237, 0.95) !important;
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
 }
 
 /* ===== BOTÕES MODERNIZADOS ===== */
@@ -372,7 +374,7 @@
 
 .btn-gradient-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(230, 126, 74, 0.4);
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
     color: #fff;
 }
 
@@ -422,8 +424,8 @@
 }
 
 .auth-card .form-control:focus {
-    border-color: #E67E4A;
-    box-shadow: 0 0 0 4px rgba(230, 126, 74, 0.1);
+    border-color: #7C3AED;
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
 }
 
 .auth-card .btn-primary {
@@ -472,13 +474,13 @@
 }
 
 .badge-soft-primary {
-    background: rgba(102, 126, 234, 0.15);
-    color: #667eea;
+    background: rgba(124, 58, 237, 0.15);
+    color: #7C3AED;
 }
 
 .badge-soft-success {
     background: rgba(17, 153, 142, 0.15);
-    color: #11998e;
+    color: #10B981;
 }
 
 /* ===== PÁGINA SOBRE ===== */
@@ -548,20 +550,20 @@
 
 /* Badges atualizados para tema animal */
 .badge-pet-orange {
-    background: rgba(230, 126, 74, 0.15);
-    color: #E67E4A;
-    border: 1px solid rgba(230, 126, 74, 0.3);
+    background: rgba(124, 58, 237, 0.15);
+    color: #7C3AED;
+    border: 1px solid rgba(124, 58, 237, 0.3);
 }
 
 .badge-pet-green {
     background: rgba(107, 163, 68, 0.15);
-    color: #6BA344;
+    color: #10B981;
     border: 1px solid rgba(107, 163, 68, 0.3);
 }
 
 .badge-pet-brown {
     background: rgba(139, 115, 85, 0.15);
-    color: #8B7355;
+    color: #2D1B69;
     border: 1px solid rgba(139, 115, 85, 0.3);
 }
 
@@ -603,7 +605,7 @@
 
 .pet-health-good {
     background: rgba(107, 163, 68, 0.1);
-    color: #6BA344;
+    color: #10B981;
     border: 1px solid rgba(107, 163, 68, 0.3);
 }
 
@@ -622,19 +624,19 @@
 /* Cards de informação - acessórios, alimentos, etc */
 .info-card {
     background: linear-gradient(135deg, #FFF5E6 0%, rgba(255, 255, 255, 0.8) 100%);
-    border: 1px solid rgba(230, 126, 74, 0.2);
+    border: 1px solid rgba(124, 58, 237, 0.2);
     border-radius: 1.25rem;
     padding: 1.5rem;
     transition: all var(--transition-normal);
 }
 
 .info-card:hover {
-    border-color: rgba(230, 126, 74, 0.4);
-    box-shadow: 0 4px 16px rgba(230, 126, 74, 0.1);
+    border-color: rgba(124, 58, 237, 0.4);
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.1);
 }
 
 .info-card-title {
-    color: #E67E4A;
+    color: #7C3AED;
     font-weight: 600;
     margin-bottom: 0.75rem;
 }
@@ -642,13 +644,13 @@
 /* Seção de cuidados - dicas */
 .care-tips-section {
     background: linear-gradient(135deg, rgba(107, 163, 68, 0.05) 0%, rgba(74, 159, 184, 0.05) 100%);
-    border-left: 4px solid #6BA344;
+    border-left: 4px solid #10B981;
     border-radius: 0.75rem;
     padding: 1.5rem;
 }
 
 .care-tips-section h3 {
-    color: #6BA344;
+    color: #10B981;
     font-weight: 600;
     margin-bottom: 1rem;
 }
@@ -658,8 +660,8 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    border: 3px solid #E67E4A;
-    box-shadow: 0 4px 12px rgba(230, 126, 74, 0.2);
+    border: 3px solid #7C3AED;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -713,9 +715,9 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #E67E4A;
+    background: #7C3AED;
     border: 3px solid #fff;
-    box-shadow: 0 0 0 2px #E67E4A;
+    box-shadow: 0 0 0 2px #7C3AED;
 }
 
 .timeline-item:not(:last-child)::after {
@@ -791,7 +793,7 @@
 
 .alert-care-success {
     background: rgba(107, 163, 68, 0.1);
-    border-left-color: #6BA344;
+    border-left-color: #10B981;
     color: #5a8c38;
 }
 
@@ -824,7 +826,7 @@
     top: -10px;
     left: 1rem;
     font-size: 3rem;
-    color: #E67E4A;
+    color: #7C3AED;
     opacity: 0.3;
 }
 
@@ -854,8 +856,8 @@
 
 .dropdown-custom .dropdown-item:hover {
     background: #FFF5E6;
-    border-left-color: #E67E4A;
-    color: #E67E4A;
+    border-left-color: #7C3AED;
+    color: #7C3AED;
 }
 
 .dropdown-custom .dropdown-divider {
@@ -874,13 +876,13 @@
 }
 
 .feature-icon-primary {
-    background: linear-gradient(135deg, rgba(230, 126, 74, 0.15) 0%, rgba(214, 76, 92, 0.15) 100%);
-    color: #E67E4A;
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(214, 76, 92, 0.15) 100%);
+    color: #7C3AED;
 }
 
 .feature-icon-success {
     background: linear-gradient(135deg, rgba(107, 163, 68, 0.15) 0%, rgba(143, 188, 79, 0.15) 100%);
-    color: #6BA344;
+    color: #10B981;
 }
 
 .feature-icon-warning {
