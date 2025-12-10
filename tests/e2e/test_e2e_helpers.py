@@ -193,7 +193,7 @@ class HomePage:
     def __init__(self, page: Page, base_url: str):
         self.page = page
         self.base_url = base_url
-        self.url = f"{base_url}/home"
+        self.url = f"{base_url}/"
 
     def navegar(self) -> None:
         """Navega para a pagina inicial."""
@@ -201,7 +201,9 @@ class HomePage:
 
     def esta_na_home(self) -> bool:
         """Verifica se esta na pagina inicial."""
-        return "/home" in self.page.url or self.page.url.rstrip("/") == self.base_url
+        url = self.page.url.rstrip("/")
+        base = self.base_url.rstrip("/")
+        return url == base or "/index" in self.page.url
 
 
 class SobrePage:
@@ -218,12 +220,12 @@ class SobrePage:
 
 
 class ProdutosPage:
-    """Page Object para a pagina de produtos."""
+    """Page Object para a pagina de produtos (anuncios)."""
 
     def __init__(self, page: Page, base_url: str):
         self.page = page
         self.base_url = base_url
-        self.url = f"{base_url}/produtos"
+        self.url = f"{base_url}/anuncios"
 
     def navegar(self) -> None:
         """Navega para a pagina de produtos."""
@@ -231,7 +233,7 @@ class ProdutosPage:
 
     def buscar(self, termo: str) -> None:
         """Realiza busca por termo."""
-        self.page.fill('input[name="q"]', termo)
+        self.page.fill('input[name="busca"]', termo)
         self.page.locator('button[type="submit"]').first.click()
 
     def visualizar_produto(self, indice: int = 0) -> None:
@@ -251,13 +253,17 @@ class PerfilPage:
         """Navega para a pagina de perfil."""
         self.page.goto(self.url)
 
+    def navegar_visualizar(self) -> None:
+        """Navega para visualizacao do perfil."""
+        self.page.goto(f"{self.base_url}/usuario/perfil/visualizar")
+
     def navegar_editar(self) -> None:
         """Navega para edicao de perfil."""
-        self.page.goto(f"{self.base_url}/usuario/editar")
+        self.page.goto(f"{self.base_url}/usuario/perfil/editar")
 
     def navegar_alterar_senha(self) -> None:
         """Navega para alteracao de senha."""
-        self.page.goto(f"{self.base_url}/usuario/alterar-senha")
+        self.page.goto(f"{self.base_url}/usuario/perfil/alterar-senha")
 
     def preencher_edicao(self, nome: str, email: str) -> None:
         """Preenche formulario de edicao."""
@@ -297,16 +303,18 @@ class EnderecoPage:
         complemento: str,
         bairro: str,
         cidade: str,
-        estado: str,
+        uf: str,
+        titulo: str = "Casa",
     ) -> None:
         """Preenche formulario de endereco."""
-        self.page.fill('input[name="cep"]', cep)
+        self.page.fill('input[name="titulo"]', titulo)
         self.page.fill('input[name="logradouro"]', logradouro)
         self.page.fill('input[name="numero"]', numero)
         self.page.fill('input[name="complemento"]', complemento)
         self.page.fill('input[name="bairro"]', bairro)
         self.page.fill('input[name="cidade"]', cidade)
-        self.page.select_option('select[name="estado"]', estado)
+        self.page.select_option('select[name="uf"]', uf)
+        self.page.fill('input[name="cep"]', cep)
 
     def submeter(self) -> None:
         """Submete o formulario."""
@@ -571,7 +579,7 @@ class RecuperarSenhaPage:
     def __init__(self, page: Page, base_url: str):
         self.page = page
         self.base_url = base_url
-        self.url = f"{base_url}/recuperar-senha"
+        self.url = f"{base_url}/esqueci-senha"
 
     def navegar(self) -> None:
         """Navega para pagina de recuperacao."""

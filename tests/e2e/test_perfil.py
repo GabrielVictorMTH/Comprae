@@ -100,7 +100,7 @@ class TestVisualizarPerfil:
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
         """UC-102: Pagina de perfil deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/perfil")
+        e2e_page.goto(f"{e2e_server}/usuario/perfil/visualizar")
         e2e_page.wait_for_timeout(500)
 
         assert verificar_redirecionamento_login(e2e_page)
@@ -141,7 +141,7 @@ class TestEditarPerfil:
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
         """UC-103: Edicao de perfil deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/editar")
+        e2e_page.goto(f"{e2e_server}/usuario/perfil/editar")
         e2e_page.wait_for_timeout(500)
 
         assert verificar_redirecionamento_login(e2e_page)
@@ -233,7 +233,7 @@ class TestAlterarSenha:
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
         """UC-104: Alteracao de senha deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/alterar-senha")
+        e2e_page.goto(f"{e2e_server}/usuario/perfil/alterar-senha")
         e2e_page.wait_for_timeout(500)
 
         assert verificar_redirecionamento_login(e2e_page)
@@ -257,7 +257,7 @@ class TestAlterarSenha:
 
         # Deve ter campos de senha
         expect(e2e_page.locator('input[name="senha_atual"]')).to_be_visible()
-        expect(e2e_page.locator('input[name="nova_senha"]')).to_be_visible()
+        expect(e2e_page.locator('input[name="senha_nova"]')).to_be_visible()
 
     def test_alterar_senha_com_sucesso(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
@@ -265,7 +265,7 @@ class TestAlterarSenha:
         """UC-104: Deve permitir alterar senha com senha atual correta."""
         email = "alterar_sucesso@example.com"
         senha_antiga = "SenhaForte@123"
-        senha_nova = "NovaSenha@456"
+        nova_senha = "NovaSenha@456"
 
         criar_usuario_e_logar(
             e2e_page,
@@ -280,10 +280,10 @@ class TestAlterarSenha:
         perfil.navegar_alterar_senha()
         e2e_page.wait_for_timeout(500)
 
-        # Preencher formulario
+        # Preencher formulario com nomes corretos
         e2e_page.fill('input[name="senha_atual"]', senha_antiga)
-        e2e_page.fill('input[name="nova_senha"]', senha_nova)
-        e2e_page.fill('input[name="confirmar_nova_senha"]', senha_nova)
+        e2e_page.fill('input[name="senha_nova"]', nova_senha)
+        e2e_page.fill('input[name="confirmar_senha"]', nova_senha)
         perfil.submeter()
         e2e_page.wait_for_timeout(500)
 
@@ -307,10 +307,10 @@ class TestAlterarSenha:
         perfil.navegar_alterar_senha()
         e2e_page.wait_for_timeout(500)
 
-        # Tentar com senha atual errada
+        # Tentar com senha atual errada (nomes corretos)
         e2e_page.fill('input[name="senha_atual"]', "SenhaErrada@123")
-        e2e_page.fill('input[name="nova_senha"]', "NovaSenha@456")
-        e2e_page.fill('input[name="confirmar_nova_senha"]', "NovaSenha@456")
+        e2e_page.fill('input[name="senha_nova"]', "NovaSenha@456")
+        e2e_page.fill('input[name="confirmar_senha"]', "NovaSenha@456")
         perfil.submeter()
         e2e_page.wait_for_timeout(500)
 
@@ -330,8 +330,10 @@ class TestAtualizarFotoPerfil:
     def test_foto_perfil_requer_autenticacao(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
     ):
-        """UC-105: Upload de foto deve requerer autenticacao."""
-        e2e_page.goto(f"{e2e_server}/usuario/foto")
+        """UC-105: Pagina de edicao (onde fica foto) deve requerer autenticacao."""
+        # A foto e atualizada via POST em /usuario/perfil/atualizar-foto
+        # Testamos a pagina de edicao onde o campo de foto estaria
+        e2e_page.goto(f"{e2e_server}/usuario/perfil/editar")
         e2e_page.wait_for_timeout(500)
 
         assert verificar_redirecionamento_login(e2e_page)

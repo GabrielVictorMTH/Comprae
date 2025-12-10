@@ -49,9 +49,9 @@ class TestVisualizarPaginaInicial:
         page = HomePage(e2e_page, e2e_server)
         page.navegar()
 
-        # Verifica se existe algum elemento de logo/marca
+        # Verifica se existe algum elemento de logo/marca (compraê ou comprae)
         conteudo = e2e_page.content().lower()
-        assert "comprae" in conteudo
+        assert "comprae" in conteudo or "compraê" in conteudo
 
     def test_pagina_inicial_exibe_navegacao(
         self, e2e_page: Page, e2e_server: str
@@ -126,11 +126,11 @@ class TestNavegarPorProdutos:
     def test_pagina_produtos_carrega_corretamente(
         self, e2e_page: Page, e2e_server: str
     ):
-        """UC-003: Deve carregar a pagina de produtos."""
+        """UC-003: Deve carregar a pagina de produtos (anuncios)."""
         page = ProdutosPage(e2e_page, e2e_server)
         page.navegar()
 
-        assert "/produtos" in e2e_page.url
+        assert "/anuncios" in e2e_page.url
 
     def test_pagina_produtos_exibe_campo_busca(
         self, e2e_page: Page, e2e_server: str
@@ -140,7 +140,7 @@ class TestNavegarPorProdutos:
         page.navegar()
 
         # Deve ter um campo de busca
-        campo_busca = e2e_page.locator('input[name="q"]')
+        campo_busca = e2e_page.locator('input[name="busca"]')
         expect(campo_busca).to_be_visible()
 
     def test_pagina_produtos_permite_busca(
@@ -154,7 +154,7 @@ class TestNavegarPorProdutos:
         page.buscar("teste")
 
         # Deve permanecer na pagina de produtos com parametro de busca
-        assert "/produtos" in e2e_page.url
+        assert "/anuncios" in e2e_page.url
 
     def test_pagina_produtos_exibe_listagem(
         self, e2e_page: Page, e2e_server: str
@@ -165,7 +165,7 @@ class TestNavegarPorProdutos:
 
         # Deve ter container para produtos (mesmo vazio)
         conteudo = e2e_page.content().lower()
-        assert "produto" in conteudo
+        assert "anuncio" in conteudo or "anúncio" in conteudo
 
 
 # ============================================================
@@ -182,7 +182,7 @@ class TestVisualizarDetalhesProduto:
     ):
         """UC-004: A rota de detalhes do produto deve existir."""
         # Tenta acessar um produto (mesmo inexistente)
-        e2e_page.goto(f"{e2e_server}/produtos/1")
+        e2e_page.goto(f"{e2e_server}/anuncios/1")
 
         # Deve redirecionar ou mostrar mensagem (nao dar erro 500)
         assert e2e_page.url is not None
@@ -191,7 +191,7 @@ class TestVisualizarDetalhesProduto:
         self, e2e_page: Page, e2e_server: str
     ):
         """UC-004: Produto inexistente deve exibir mensagem apropriada."""
-        e2e_page.goto(f"{e2e_server}/produtos/99999")
+        e2e_page.goto(f"{e2e_server}/anuncios/99999")
         e2e_page.wait_for_timeout(500)
 
         # Deve mostrar mensagem de erro ou redirecionar
@@ -199,7 +199,7 @@ class TestVisualizarDetalhesProduto:
         # Pode ter sido redirecionado ou mostrar erro
         assert (
             "encontrad" in conteudo
-            or "/produtos" in e2e_page.url
+            or "/anuncios" in e2e_page.url
             or "erro" in conteudo
         )
 
@@ -220,7 +220,7 @@ class TestSolicitarRecuperacaoSenha:
         page = RecuperarSenhaPage(e2e_page, e2e_server)
         page.navegar()
 
-        assert "/recuperar-senha" in e2e_page.url
+        assert "/esqueci-senha" in e2e_page.url
 
     def test_pagina_recuperar_senha_exibe_formulario(
         self, e2e_page: Page, e2e_server: str
@@ -230,7 +230,7 @@ class TestSolicitarRecuperacaoSenha:
         page.navegar()
 
         expect(e2e_page.locator('input[name="email"]')).to_be_visible()
-        expect(e2e_page.locator('button[type="submit"]')).to_be_visible()
+        expect(e2e_page.locator('form button[type="submit"]').first).to_be_visible()
 
     def test_solicitar_recuperacao_email_invalido(
         self, e2e_page: Page, e2e_server: str
@@ -244,7 +244,7 @@ class TestSolicitarRecuperacaoSenha:
         e2e_page.wait_for_timeout(500)
 
         # Deve permanecer na pagina ou mostrar erro
-        assert "/recuperar-senha" in e2e_page.url
+        assert "/esqueci-senha" in e2e_page.url
 
     def test_solicitar_recuperacao_email_nao_cadastrado(
         self, e2e_page: Page, e2e_server: str, limpar_banco_e2e
@@ -302,7 +302,7 @@ class TestRedefinirSenha:
             or "invalido" in conteudo
             or "expirado" in conteudo
             or "/login" in e2e_page.url
-            or "/recuperar-senha" in e2e_page.url
+            or "/esqueci-senha" in e2e_page.url
         )
 
 
@@ -322,12 +322,12 @@ class TestNavegacaoPublica:
         e2e_page.goto(e2e_server)
         e2e_page.wait_for_timeout(300)
 
-        # Clicar em link de produtos
-        link = e2e_page.get_by_role("link", name="Produtos")
+        # Clicar em link de anuncios (navbar tem "anuncios")
+        link = e2e_page.locator('a[href="/anuncios"]').first
         if link.is_visible():
             link.click()
             e2e_page.wait_for_timeout(500)
-            assert "/produtos" in e2e_page.url
+            assert "/anuncios" in e2e_page.url
 
     def test_navegacao_home_para_login(
         self, e2e_page: Page, e2e_server: str
@@ -336,11 +336,8 @@ class TestNavegacaoPublica:
         e2e_page.goto(e2e_server)
         e2e_page.wait_for_timeout(300)
 
-        # Clicar em link de login/entrar
-        link = e2e_page.get_by_role("link", name="Entrar")
-        if not link.is_visible():
-            link = e2e_page.get_by_role("link", name="Login")
-
+        # Clicar em link de login (navbar tem "login")
+        link = e2e_page.locator('a[href="/login"]').first
         if link.is_visible():
             link.click()
             e2e_page.wait_for_timeout(500)
@@ -368,8 +365,8 @@ class TestNavegacaoPublica:
         e2e_page.wait_for_timeout(300)
 
         # Clicar em link de esqueci senha
-        link = e2e_page.get_by_text("Esqueceu sua senha?")
+        link = e2e_page.locator('a[href="/esqueci-senha"]')
         if link.is_visible():
             link.click()
             e2e_page.wait_for_timeout(500)
-            assert "/recuperar-senha" in e2e_page.url
+            assert "/esqueci-senha" in e2e_page.url
