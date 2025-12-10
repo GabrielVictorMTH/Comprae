@@ -9,14 +9,14 @@
         <div class="col-12 col-md-6 col-lg-5">
             <!-- Header com icone -->
             <div class="text-center mb-5">
-                <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(245, 169, 66, 0.2) 0%, rgba(212, 165, 116, 0.2) 100%); border-radius: 20px;">
-                    <i class="bi bi-key-fill" style="font-size: 2.5rem; color: #F5A942;"></i>
+                <div style="width: 80px; height: 80px; margin: 0 auto 1.5rem; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, rgba(245, 169, 66, 0.2) 0%, rgba(236, 72, 153, 0.2) 100%); border-radius: 20px;">
+                    <i class="bi bi-key-fill" style="font-size: 2.5rem; color: #F59E0B;"></i>
                 </div>
-                <h2 class="fw-bold" style="color: #3D3D3D;">Recuperar Senha</h2>
-                <p class="text-muted">Não se preocupe, ajudamos você a recuperar o acesso</p>
+                <h2 class="fw-bold" style="color: #1E293B;">Recuperar Acesso</h2>
+                <p class="text-muted">Sem problemas! Vamos ajudar você a recuperar sua conta</p>
             </div>
 
-            <div class="card auth-card" style="border: 1px solid rgba(230, 126, 74, 0.1);">
+            <div class="card auth-card" style="border: 1px solid rgba(124, 58, 237, 0.15);">
                 <form method="POST" action="/esqueci-senha">
                     {{ csrf_input() }}
                     <div class="card-body p-4">
@@ -32,8 +32,8 @@
                             </div>
 
                             <div class="col-12">
-                                <label for="email" class="form-label fw-semibold" style="color: #3D3D3D;">
-                                    <i class="bi bi-envelope me-2" style="color: #E67E4A;"></i>E-mail
+                                <label for="email" class="form-label fw-semibold" style="color: #1E293B;">
+                                    <i class="bi bi-envelope me-2" style="color: #7C3AED;"></i>E-mail
                                 </label>
                                 {{ field(name='email', label='', type='email', required=true, autofocus=true, placeholder='seu@email.com') }}
                             </div>
@@ -42,11 +42,11 @@
                     <div class="card-footer bg-transparent border-0 p-4">
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-gradient-primary btn-lg fw-semibold">
-                                <i class="bi bi-envelope me-2"></i> Enviar Link
+                                <i class="bi bi-envelope me-2"></i>Enviar Link
                             </button>
 
-                            <a href="/login" class="btn btn-outline-secondary">
-                                <i class="bi bi-arrow-left me-2"></i> Voltar ao Login
+                            <a href="/login" class="btn btn-outline-secondary fw-semibold" style="color: #7C3AED; border-color: #7C3AED;">
+                                <i class="bi bi-arrow-left me-2"></i>Voltar ao Login
                             </a>
                         </div>
                     </div>
@@ -54,9 +54,9 @@
             </div>
 
             <!-- Info de segurança -->
-            <div style="margin-top: 2rem; padding: 1rem; background: rgba(245, 169, 66, 0.08); border: 1px solid rgba(245, 169, 66, 0.2); border-radius: 0.75rem; text-align: center;">
+            <div style="margin-top: 2rem; padding: 1rem; background: rgba(124, 58, 237, 0.08); border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 0.75rem; text-align: center;">
                 <p class="small text-muted mb-0">
-                    <i class="bi bi-info-circle me-1" style="color: #F5A942;"></i>
+                    <i class="bi bi-info-circle me-1" style="color: #7C3AED;"></i>
                     O link de recuperação expira em 24 horas por segurança
                 </p>
             </div>
