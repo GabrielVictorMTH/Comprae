@@ -8,71 +8,71 @@
         <!-- Cabeçalho -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold" style="color: #3D3D3D;">
-                    <i class="bi bi-shop-window me-2" style="color: #E67E4A;"></i>Meus Anúncios
+                <h2 class="fw-bold" style="color: #1E293B;">
+                    <i class="bi bi-palette-fill me-2" style="color: #7C3AED;"></i>Minhas Obras
                 </h2>
-                <p class="text-muted mb-0">Gerenciar produtos para venda</p>
+                <p class="text-muted mb-0">Gerenciar suas criações artísticas</p>
             </div>
             <a href="/vendedor/anuncios/cadastrar" class="btn btn-gradient-primary fw-semibold">
-                <i class="bi bi-plus-circle me-2"></i>Novo Anúncio
+                <i class="bi bi-plus-circle me-2"></i>Nova Obra
             </a>
         </div>
 
         {% include "components/alerta_erro.html" %}
 
         {% if anuncios %}
-        <!-- Tabela de Anúncios -->
-        <div class="card shadow-sm" style="border: 1px solid rgba(230, 126, 74, 0.2); border-radius: 15px;">
+        <!-- Tabela de Obras -->
+        <div class="card shadow-sm" style="border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 15px;">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
-                    <thead style="background: linear-gradient(135deg, rgba(230, 126, 74, 0.1) 0%, rgba(107, 163, 68, 0.1) 100%); border-bottom: 2px solid rgba(230, 126, 74, 0.2);">
+                    <thead style="background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%); border-bottom: 2px solid rgba(124, 58, 237, 0.2);">
                         <tr>
-                            <th style="width: 80px; color: #3D3D3D; font-weight: 600;">Foto</th>
-                            <th style="color: #3D3D3D; font-weight: 600;">Nome</th>
-                            <th style="color: #3D3D3D; font-weight: 600;">Categoria</th>
-                            <th class="text-end" style="color: #3D3D3D; font-weight: 600;">Preço</th>
-                            <th class="text-center" style="color: #3D3D3D; font-weight: 600;">Estoque</th>
-                            <th class="text-center" style="color: #3D3D3D; font-weight: 600;">Status</th>
-                            <th class="text-center" style="width: 150px; color: #3D3D3D; font-weight: 600;">Ações</th>
+                            <th style="width: 80px; color: #1E293B; font-weight: 600;">Imagem</th>
+                            <th style="color: #1E293B; font-weight: 600;">Título</th>
+                            <th style="color: #1E293B; font-weight: 600;">Tipo</th>
+                            <th class="text-end" style="color: #1E293B; font-weight: 600;">Preço</th>
+                            <th class="text-center" style="color: #1E293B; font-weight: 600;">Quantidade</th>
+                            <th class="text-center" style="color: #1E293B; font-weight: 600;">Status</th>
+                            <th class="text-center" style="width: 150px; color: #1E293B; font-weight: 600;">Ações</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for anuncio in anuncios %}
-                        <tr style="border-bottom: 1px solid rgba(230, 126, 74, 0.1);">
+                        <tr style="border-bottom: 1px solid rgba(124, 58, 237, 0.1);">
                             <td>
                                 <img src="{{ anuncio.id|foto_anuncio }}" alt="{{ anuncio.nome }}"
-                                    class="rounded" width="60" height="60" style="object-fit: cover; border: 2px solid rgba(230, 126, 74, 0.2);">
+                                    class="rounded" width="60" height="60" style="object-fit: cover; border: 2px solid rgba(124, 58, 237, 0.2);">
                             </td>
                             <td>
-                                <strong style="color: #3D3D3D;">{{ anuncio.nome }}</strong>
+                                <strong style="color: #1E293B;">{{ anuncio.nome }}</strong>
                                 {% if anuncio.descricao %}
                                 <br><small class="text-muted">{{ anuncio.descricao[:50] }}{% if anuncio.descricao|length > 50 %}...{% endif %}</small>
                                 {% endif %}
                             </td>
                             <td>
-                                <span class="badge badge-pet-brown">{{ anuncio.nome_categoria or 'Sem categoria' }}</span>
+                                <span class="badge" style="background: rgba(236, 72, 153, 0.2); color: #EC4899;">{{ anuncio.nome_categoria or 'Sem categoria' }}</span>
                             </td>
                             <td class="text-end">
-                                <strong style="background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">R$ {{ "%.2f"|format(anuncio.preco)|replace('.', ',') }}</strong>
+                                <strong style="background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">R$ {{ "%.2f"|format(anuncio.preco)|replace('.', ',') }}</strong>
                             </td>
                             <td class="text-center">
                                 {% if anuncio.estoque > 0 %}
-                                <span class="badge badge-pet-green">{{ anuncio.estoque }} un.</span>
+                                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10B981;">{{ anuncio.estoque }} un.</span>
                                 {% else %}
-                                <span class="badge" style="background: rgba(214, 76, 92, 0.2); color: #D64C5C;">Esgotado</span>
+                                <span class="badge" style="background: rgba(220, 38, 38, 0.2); color: #DC2626;">Esgotado</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
                                 {% if anuncio.ativo %}
-                                <span class="badge badge-pet-green"><i class="bi bi-check-circle me-1"></i>Ativo</span>
+                                <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #10B981;"><i class="bi bi-check-circle me-1"></i>Ativa</span>
                                 {% else %}
-                                <span class="badge badge-pet-orange"><i class="bi bi-pause-circle me-1"></i>Inativo</span>
+                                <span class="badge" style="background: rgba(124, 58, 237, 0.2); color: #7C3AED;"><i class="bi bi-pause-circle me-1"></i>Inativa</span>
                                 {% endif %}
                             </td>
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm">
                                     <a href="/vendedor/anuncios/editar/{{ anuncio.id }}"
-                                       class="btn btn-outline-primary fw-semibold" title="Editar" style="color: #E67E4A; border-color: #E67E4A;">
+                                       class="btn btn-outline-primary fw-semibold" title="Editar" style="color: #7C3AED; border-color: #7C3AED;">
                                         <i class="bi bi-pencil"></i>
                                     </a>
                                     <form action="/vendedor/anuncios/ativar/{{ anuncio.id }}" method="post" class="d-inline">
@@ -80,12 +80,12 @@
                                         <button type="submit"
                                                 class="btn btn-outline-{% if anuncio.ativo %}warning{% else %}success{% endif %} fw-semibold"
                                                 title="{% if anuncio.ativo %}Desativar{% else %}Ativar{% endif %}"
-                                                style="{% if anuncio.ativo %}color: #F5A942; border-color: #F5A942;{% else %}color: #6BA344; border-color: #6BA344;{% endif %}">
+                                                style="{% if anuncio.ativo %}color: #F59E0B; border-color: #F59E0B;{% else %}color: #10B981; border-color: #10B981;{% endif %}">
                                             <i class="bi bi-{% if anuncio.ativo %}pause{% else %}play{% endif %}-circle"></i>
                                         </button>
                                     </form>
                                     <button type="button" class="btn btn-outline-danger fw-semibold" title="Excluir"
-                                            style="color: #D64C5C; border-color: #D64C5C;"
+                                            style="color: #DC2626; border-color: #DC2626;"
                                             data-bs-toggle="modal" data-bs-target="#modalExcluir{{ anuncio.id }}">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -128,22 +128,22 @@
 
         <!-- Resumo -->
         <div class="mt-3">
-            <span class="badge badge-pet-orange px-3 py-2" style="border-radius: 20px;">
-                <i class="bi bi-shop me-1"></i>Total: {{ anuncios|length }} anúncio(s)
+            <span class="badge px-3 py-2" style="border-radius: 20px; background: rgba(124, 58, 237, 0.2); color: #7C3AED;">
+                <i class="bi bi-palette-fill me-1"></i>Total: {{ anuncios|length }} obra(s)
             </span>
         </div>
 
         {% else %}
         <!-- Estado Vazio -->
-        <div class="card shadow-sm" style="border: 1px solid rgba(230, 126, 74, 0.2); border-radius: 15px;">
+        <div class="card shadow-sm" style="border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 15px;">
             <div class="card-body text-center py-5">
-                <div style="font-size: 4rem; color: rgba(230, 126, 74, 0.3); margin-bottom: 1rem;">
-                    <i class="bi bi-shop-window"></i>
+                <div style="font-size: 4rem; color: rgba(124, 58, 237, 0.3); margin-bottom: 1rem;">
+                    <i class="bi bi-palette"></i>
                 </div>
-                <h4 class="mt-3 fw-bold" style="color: #3D3D3D;">Nenhum anúncio cadastrado</h4>
-                <p class="text-muted">Comece a vender criando seu primeiro anúncio!</p>
+                <h4 class="mt-3 fw-bold" style="color: #1E293B;">Nenhuma obra cadastrada</h4>
+                <p class="text-muted">Comece compartilhando sua primeira obra de arte!</p>
                 <a href="/vendedor/anuncios/cadastrar" class="btn btn-gradient-primary btn-lg fw-semibold">
-                    <i class="bi bi-plus-circle me-2"></i>Criar Primeiro Anúncio
+                    <i class="bi bi-plus-circle me-2"></i>Compartilhar Primeira Obra
                 </a>
             </div>
         </div>
