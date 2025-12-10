@@ -8,30 +8,30 @@
         <!-- Cabeçalho -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold" style="color: #3D3D3D;">
-                    <i class="bi bi-geo-alt-fill me-2" style="color: #E67E4A;"></i>Meu Endereço
+                <h2 class="fw-bold" style="color: #1E293B;">
+                    <i class="bi bi-geo-alt-fill me-2" style="color: #7C3AED;"></i>Meu Endereço
                 </h2>
                 <p class="text-muted mb-0">Gerenciar endereço de entrega</p>
             </div>
-            <a href="/usuario/perfil/visualizar" class="btn btn-outline-secondary fw-semibold">
+            <a href="/usuario/perfil/visualizar" class="btn btn-outline-secondary fw-semibold" style="color: #7C3AED; border-color: #7C3AED;">
                 <i class="bi bi-arrow-left me-2"></i>Voltar
             </a>
         </div>
 
         <!-- Card do Endereço -->
-        <div class="card shadow-sm mb-4" style="border: 1px solid rgba(230, 126, 74, 0.2); border-radius: 15px;">
-            <div style="background: linear-gradient(135deg, #E67E4A 0%, #D64C5C 100%); color: white;" class="card-header">
+        <div class="card shadow-sm mb-4" style="border: 1px solid rgba(124, 58, 237, 0.2); border-radius: 15px;">
+            <div style="background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%); color: white;" class="card-header">
                 <h5 class="mb-0 fw-bold">
-                    <i class="bi bi-house-heart-fill me-2"></i>{{ endereco.titulo }}
+                    <i class="bi bi-geo-alt me-2"></i>{{ endereco.titulo }}
                 </h5>
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
                     <div class="col-md-6">
-                        <div style="padding: 1.25rem; background: rgba(230, 126, 74, 0.05); border-radius: 10px;">
+                        <div style="padding: 1.25rem; background: rgba(124, 58, 237, 0.05); border-radius: 10px;">
                             <p class="mb-3" style="color: #666;">
-                                <i class="bi bi-signpost-2" style="color: #E67E4A; font-weight: bold;"></i>
-                                <strong style="color: #3D3D3D; display: block; margin-top: 0.5rem;">Endereço</strong>
+                                <i class="bi bi-signpost-2" style="color: #7C3AED; font-weight: bold;"></i>
+                                <strong style="color: #1E293B; display: block; margin-top: 0.5rem;">Endereço</strong>
                                 {{ endereco.logradouro }}, {{ endereco.numero }}
                                 {% if endereco.complemento %}<br><small class="text-muted">{{ endereco.complemento }}</small>{% endif %}
                             </p>
@@ -39,30 +39,30 @@
                     </div>
 
                     <div class="col-md-6">
-                        <div style="padding: 1.25rem; background: rgba(107, 163, 68, 0.05); border-radius: 10px;">
+                        <div style="padding: 1.25rem; background: rgba(14, 165, 233, 0.05); border-radius: 10px;">
                             <p class="mb-3" style="color: #666;">
-                                <i class="bi bi-building" style="color: #6BA344; font-weight: bold;"></i>
-                                <strong style="color: #3D3D3D; display: block; margin-top: 0.5rem;">Bairro</strong>
+                                <i class="bi bi-building" style="color: #0EA5E9; font-weight: bold;"></i>
+                                <strong style="color: #1E293B; display: block; margin-top: 0.5rem;">Bairro</strong>
                                 {{ endereco.bairro }}
                             </p>
                         </div>
                     </div>
 
                     <div class="col-md-6">
-                        <div style="padding: 1.25rem; background: rgba(74, 159, 184, 0.05); border-radius: 10px;">
+                        <div style="padding: 1.25rem; background: rgba(236, 72, 153, 0.05); border-radius: 10px;">
                             <p class="mb-0" style="color: #666;">
-                                <i class="bi bi-pin-map" style="color: #4A9FB8; font-weight: bold;"></i>
-                                <strong style="color: #3D3D3D; display: block; margin-top: 0.5rem;">Cidade/UF</strong>
+                                <i class="bi bi-pin-map" style="color: #EC4899; font-weight: bold;"></i>
+                                <strong style="color: #1E293B; display: block; margin-top: 0.5rem;">Cidade/UF</strong>
                                 {{ endereco.cidade }} - {{ endereco.uf }}
                             </p>
                         </div>
                     </div>
 
                     <div class="col-md-6">
-                        <div style="padding: 1.25rem; background: rgba(245, 169, 66, 0.05); border-radius: 10px;">
+                        <div style="padding: 1.25rem; background: rgba(245, 158, 11, 0.05); border-radius: 10px;">
                             <p class="mb-0" style="color: #666;">
-                                <i class="bi bi-mailbox" style="color: #F5A942; font-weight: bold;"></i>
-                                <strong style="color: #3D3D3D; display: block; margin-top: 0.5rem;">CEP</strong>
+                                <i class="bi bi-mailbox" style="color: #F59E0B; font-weight: bold;"></i>
+                                <strong style="color: #1E293B; display: block; margin-top: 0.5rem;">CEP</strong>
                                 {{ endereco.cep }}
                             </p>
                         </div>
@@ -83,9 +83,11 @@
         </div>
 
         <!-- Aviso -->
-        <div class="alert-care alert-care-success" role="alert">
-            <i class="bi bi-info-circle me-2"></i>
-            <strong>Importante:</strong> Este endereço será utilizado como endereço de entrega para seus pedidos.
+        <div style="padding: 1rem; background: rgba(14, 165, 233, 0.1); border-left: 4px solid #0EA5E9; border-radius: 0.75rem; margin-top: 2rem;">
+            <p class="mb-0" style="color: #0EA5E9;">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>Importante:</strong> Este endereço será utilizado como endereço de entrega para seus pedidos.
+            </p>
         </div>
     </div>
 </div>
