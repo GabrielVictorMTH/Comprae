@@ -99,9 +99,9 @@
         {% endfor %}
     </div>
 
-    <!-- Paginacao Modernizada -->
+    <!-- Paginação Modernizada -->
     {% if total_paginas > 1 %}
-    <nav aria-label="Navegacao de paginas">
+    <nav aria-label="Navegação de páginas">
         <ul class="pagination justify-content-center gap-1">
             <!-- Anterior -->
             <li class="page-item {% if pagina_atual <= 1 %}disabled{% endif %}">
@@ -110,7 +110,7 @@
                 </a>
             </li>
 
-            <!-- Numeros das paginas -->
+            <!-- Números das páginas -->
             {% set inicio = [1, pagina_atual - 2]|max %}
             {% set fim = [total_paginas, pagina_atual + 2]|min %}
 
@@ -139,7 +139,7 @@
             </li>
             {% endif %}
 
-            <!-- Proximo -->
+            <!-- Próximo -->
             <li class="page-item {% if pagina_atual >= total_paginas %}disabled{% endif %}">
                 <a class="page-link rounded-3 px-3" href="/anuncios?pagina={{ pagina_atual + 1 }}{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}">
                     <i class="bi bi-chevron-right"></i>
@@ -181,7 +181,7 @@
 
 {% block scripts %}
 <script>
-// Remove o campo categoria do formulario quando vazio para evitar erro 422
+// Remove o campo categoria do formulário quando vazio para evitar erro 422
 document.querySelector('form[action="/anuncios"]').addEventListener('submit', function(e) {
     const categoria = document.getElementById('categoria');
     if (categoria.value === '') {
