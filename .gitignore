@@ -77,7 +77,6 @@ codebase*
 .mcp.json
 
 # Imagens
-static/img/usuarios/*
 backups/
 
 # Tema
