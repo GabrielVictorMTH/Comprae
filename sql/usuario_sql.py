@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS usuario (
     email TEXT UNIQUE NOT NULL,
     senha TEXT NOT NULL,
     perfil TEXT NOT NULL,
+    genero TEXT,
+    data_nascimento DATE,
     token_redefinicao TEXT,
     data_token TIMESTAMP,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -19,7 +21,7 @@ VALUES (?, ?, ?, ?)
 
 ALTERAR = """
 UPDATE usuario
-SET nome = ?, email = ?, perfil = ?, data_atualizacao = CURRENT_TIMESTAMP
+SET nome = ?, email = ?, perfil = ?, genero = ?, data_nascimento = ?, data_atualizacao = CURRENT_TIMESTAMP
 WHERE id = ?
 """
 

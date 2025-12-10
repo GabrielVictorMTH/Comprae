@@ -10,6 +10,8 @@ class Usuario:
     email: str
     senha: str
     perfil: str
+    genero: Optional[str] = None
+    data_nascimento: Optional[datetime] = None
     token_redefinicao: Optional[str] = None
     data_token: Optional[datetime] = None
     data_cadastro: Optional[datetime] = None
