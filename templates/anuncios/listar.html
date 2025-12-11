@@ -27,14 +27,14 @@
         <div class="card-body p-4">
             <form action="/anuncios" method="get">
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-5">
+                    <div class="col-md-4">
                         <label for="busca" class="form-label fw-semibold">
                             <i class="bi bi-search me-1 text-primary"></i>Buscar
                         </label>
                         <input type="text" class="form-control form-control-lg" id="busca" name="busca"
                                placeholder="O que você procura?" value="{{ busca }}">
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <label for="categoria" class="form-label fw-semibold">
                             <i class="bi bi-tag me-1 text-primary"></i>Categoria
                         </label>
@@ -48,6 +48,26 @@
                         </select>
                     </div>
                     <div class="col-md-3">
+                        <label for="ordenar" class="form-label fw-semibold">
+                            <i class="bi bi-sort-down me-1 text-primary"></i>Ordenar por
+                        </label>
+                        <select class="form-select form-select-lg" id="ordenar" name="ordenar">
+                            <option value="">Mais recentes</option>
+                            <option value="preco_asc" {% if ordenacao_selecionada == 'preco_asc' %}selected{% endif %}>
+                                Menor preco
+                            </option>
+                            <option value="preco_desc" {% if ordenacao_selecionada == 'preco_desc' %}selected{% endif %}>
+                                Maior preco
+                            </option>
+                            <option value="data_asc" {% if ordenacao_selecionada == 'data_asc' %}selected{% endif %}>
+                                Mais antigos
+                            </option>
+                            <option value="data_desc" {% if ordenacao_selecionada == 'data_desc' %}selected{% endif %}>
+                                Mais recentes
+                            </option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
                         <button type="submit" class="btn btn-gradient-primary btn-lg w-100">
                             <i class="bi bi-funnel me-2"></i>Filtrar
                         </button>
@@ -105,7 +125,7 @@
         <ul class="pagination justify-content-center gap-1">
             <!-- Anterior -->
             <li class="page-item {% if pagina_atual <= 1 %}disabled{% endif %}">
-                <a class="page-link rounded-3 px-3" href="/anuncios?pagina={{ pagina_atual - 1 }}{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}">
+                <a class="page-link rounded-3 px-3" href="/anuncios?pagina={{ pagina_atual - 1 }}{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" {% if ordenacao_selecionada %}&ordenar={{ ordenacao_selecionada }}{% endif %}>
                     <i class="bi bi-chevron-left"></i>
                 </a>
             </li>
@@ -116,7 +136,7 @@
 
             {% if inicio > 1 %}
             <li class="page-item">
-                <a class="page-link rounded-3" href="/anuncios?pagina=1{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}">1</a>
+                <a class="page-link rounded-3" href="/anuncios?pagina=1{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" {% if ordenacao_selecionada %}&ordenar={{ ordenacao_selecionada }}{% endif %}>1</a>
             </li>
             {% if inicio > 2 %}
             <li class="page-item disabled"><span class="page-link rounded-3 border-0">...</span></li>
@@ -126,7 +146,7 @@
             {% for p in range(inicio, fim + 1) %}
             <li class="page-item {% if p == pagina_atual %}active{% endif %}">
                 <a class="page-link rounded-3 {% if p == pagina_atual %}btn-gradient-primary border-0{% endif %}"
-                   href="/anuncios?pagina={{ p }}{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}">{{ p }}</a>
+                   href="/anuncios?pagina={{ p }}{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" {% if ordenacao_selecionada %}&ordenar={{ ordenacao_selecionada }}{% endif %}>{{ p }}</a>
             </li>
             {% endfor %}
 
@@ -135,13 +155,13 @@
             <li class="page-item disabled"><span class="page-link rounded-3 border-0">...</span></li>
             {% endif %}
             <li class="page-item">
-                <a class="page-link rounded-3" href="/anuncios?pagina={{ total_paginas }}{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}">{{ total_paginas }}</a>
+                <a class="page-link rounded-3" href="/anuncios?pagina={{ total_paginas }}{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" {% if ordenacao_selecionada %}&ordenar={{ ordenacao_selecionada }}{% endif %}>{{ total_paginas }}</a>
             </li>
             {% endif %}
 
             <!-- Próximo -->
             <li class="page-item {% if pagina_atual >= total_paginas %}disabled{% endif %}">
-                <a class="page-link rounded-3 px-3" href="/anuncios?pagina={{ pagina_atual + 1 }}{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}">
+                <a class="page-link rounded-3 px-3" href="/anuncios?pagina={{ pagina_atual + 1 }}{% if busca %}&busca={{ busca }}{% endif %}{% if categoria_selecionada %}&categoria={{ categoria_selecionada }}{% endif %}" {% if ordenacao_selecionada %}&ordenar={{ ordenacao_selecionada }}{% endif %}>
                     <i class="bi bi-chevron-right"></i>
                 </a>
             </li>
@@ -186,6 +206,10 @@ document.querySelector('form[action="/anuncios"]').addEventListener('submit', fu
     const categoria = document.getElementById('categoria');
     if (categoria.value === '') {
         categoria.removeAttribute('name');
+    }
+    const ordenar = document.getElementById('ordenar');
+    if (ordenar.value === '') {
+        ordenar.removeAttribute('name');
     }
 });
 </script>

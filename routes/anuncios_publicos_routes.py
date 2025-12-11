@@ -41,6 +41,7 @@ async def listar_anuncios(
     pagina: int = Query(1, ge=1, description="Numero da pagina"),
     busca: Optional[str] = Query(None, description="Termo de busca"),
     categoria: Optional[int] = Query(None, description="ID da categoria"),
+    ordenar: Optional[str] = Query(None, description="Ordenacao"),
 ):
     """Lista anuncios publicos com paginacao e filtros"""
     usuario_logado: Optional[UsuarioLogado] = obter_usuario_logado(request)
@@ -50,7 +51,8 @@ async def listar_anuncios(
         pagina=pagina,
         por_pagina=ANUNCIOS_POR_PAGINA,
         termo=busca,
-        id_categoria=categoria
+        id_categoria=categoria,
+        ordenar_por=ordenar
     )
 
     # Calcular paginacao
@@ -69,13 +71,13 @@ async def listar_anuncios(
             # Filtros atuais
             "busca": busca or "",
             "categoria_selecionada": categoria,
+            "ordenacao_selecionada": ordenar,
             # Paginacao
             "pagina_atual": pagina,
             "total_paginas": total_paginas,
             "total_anuncios": total,
         },
     )
-
 
 @router.get("/{id}")
 async def detalhes_anuncio(request: Request, id: int):
