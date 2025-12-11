@@ -28,10 +28,7 @@
                 <div class="card-body">
                     <!-- Categoria -->
                     <span class="badge bg-secondary mb-2">{{ anuncio.nome_categoria or 'Sem categoria' }}</span>
-                    <p class="text-muted">
-              <i class="bi bi-eye me-1"></i>
-              {{ anuncio.visualizacoes }} visualizacao{% if anuncio.visualizacoes != 1 %}es{% endif %}
-               </p>
+
 
                     <!-- Nome -->
                     <h1 class="h2 mb-3">{{ anuncio.nome }}</h1>
@@ -51,6 +48,10 @@
                         </span>
                         <span class="text-muted ms-2">{{ anuncio.estoque }} em estoque</span>
                         {% else %}
+                        <p class="text-muted">
+                        <i class="bi bi-eye me-1"></i>
+                       {{ anuncio.visualizacoes }} visualizacao{% if anuncio.visualizacoes != 1 %}es{% endif %}
+                        </p>
                         <span class="badge bg-danger fs-6">
                             <i class="bi bi-x-circle"></i> Indisponível
                         </span>

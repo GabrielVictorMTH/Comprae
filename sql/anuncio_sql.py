@@ -134,11 +134,6 @@ WHERE a.ativo = 1 AND a.estoque > 0
 ORDER BY a.data_cadastro DESC
 LIMIT ?
 """
-INCREMENTAR_VISUALIZACOES = """
-UPDATE anuncio
-SET visualizacoes = visualizacoes + 1
-WHERE id = ?
-"""
 
 OBTER_POR_ID_COM_DETALHES = """
 SELECT a.*, c.nome as nome_categoria, u.nome as nome_vendedor, u.email as email_vendedor
@@ -146,4 +141,9 @@ FROM anuncio a
 LEFT JOIN categoria c ON a.id_categoria = c.id
 LEFT JOIN usuario u ON a.id_vendedor = u.id
 WHERE a.id = ?
+"""
+INCREMENTAR_VISUALIZACOES = """
+UPDATE anuncio
+SET visualizacoes = visualizacoes + 1
+WHERE id = ?
 """

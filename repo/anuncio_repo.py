@@ -3,7 +3,6 @@ Repositório para operações com anúncios (produtos).
 """
 from typing import Optional
 from datetime import datetime
-
 from model.anuncio_model import Anuncio
 from sql import anuncio_sql
 from sql.anuncio_sql import *
@@ -251,9 +250,8 @@ def _row_to_anuncio(row) -> Anuncio:
         anuncio.email_vendedor = row["email_vendedor"]
     return anuncio
     
-    from sql import anuncio_sql
     
-    def incrementar_visualizacoes(id: int) -> bool:
+def incrementar_visualizacoes(id: int) -> bool:
        """Incrementa o contador de visualizacoes de um anuncio"""
        with obter_conexao() as conn:
         cursor = conn.cursor()
