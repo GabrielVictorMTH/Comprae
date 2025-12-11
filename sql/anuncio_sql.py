@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS anuncio (
     estoque INTEGER NOT NULL,
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP,
     ativo BOOLEAN DEFAULT 1,
+    visualizacoes INTEGER DEFAULT 0,
     FOREIGN KEY (id_vendedor) REFERENCES usuario(id) ON DELETE CASCADE,
     FOREIGN KEY (id_categoria) REFERENCES categoria(id) ON DELETE RESTRICT
 )
@@ -132,6 +133,11 @@ LEFT JOIN usuario u ON a.id_vendedor = u.id
 WHERE a.ativo = 1 AND a.estoque > 0
 ORDER BY a.data_cadastro DESC
 LIMIT ?
+"""
+INCREMENTAR_VISUALIZACOES = """
+UPDATE anuncio
+SET visualizacoes = visualizacoes + 1
+WHERE id = ?
 """
 
 OBTER_POR_ID_COM_DETALHES = """

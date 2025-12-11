@@ -20,6 +20,7 @@ class Anuncio:
     estoque: int
     data_cadastro: datetime
     ativo: bool
+    visualizacoes: int = 0
     # Relacionamentos
     vendedor: Optional[Usuario] = None
     categoria: Optional["Categoria"] = None

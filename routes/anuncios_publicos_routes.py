@@ -83,6 +83,7 @@ async def detalhes_anuncio(request: Request, id: int):
     usuario_logado: Optional[UsuarioLogado] = obter_usuario_logado(request)
 
     # Buscar anuncio com detalhes
+    # Buscar anuncio com detalhes
     anuncio = anuncio_repo.obter_por_id_com_detalhes(id)
 
     if not anuncio:
@@ -101,6 +102,8 @@ async def detalhes_anuncio(request: Request, id: int):
                 "total_anuncios": 0,
             },
         )
+         # Incrementar contador de visualizacoes
+    anuncio_repo.incrementar_visualizacoes(id)
 
     # Verificar se anúncio está ativo e com estoque
     if not anuncio.ativo or anuncio.estoque <= 0:

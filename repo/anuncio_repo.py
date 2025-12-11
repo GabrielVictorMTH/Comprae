@@ -5,6 +5,7 @@ from typing import Optional
 from datetime import datetime
 
 from model.anuncio_model import Anuncio
+from sql import anuncio_sql
 from sql.anuncio_sql import *
 from util.db_util import obter_conexao
 
@@ -249,3 +250,12 @@ def _row_to_anuncio(row) -> Anuncio:
     if "email_vendedor" in keys:
         anuncio.email_vendedor = row["email_vendedor"]
     return anuncio
+    
+    from sql import anuncio_sql
+    
+    def incrementar_visualizacoes(id: int) -> bool:
+       """Incrementa o contador de visualizacoes de um anuncio"""
+       with obter_conexao() as conn:
+        cursor = conn.cursor()
+        cursor.execute(anuncio_sql.INCREMENTAR_VISUALIZACOES, (id,))
+        return cursor.rowcount > 0
