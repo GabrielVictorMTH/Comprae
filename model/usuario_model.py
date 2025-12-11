@@ -12,6 +12,7 @@ class Usuario:
     perfil: str
     genero: Optional[str] = None
     data_nascimento: Optional[datetime] = None
+    sobre_mim: Optional[str] = None
     token_redefinicao: Optional[str] = None
     data_token: Optional[datetime] = None
     data_cadastro: Optional[datetime] = None

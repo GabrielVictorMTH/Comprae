@@ -30,7 +30,13 @@
                             {{ field(name='email', label='E-mail', type='email', required=true,
                             value=dados.email) }}
                         </div>
-
+                        <div class="col-12 mb-3">
+                            <label for="sobre_mim" class="form-label">Sobre Mim</label>
+                            <textarea class="form-control" id="sobre_mim" name="sobre_mim"
+                                rows="3" maxlength="500"
+                                placeholder="Conte um pouco sobre voce...">{{ dados.sobre_mim or '' }}</textarea>
+                            <div class="form-text">Maximo de 500 caracteres</div>
+                        </div>
                         <div class="col-12">
                             {{ field(name='perfil', label='Perfil de Acesso', type='text',
                             value=dados.perfil, disabled=true, wrapper_class='mb-0') }}

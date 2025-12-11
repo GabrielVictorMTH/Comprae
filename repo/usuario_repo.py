@@ -25,12 +25,6 @@ from util.foto_util import criar_foto_padrao_usuario
 def _row_to_usuario(row: sqlite3.Row) -> Usuario:
     """
     Converte uma linha do banco de dados em objeto Usuario.
-
-    Args:
-        row: Linha do cursor SQLite (sqlite3.Row)
-
-    Returns:
-        Objeto Usuario populado
     """
     return Usuario(
         id=row["id"],
@@ -38,12 +32,14 @@ def _row_to_usuario(row: sqlite3.Row) -> Usuario:
         email=row["email"],
         senha=row["senha"],
         perfil=row["perfil"],
+        genero=row["genero"] if "genero" in row.keys() else None,
+        data_nascimento=row["data_nascimento"] if "data_nascimento" in row.keys() else None,
+        sobre_mim=row["sobre_mim"] if "sobre_mim" in row.keys() else None,
         token_redefinicao=row["token_redefinicao"] if "token_redefinicao" in row.keys() else None,
         data_token=row["data_token"] if "data_token" in row.keys() else None,
         data_cadastro=row["data_cadastro"] if "data_cadastro" in row.keys() else None,
         data_atualizacao=row["data_atualizacao"] if "data_atualizacao" in row.keys() else None
     )
-
 
 def criar_tabela() -> bool:
     with obter_conexao() as conn:
@@ -77,6 +73,9 @@ def alterar(usuario: Usuario) -> bool:
             usuario.nome,
             usuario.email,
             usuario.perfil,
+            usuario.genero,
+            usuario.data_nascimento,
+            usuario.sobre_mim,
             usuario.id
         ))
         return cursor.rowcount > 0

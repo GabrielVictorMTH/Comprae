@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS usuario (
     token_redefinicao TEXT,
     data_token TIMESTAMP,
     data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    sobre_mim TEXT,
     data_atualizacao TIMESTAMP
 )
 """
@@ -21,7 +22,7 @@ VALUES (?, ?, ?, ?)
 
 ALTERAR = """
 UPDATE usuario
-SET nome = ?, email = ?, perfil = ?, genero = ?, data_nascimento = ?, data_atualizacao = CURRENT_TIMESTAMP
+SET nome = ?, email = ?, perfil = ?, genero = ?, data_nascimento = ?, sobre_mim = ?, data_atualizacao = CURRENT_TIMESTAMP
 WHERE id = ?
 """
 
