@@ -163,43 +163,41 @@ def atualizar_estoque(id: int, quantidade: int) -> bool:
 def obter_ativos_paginados(
     pagina: int = 1,
     por_pagina: int = 12,
-    termo: Optional[str] = None,
-    id_categoria: Optional[int] = None
-) -> tuple[list[Anuncio], int]:
+    termo: str = None,
+    id_categoria: int = None,
+    ordenar_por: str = None
+) -> tuple[list, int]:
     """
-    Obtém anúncios ativos com paginação e filtros.
+    Retorna anuncios ativos com paginacao, filtros e ordenacao.
 
-    Returns:
-        Tupla com (lista de anúncios, total de registros)
+    Args:
+        ordenar_por: 'preco_asc', 'preco_desc', 'data_asc', 'data_desc'
     """
+    offset = (pagina - 1) * por_pagina
+    termo_busca = f"%{termo}%" if termo else None
+
     with obter_conexao() as conn:
         cursor = conn.cursor()
 
-        # Preparar parâmetros de busca
-        termo_like = f"%{termo}%" if termo else None
-        offset = (pagina - 1) * por_pagina
-
-        # Buscar anúncios paginados
+        # Contar total
         cursor.execute(
-            OBTER_ATIVOS_PAGINADOS,
+            anuncio_sql.CONTAR_ATIVOS,
+            (termo_busca, termo_busca, termo_busca, id_categoria, id_categoria)
+        )
+        total = cursor.fetchone()["total"]
+
+        # Buscar anuncios
+        cursor.execute(
+            anuncio_sql.OBTER_ATIVOS_PAGINADOS,
             (
-                termo_like, termo_like, termo_like,  # termo para nome e descricao
-                id_categoria, id_categoria,           # categoria
-                por_pagina, offset                    # paginacao
+                termo_busca, termo_busca, termo_busca,
+                id_categoria, id_categoria,
+                ordenar_por, ordenar_por, ordenar_por, ordenar_por, ordenar_por,
+                por_pagina, offset
             )
         )
         rows = cursor.fetchall()
         anuncios = [_row_to_anuncio(row) for row in rows]
-
-        # Contar total
-        cursor.execute(
-            CONTAR_ATIVOS,
-            (
-                termo_like, termo_like, termo_like,
-                id_categoria, id_categoria
-            )
-        )
-        total = cursor.fetchone()["total"]
 
         return anuncios, total
 

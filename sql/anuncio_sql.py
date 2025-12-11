@@ -112,7 +112,11 @@ LEFT JOIN usuario u ON a.id_vendedor = u.id
 WHERE a.ativo = 1 AND a.estoque > 0
   AND (? IS NULL OR a.nome LIKE ? OR a.descricao LIKE ?)
   AND (? IS NULL OR a.id_categoria = ?)
-ORDER BY a.data_cadastro DESC
+ORDER BY
+    CASE WHEN ? = 'preco_asc' THEN a.preco END ASC,
+    CASE WHEN ? = 'preco_desc' THEN a.preco END DESC,
+    CASE WHEN ? = 'data_asc' THEN a.data_cadastro END ASC,
+    CASE WHEN ? = 'data_desc' OR ? IS NULL THEN a.data_cadastro END DESC
 LIMIT ? OFFSET ?
 """
 
